@@ -1,0 +1,984 @@
+{
+  "scenes": [
+    {
+      "id": "01",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "rain-room",
+      "soundLabel": "창 너머의 빗소리",
+      "category": "기존 10편"
+    },
+    {
+      "id": "02",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "rain-street",
+      "soundLabel": "빗물과 물웅덩이 소리",
+      "category": "기존 10편"
+    },
+    {
+      "id": "03",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "sea",
+      "soundLabel": "밤바다의 파도 소리",
+      "category": "기존 10편"
+    },
+    {
+      "id": "04",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "lake",
+      "soundLabel": "호숫가의 잔물결 소리",
+      "category": "기존 10편"
+    },
+    {
+      "id": "05",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "snow",
+      "soundLabel": "눈밭 너머의 바람 소리",
+      "category": "기존 10편"
+    },
+    {
+      "id": "06",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "train",
+      "soundLabel": "객실 안에서 듣는 차륜 소리",
+      "category": "기존 10편"
+    },
+    {
+      "id": "07",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "forest",
+      "soundLabel": "개울과 작은 물방울 소리",
+      "category": "기존 10편"
+    },
+    {
+      "id": "08",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "embers",
+      "soundLabel": "작게 타닥이는 잿불 소리",
+      "category": "기존 10편"
+    },
+    {
+      "id": "09",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "설원을 스치는 바람 소리",
+      "category": "기존 10편"
+    },
+    {
+      "id": "10",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "fireworks",
+      "soundLabel": "잔잔한 밤바다의 파도 소리",
+      "category": "기존 10편"
+    },
+    {
+      "id": "11",
+      "family": "interiors",
+      "category": "실내",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "drips",
+      "soundLabel": "유리 곁에 맺힌 물방울 소리",
+      "soundOffsetSeconds": 14.1
+    },
+    {
+      "id": "12",
+      "family": "interiors",
+      "category": "실내",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "lake",
+      "soundLabel": "수초 너머로 번지는 잔물결 소리",
+      "soundOffsetSeconds": 22
+    },
+    {
+      "id": "13",
+      "family": "interiors",
+      "category": "실내",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "온실 밖에서 스치는 바람",
+      "soundOffsetSeconds": 5.8
+    },
+    {
+      "id": "14",
+      "family": "interiors",
+      "category": "실내",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "rain-room",
+      "soundLabel": "벽 너머의 잔잔한 빗소리",
+      "soundOffsetSeconds": 13.6
+    },
+    {
+      "id": "15",
+      "family": "interiors",
+      "category": "실내",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "rain-room",
+      "soundLabel": "창 너머의 낮은 빗소리",
+      "soundOffsetSeconds": 21.5
+    },
+    {
+      "id": "16",
+      "family": "interiors",
+      "category": "실내",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "작업실 밖을 스치는 바람",
+      "soundOffsetSeconds": 5.3
+    },
+    {
+      "id": "17",
+      "family": "interiors",
+      "category": "실내",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "record",
+      "soundLabel": "레코드 표면의 낮은 잡음",
+      "soundOffsetSeconds": 13.1
+    },
+    {
+      "id": "18",
+      "family": "interiors",
+      "category": "실내",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "mechanism",
+      "soundLabel": "카세트 모터의 낮은 울림",
+      "soundOffsetSeconds": 20.9
+    },
+    {
+      "id": "19",
+      "family": "interiors",
+      "category": "실내",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "mechanism",
+      "soundLabel": "영사기의 조용한 모터음",
+      "soundOffsetSeconds": 4.8
+    },
+    {
+      "id": "20",
+      "family": "interiors",
+      "category": "실내",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "창호 너머의 희미한 바람",
+      "soundOffsetSeconds": 12.6
+    },
+    {
+      "id": "21",
+      "family": "interiors",
+      "category": "실내",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "rain-room",
+      "soundLabel": "고요하게 깔리는 빗소리",
+      "soundOffsetSeconds": 20.4
+    },
+    {
+      "id": "22",
+      "family": "interiors",
+      "category": "실내",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "닫힌 창 너머의 잔잔한 바람",
+      "soundOffsetSeconds": 4.3
+    },
+    {
+      "id": "23",
+      "family": "interiors",
+      "category": "실내",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "기와 지붕 너머를 지나는 바람",
+      "soundOffsetSeconds": 12.1
+    },
+    {
+      "id": "24",
+      "family": "interiors",
+      "category": "실내",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "먼 복도를 스치는 미세한 바람",
+      "soundOffsetSeconds": 19.9
+    },
+    {
+      "id": "25",
+      "family": "interiors",
+      "category": "실내",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "rain-room",
+      "soundLabel": "닫힌 독서실 창의 낮은 빗소리",
+      "soundOffsetSeconds": 3.8
+    },
+    {
+      "id": "26",
+      "family": "waters",
+      "category": "물가",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "sea",
+      "soundLabel": "절벽 밑에 부서지는 파도",
+      "soundOffsetSeconds": 11.6
+    },
+    {
+      "id": "27",
+      "family": "waters",
+      "category": "물가",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "lake",
+      "soundLabel": "정박한 배 곁의 잔물결",
+      "soundOffsetSeconds": 19.4
+    },
+    {
+      "id": "28",
+      "family": "waters",
+      "category": "물가",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "sea",
+      "soundLabel": "배 뒤로 흐르는 물소리",
+      "soundOffsetSeconds": 3.2
+    },
+    {
+      "id": "29",
+      "family": "waters",
+      "category": "물가",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "sea",
+      "soundLabel": "갯바위 틈에 고인 물소리",
+      "soundOffsetSeconds": 11.1
+    },
+    {
+      "id": "30",
+      "family": "waters",
+      "category": "물가",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "lake",
+      "soundLabel": "논두렁 물길의 잔잔한 소리",
+      "soundOffsetSeconds": 18.9
+    },
+    {
+      "id": "31",
+      "family": "waters",
+      "category": "물가",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "갈대 사이로 스치는 바람",
+      "soundOffsetSeconds": 2.7
+    },
+    {
+      "id": "32",
+      "family": "waters",
+      "category": "물가",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "lake",
+      "soundLabel": "운하에 부딪히는 물소리",
+      "soundOffsetSeconds": 10.6
+    },
+    {
+      "id": "33",
+      "family": "waters",
+      "category": "물가",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "lake",
+      "soundLabel": "창고 아래 고요한 잔물결",
+      "soundOffsetSeconds": 18.4
+    },
+    {
+      "id": "34",
+      "family": "waters",
+      "category": "물가",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "forest",
+      "soundLabel": "나무뿌리 사이 흐르는 물",
+      "soundOffsetSeconds": 2.2
+    },
+    {
+      "id": "35",
+      "family": "waters",
+      "category": "물가",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "sea",
+      "soundLabel": "갯벌로 스며드는 잔물결",
+      "soundOffsetSeconds": 10.1
+    },
+    {
+      "id": "36",
+      "family": "waters",
+      "category": "물가",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "sea",
+      "soundLabel": "동굴 입구에 닿는 바닷물",
+      "soundOffsetSeconds": 17.9
+    },
+    {
+      "id": "37",
+      "family": "waters",
+      "category": "물가",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "겨울 바닷가의 바람 소리",
+      "soundOffsetSeconds": 1.7
+    },
+    {
+      "id": "38",
+      "family": "waters",
+      "category": "물가",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "cascade",
+      "soundLabel": "바위를 타고 쏟아지는 물소리",
+      "soundOffsetSeconds": 9.5
+    },
+    {
+      "id": "39",
+      "family": "waters",
+      "category": "물가",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "lake",
+      "soundLabel": "물레 밑을 지나는 강물",
+      "soundOffsetSeconds": 17.4
+    },
+    {
+      "id": "40",
+      "family": "waters",
+      "category": "물가",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "lake",
+      "soundLabel": "연잎 사이 번지는 잔물결",
+      "soundOffsetSeconds": 1.2
+    },
+    {
+      "id": "41",
+      "family": "woodlands",
+      "category": "숲과 정원",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "대나무 잎 사이를 스치는 바람",
+      "soundOffsetSeconds": 9
+    },
+    {
+      "id": "42",
+      "family": "woodlands",
+      "category": "숲과 정원",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "돌길을 지나는 잔바람",
+      "soundOffsetSeconds": 16.9
+    },
+    {
+      "id": "43",
+      "family": "woodlands",
+      "category": "숲과 정원",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "snow",
+      "soundLabel": "눈 내리는 숲의 바람",
+      "soundOffsetSeconds": 0.7
+    },
+    {
+      "id": "44",
+      "family": "woodlands",
+      "category": "숲과 정원",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "drips",
+      "soundLabel": "고사리 잎 끝의 드문 물방울",
+      "soundOffsetSeconds": 8.5
+    },
+    {
+      "id": "45",
+      "family": "woodlands",
+      "category": "숲과 정원",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "forest",
+      "soundLabel": "숲속의 가벼운 물소리",
+      "soundOffsetSeconds": 16.4
+    },
+    {
+      "id": "46",
+      "family": "woodlands",
+      "category": "숲과 정원",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "풀잎을 스치는 잔바람",
+      "soundOffsetSeconds": 0.2
+    },
+    {
+      "id": "47",
+      "family": "woodlands",
+      "category": "숲과 정원",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "억새 사이를 움직이는 바람",
+      "soundOffsetSeconds": 8
+    },
+    {
+      "id": "48",
+      "family": "woodlands",
+      "category": "숲과 정원",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "꽃밭 가장자리의 부드러운 바람",
+      "soundOffsetSeconds": 15.8
+    },
+    {
+      "id": "49",
+      "family": "woodlands",
+      "category": "숲과 정원",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "갈대를 흔드는 바람",
+      "soundOffsetSeconds": 23.7
+    },
+    {
+      "id": "50",
+      "family": "woodlands",
+      "category": "숲과 정원",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "솔잎 사이를 지나는 바람",
+      "soundOffsetSeconds": 7.5
+    },
+    {
+      "id": "51",
+      "family": "woodlands",
+      "category": "숲과 정원",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "단풍잎을 스치는 바람",
+      "soundOffsetSeconds": 15.3
+    },
+    {
+      "id": "52",
+      "family": "woodlands",
+      "category": "숲과 정원",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "꽃잎을 스쳐 가는 바람",
+      "soundOffsetSeconds": 23.2
+    },
+    {
+      "id": "53",
+      "family": "woodlands",
+      "category": "숲과 정원",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "forest",
+      "soundLabel": "돌담 곁 숲의 작은 물소리",
+      "soundOffsetSeconds": 7
+    },
+    {
+      "id": "54",
+      "family": "woodlands",
+      "category": "숲과 정원",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "계단을 따라 흐르는 잔바람",
+      "soundOffsetSeconds": 14.8
+    },
+    {
+      "id": "55",
+      "family": "woodlands",
+      "category": "숲과 정원",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "forest",
+      "soundLabel": "정자와 숲 사이의 고요한 숲소리",
+      "soundOffsetSeconds": 22.6
+    },
+    {
+      "id": "56",
+      "family": "skies",
+      "category": "밤하늘",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "바람이 모래를 스치는 소리",
+      "soundOffsetSeconds": 6.5
+    },
+    {
+      "id": "57",
+      "family": "skies",
+      "category": "밤하늘",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "바람이 모래를 스치는 소리",
+      "soundOffsetSeconds": 14.3
+    },
+    {
+      "id": "58",
+      "family": "skies",
+      "category": "밤하늘",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "바람이 모래를 스치는 소리",
+      "soundOffsetSeconds": 22.1
+    },
+    {
+      "id": "59",
+      "family": "skies",
+      "category": "밤하늘",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "절벽 사이를 지나는 바람 소리",
+      "soundOffsetSeconds": 6
+    },
+    {
+      "id": "60",
+      "family": "skies",
+      "category": "밤하늘",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "돌기둥 사이를 스치는 바람 소리",
+      "soundOffsetSeconds": 13.8
+    },
+    {
+      "id": "61",
+      "family": "skies",
+      "category": "밤하늘",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "절벽 사이를 지나는 바람 소리",
+      "soundOffsetSeconds": 21.6
+    },
+    {
+      "id": "62",
+      "family": "skies",
+      "category": "밤하늘",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "풀잎을 스치고 지나는 바람 소리",
+      "soundOffsetSeconds": 5.5
+    },
+    {
+      "id": "63",
+      "family": "skies",
+      "category": "밤하늘",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "풀잎을 스치고 지나는 바람 소리",
+      "soundOffsetSeconds": 13.3
+    },
+    {
+      "id": "64",
+      "family": "skies",
+      "category": "밤하늘",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "풀잎을 스치고 지나는 바람 소리",
+      "soundOffsetSeconds": 21.1
+    },
+    {
+      "id": "65",
+      "family": "skies",
+      "category": "밤하늘",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "산등성이를 스치는 잔잔한 바람 소리",
+      "soundOffsetSeconds": 4.9
+    },
+    {
+      "id": "66",
+      "family": "skies",
+      "category": "밤하늘",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "산등성이를 스치는 잔잔한 바람 소리",
+      "soundOffsetSeconds": 12.8
+    },
+    {
+      "id": "67",
+      "family": "skies",
+      "category": "밤하늘",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "산등성이를 스치는 잔잔한 바람 소리",
+      "soundOffsetSeconds": 20.6
+    },
+    {
+      "id": "68",
+      "family": "skies",
+      "category": "밤하늘",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "snow",
+      "soundLabel": "얼음과 눈 위로 스치는 바람 소리",
+      "soundOffsetSeconds": 4.4
+    },
+    {
+      "id": "69",
+      "family": "skies",
+      "category": "밤하늘",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "snow",
+      "soundLabel": "얼음과 눈 위로 스치는 바람 소리",
+      "soundOffsetSeconds": 12.3
+    },
+    {
+      "id": "70",
+      "family": "skies",
+      "category": "밤하늘",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "snow",
+      "soundLabel": "얼음과 눈 위로 스치는 바람 소리",
+      "soundOffsetSeconds": 20.1
+    },
+    {
+      "id": "71",
+      "family": "street",
+      "category": "도시와 교통",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "rain-street",
+      "soundLabel": "지붕과 보도에 떨어지는 빗소리",
+      "soundOffsetSeconds": 3.9
+    },
+    {
+      "id": "72",
+      "family": "street",
+      "category": "도시와 교통",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "snow",
+      "soundLabel": "골목을 스치는 바람 소리",
+      "soundOffsetSeconds": 11.8
+    },
+    {
+      "id": "73",
+      "family": "street",
+      "category": "도시와 교통",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "rain-street",
+      "soundLabel": "차양 끝에서 떨어지는 빗물 소리",
+      "soundOffsetSeconds": 19.6
+    },
+    {
+      "id": "74",
+      "family": "street",
+      "category": "도시와 교통",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "옥상에 부는 잔잔한 바람",
+      "soundOffsetSeconds": 3.4
+    },
+    {
+      "id": "75",
+      "family": "street",
+      "category": "도시와 교통",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "안테나 사이에 부는 바람",
+      "soundOffsetSeconds": 11.3
+    },
+    {
+      "id": "76",
+      "family": "street",
+      "category": "도시와 교통",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "기와를 스치는 찬 바람",
+      "soundOffsetSeconds": 19.1
+    },
+    {
+      "id": "77",
+      "family": "street",
+      "category": "도시와 교통",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "lake",
+      "soundLabel": "돌다리 아래 흐르는 물소리",
+      "soundOffsetSeconds": 2.9
+    },
+    {
+      "id": "78",
+      "family": "street",
+      "category": "도시와 교통",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "rain-street",
+      "soundLabel": "교각 둘레의 빗소리",
+      "soundOffsetSeconds": 10.7
+    },
+    {
+      "id": "79",
+      "family": "street",
+      "category": "도시와 교통",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "drips",
+      "soundLabel": "계단 가장자리에 드문드문 떨어지는 물소리",
+      "soundOffsetSeconds": 18.6
+    },
+    {
+      "id": "80",
+      "family": "street",
+      "category": "도시와 교통",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "snow",
+      "soundLabel": "눈 쌓인 승강장을 스치는 찬 바람",
+      "soundOffsetSeconds": 2.4
+    },
+    {
+      "id": "81",
+      "family": "street",
+      "category": "도시와 교통",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "train",
+      "soundLabel": "멀어지는 전차의 차륜 소리",
+      "soundOffsetSeconds": 10.2
+    },
+    {
+      "id": "82",
+      "family": "street",
+      "category": "도시와 교통",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "넓은 활주로를 가로지르는 바람",
+      "soundOffsetSeconds": 18.1
+    },
+    {
+      "id": "83",
+      "family": "street",
+      "category": "도시와 교통",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "laundry",
+      "soundLabel": "빗소리에 섞여 들리는 세탁기의 낮은 울림",
+      "soundOffsetSeconds": 1.9
+    },
+    {
+      "id": "84",
+      "family": "street",
+      "category": "도시와 교통",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "rain-street",
+      "soundLabel": "빗물에 젖은 주차장의 빗소리",
+      "soundOffsetSeconds": 9.7
+    },
+    {
+      "id": "85",
+      "family": "street",
+      "category": "도시와 교통",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "rain-street",
+      "soundLabel": "푹 젖은 골목에 떨어지는 빗소리",
+      "soundOffsetSeconds": 17.5
+    },
+    {
+      "id": "86",
+      "family": "weather",
+      "category": "날씨와 전원",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "언덕 너머로 부는 밤바람",
+      "soundOffsetSeconds": 1.4
+    },
+    {
+      "id": "87",
+      "family": "weather",
+      "category": "날씨와 전원",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "밤바람과 들판의 바스락거림",
+      "soundOffsetSeconds": 9.2
+    },
+    {
+      "id": "88",
+      "family": "weather",
+      "category": "날씨와 전원",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "농장 너머로 지나가는 바람",
+      "soundOffsetSeconds": 17
+    },
+    {
+      "id": "89",
+      "family": "weather",
+      "category": "날씨와 전원",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "snow",
+      "soundLabel": "눈 내리는 들판의 낮은 바람",
+      "soundOffsetSeconds": 0.9
+    },
+    {
+      "id": "90",
+      "family": "weather",
+      "category": "날씨와 전원",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "snow",
+      "soundLabel": "서리 내린 과수원의 밤바람",
+      "soundOffsetSeconds": 8.7
+    },
+    {
+      "id": "91",
+      "family": "weather",
+      "category": "날씨와 전원",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "창고 곁을 스치는 바람",
+      "soundOffsetSeconds": 16.5
+    },
+    {
+      "id": "92",
+      "family": "weather",
+      "category": "날씨와 전원",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "목책 사이를 지나는 바람",
+      "soundOffsetSeconds": 0.4
+    },
+    {
+      "id": "93",
+      "family": "weather",
+      "category": "날씨와 전원",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "보리 이삭에 스치는 바람",
+      "soundOffsetSeconds": 8.2
+    },
+    {
+      "id": "94",
+      "family": "weather",
+      "category": "날씨와 전원",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "rain-street",
+      "soundLabel": "돌바닥과 물통에 떨어지는 빗물",
+      "soundOffsetSeconds": 16
+    },
+    {
+      "id": "95",
+      "family": "weather",
+      "category": "날씨와 전원",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "rain-street",
+      "soundLabel": "고인 물을 두드리는 빗방울",
+      "soundOffsetSeconds": 23.9
+    },
+    {
+      "id": "96",
+      "family": "weather",
+      "category": "날씨와 전원",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "snow",
+      "soundLabel": "마구간 앞을 스치는 겨울바람",
+      "soundOffsetSeconds": 7.7
+    },
+    {
+      "id": "97",
+      "family": "weather",
+      "category": "날씨와 전원",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "snow",
+      "soundLabel": "관측소 주변의 고른 바람",
+      "soundOffsetSeconds": 15.5
+    },
+    {
+      "id": "98",
+      "family": "weather",
+      "category": "날씨와 전원",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "낡은 목책과 들풀을 스치는 바람",
+      "soundOffsetSeconds": 23.3
+    },
+    {
+      "id": "99",
+      "family": "weather",
+      "category": "날씨와 전원",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "drips",
+      "soundLabel": "고랑 가장자리에서 떨어지는 드문 물방울",
+      "soundOffsetSeconds": 7.2
+    },
+    {
+      "id": "100",
+      "family": "weather",
+      "category": "날씨와 전원",
+      "cycleSeconds": 24,
+      "durationSeconds": null,
+      "sound": "wind",
+      "soundLabel": "새벽 들판의 고요한 바람",
+      "soundOffsetSeconds": 15
+    }
+  ]
+}

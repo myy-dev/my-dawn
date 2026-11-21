@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0d1119">
+  <meta name="description" content="새벽에 틀어두는 __SCENE_COUNT__개의 장면과 잔잔한 환경음.">
+  <title>my-dawn · 새벽 영상</title>
+  <link rel="icon" href="__DAWN_ICON__" type="image/png">
+  <style>/* STYLE */</style>
+</head>
+<body>
+  <header class="masthead">
+    <div class="page-width masthead-inner">
+      <div class="brand">
+        <img src="__DAWN_ICON__" width="26" height="26" alt="">
+        <span>my-dawn</span>
+      </div>
+      <p>새벽에 틀어두는 영상</p>
+    </div>
+  </header>
+  <main class="page-width screening-room">
+    <section class="now-playing" aria-labelledby="film-title">
+      <div class="screen" id="screen">
+        <canvas id="film" width="1920" height="1080" aria-labelledby="film-title"></canvas>
+      </div>
+      <div class="player-controls">
+        <button type="button" id="toggle-play">재생</button>
+        <input id="seek" type="range" min="0" max="24" step="0.1" value="0" aria-label="재생 위치">
+        <output id="play-position" for="seek">0:00</output>
+        <button type="button" id="toggle-audio" aria-pressed="false">음소거</button>
+        <button type="button" id="fullscreen" hidden>전체 화면</button>
+      </div>
+      <div class="film-details">
+        <div>
+          <h1 id="film-title"></h1>
+          <p id="film-info" class="film-info"></p>
+        </div>
+        <label class="duration-label" for="duration">
+          재생 길이 (초)
+          <input id="duration" type="number" inputmode="decimal" min="0.1" step="0.1" placeholder="계속 재생" autocomplete="off">
+        </label>
+      </div>
+      <audio id="ambience" loop preload="none"></audio>
+      <p class="playback-warning" id="playback-warning" role="status" hidden></p>
+    </section>
+    <section class="film-selection" aria-labelledby="selection-title">
+      <h2 id="selection-title">장면 __SCENE_COUNT__편</h2>
+      <div class="gallery-controls" aria-label="장면 찾기">
+        <label for="category" class="visually-hidden">분류</label>
+        <select id="category"><option value="">전체</option></select>
+        <label for="scene-search" class="visually-hidden">장면 검색</label>
+        <input type="search" id="scene-search" placeholder="장면 검색" autocomplete="off">
+      </div>
+      <p id="filter-status" class="filter-status" role="status" hidden></p>
+      <div class="film-list" id="film-list"></div>
+    </section>
+  </main>
+  <!-- ASSETS -->
+  <script>/* SCENES */</script>
+  <script>/* PLAYER */</script>
+</body>
+</html>
