@@ -341,14 +341,23 @@ function trailFactory(createCanvas, scene) {
 
   const [rim, rimCtx] = plate(createCanvas);
   shade(rimCtx, random, 1);
-  const drift = Array.from({length: species === 'birch' ? 87 : 16}, (_, i) => ({
+  const drift = Array.from({length: species === 'birch' ? 87 : 44}, (_, i) => ({
     x: random() * (W + 160) - 80, y: random() * (H + 200) - 140, phase: random(),
-    radius: species === 'birch' ? (i > 65 ? 2.7 : 0.85) + random() ** 2 * 3.6 : 2.2 + random() * 4.1,
+    radius: species === 'birch' ? (i > 65 ? 2.7 : 0.85) + random() ** 2 * 3.6 : 2.6 + random() * 4.6,
     drift: (random() - 0.5) * 47, speed: 1 + i % 2, opacity: 0.22 + random() * 0.36,
   }));
   return (out, phase) => {
     const t = ((phase % 1) + 1) % 1;
     out.drawImage(image, 0, 0);
+    if (species !== 'birch') {
+      // Wind: redraw the plate in thin rows, shifted more toward the treetops, so stalks and branches bend.
+      const angle = t * TAU, reach = species === 'bamboo' ? 7 : 4;
+      for (let y = 0; y < H; y += 4) {
+        const amp = reach * (1 - y / H) ** 1.6;
+        const dx = amp * (0.7 * Math.sin(angle * 2 + y * 0.0035) + 0.3 * Math.sin(angle * 3 + y * 0.011 + 1.7));
+        out.drawImage(image, 0, y, W, 4, dx, y, W, 4);
+      }
+    }
     const hazeX = scene.center + 40 * Math.sin(t * TAU);
     light(out, hazeX, horizon + 23, 510, 46, species === 'ginkgo' ? [189, 163, 119] : [134, 164, 156], 0.09);
     for (const item of drift) {
@@ -364,8 +373,8 @@ function trailFactory(createCanvas, scene) {
 }
 
 const trails = [
-  {id:'41', title:'대숲 사이로 스미는 새벽', slug:'bamboo-grove-at-first-light', sound:'wind',soundLabel:'대나무 잎 사이를 스치는 바람', seed:4107, species:'bamboo', center:792},
-  {id:'42', title:'은행잎이 놓인 돌길', slug:'ginkgo-stone-path', sound:'wind', soundLabel:'돌길을 지나는 잔바람', seed:4207, species:'ginkgo', center:730, curve:236, end:158},
+  {id:'41', title:'대숲 사이로 스미는 새벽', slug:'bamboo-grove-at-first-light', sound:'leaves',soundLabel:'대나무 잎 사이를 스치는 바람', seed:4107, species:'bamboo', center:792},
+  {id:'42', title:'은행잎이 놓인 돌길', slug:'ginkgo-stone-path', sound:'leaves', soundLabel:'돌길을 지나는 잔바람', seed:4207, species:'ginkgo', center:730, curve:236, end:158},
   {id:'43', title:'자작나무 사이로 내리는 눈', slug:'snowfall-in-the-birch-grove', sound:'snow', soundLabel:'눈 내리는 숲의 바람', seed:4307, species:'birch', center:1145, curve:-261, end:-19},
 ];
 module.exports = trails.map(scene => ({
@@ -610,13 +619,14 @@ function meadowFactory(createCanvas, scene) {
     return t >= 0 && Math.abs(x - creekCenter(t)) < creekHalf(t);
   };
   wash(ctx, '#121d29', '#47565d', '#334738');
-  light(ctx, moon[0], 565, 860, 360, sky, type === 'reed' ? 0.46 : 0.31);
+  light(ctx, moon[0], 565, 860, 360, scene.dawn ? [226, 152, 124] : sky, scene.dawn ? 0.5 : type === 'reed' ? 0.46 : 0.31);
   for (let i = 0; i < 83; i++) {
     const x = random() * W;
     const y = random() * 386;
     disk(ctx, x, y, random() * 1.2 + 0.3, random() * 1.2 + 0.3, alpha([199, 205, 204], 0.19 + random() * 0.29));
   }
   if (type === 'reed') light(ctx, 1244, 694, 694, 173, [177, 166, 115], 0.23);
+  else if (scene.dawn) light(ctx, moon[0], 600, 900, 150, [244, 178, 138], 0.42);
   else {
     light(ctx, moon[0], moon[1], moon[2] * 4.1, moon[2] * 4.1, [196, 189, 151], 0.22);
     disk(ctx, moon[0], moon[1], moon[2], moon[2], tint([183,192,167], 2));
@@ -716,12 +726,12 @@ function meadowFactory(createCanvas, scene) {
 const macros = [
   {id:'44',title:'이슬 맺힌 고사리 잎',slug:'dew-on-the-ferns',sound:'drips',soundLabel:'고사리 잎 끝의 드문 물방울',seed:4407,subject:'fern'},
   {id:'45',title:'새벽에 핀 은방울꽃',slug:'lily-bells-before-dawn',sound:'forest',soundLabel:'숲속의 가벼운 물소리',seed:4507,subject:'bells'},
-  {id:'46',title:'이슬을 머금은 거미줄',slug:'dew-along-the-silk',sound:'wind',soundLabel:'풀잎을 스치는 잔바람',seed:4607,subject:'silk'},
+  {id:'46',title:'이슬을 머금은 거미줄',slug:'dew-along-the-silk',sound:'grass',soundLabel:'풀잎을 스치는 잔바람',seed:4607,subject:'silk'},
 ];
 const meadows = [
-  {id:'47',title:'달빛을 받는 억새밭',slug:'moon-on-the-silver-grass',sound:'wind',soundLabel:'억새 사이를 움직이는 바람',seed:4707,plant:'silver'},
-  {id:'48',title:'새벽빛에 흐르는 라벤더 밭',slug:'lavender-field-in-blue-hour',sound:'wind',soundLabel:'꽃밭 가장자리의 부드러운 바람',seed:4807,plant:'lavender'},
-  {id:'49',title:'갈대 숲 너머 희미한 아침',slug:'first-light-beyond-the-reeds',sound:'wind',soundLabel:'갈대를 흔드는 바람',seed:4907,plant:'reed'},
+  {id:'47',title:'달빛을 받는 억새밭',slug:'moon-on-the-silver-grass',sound:'grass',soundLabel:'억새 사이를 움직이는 바람',seed:4707,plant:'silver'},
+  {id:'48',title:'새벽빛에 흐르는 라벤더 밭',slug:'lavender-field-in-blue-hour',dawn:true,sound:'grass',soundLabel:'꽃밭 가장자리의 부드러운 바람',seed:4807,plant:'lavender'},
+  {id:'49',title:'갈대 숲 너머 희미한 아침',slug:'first-light-beyond-the-reeds',sound:'grass',soundLabel:'갈대를 흔드는 바람',seed:4907,plant:'reed'},
 ];
 
 function addScenes(configurations, factory) {
@@ -818,7 +828,11 @@ function canopyFactory(createCanvas, scene) {
   const random = seeded(scene.seed);
   wash(ctx, '#101929', scene.species === 'maple' ? '#39404f' : '#344653', '#233341');
   const [mx, my, size] = scene.moon;
-  light(ctx, mx, my, 885, 600, scene.species === 'blossom' ? [146, 150, 169] : [126, 156, 167], 0.26);
+  if (scene.dawn) {
+    // First light low in the sky instead of a moon.
+    light(ctx, mx, H * .78, 1300, 620, [226, 150, 132], 0.42);
+    light(ctx, mx, H * .9, 900, 220, [250, 192, 150], 0.36);
+  } else light(ctx, mx, my, 885, 600, scene.species === 'blossom' ? [146, 150, 169] : [126, 156, 167], 0.26);
   for (let index = 0; index < 168; index++) {
     const x = random() * W;
     const y = random() * H;
@@ -826,9 +840,11 @@ function canopyFactory(createCanvas, scene) {
     if (size > 1.9) light(ctx, x, y, size * 4.4, size * 4.4, [193, 212, 214], 0.17);
     disk(ctx, x, y, size, size * 0.95, alpha([182, 202, 213], 0.14 + random() * 0.48));
   }
+  if (!scene.dawn) {
   light(ctx, mx, my, size * 4.8, size * 4.8, [185, 194, 181], 0.46);
   disk(ctx, mx, my, size, size, '#b8c6bb');
-  if (scene.species !== 'pine') disk(ctx, mx + size * 0.38, my - size * 0.18, size * 0.91, size * 0.94, scene.species === 'maple' ? '#4b5460' : '#53636e');
+  }
+  if (scene.dawn) {} else if (scene.species !== 'pine') disk(ctx, mx + size * 0.38, my - size * 0.18, size * 0.91, size * 0.94, scene.species === 'maple' ? '#4b5460' : '#53636e');
   else {
     for (let i = 0; i < 115; i++) {
       const rx = (random() - 0.5) * size * 2;
@@ -868,9 +884,9 @@ function canopyFactory(createCanvas, scene) {
 }
 
 const canopies = [
-  {id:'50',title:'소나무 끝에 걸린 달',slug:'moon-among-pine-needles',sound:'wind',soundLabel:'솔잎 사이를 지나는 바람',seed:5007,species:'pine',bark:[39,51,49],foliage:[34,65,57],moon:[1080,407,52],shoots:[[-12,1090,691,-430,111],[1938,1067,-579,-623,95],[-63,-32,673,316,73],[2005,-42,-514,307,96]]},
-  {id:'51',title:'단풍나무 사이의 반달',slug:'crescent-through-the-maples',sound:'wind',soundLabel:'단풍잎을 스치는 바람',seed:5107,species:'maple',bark:[51,47,46],foliage:[99,61,46],moon:[685,772,49],shoots:[[-39,970,520,-725,107],[1928,1040,-711,-418,106],[1948,-80,-802,346,71],[386,-45,-145,497,66]]},
-  {id:'52',title:'벚꽃 가지가 흔들리는 새벽 하늘',slug:'blossom-boughs-at-dawn',sound:'wind',soundLabel:'꽃잎을 스쳐 가는 바람',seed:5207,species:'blossom',bark:[58,52,57],foliage:[107,81,97],moon:[1310,362,37],shoots:[[-40,833,1118,-491,89],[-50,1030,756,-244,106],[1986,1120,-603,-636,76],[104,-62,530,316,48]]},
+  {id:'50',title:'소나무 끝에 걸린 달',slug:'moon-among-pine-needles',sound:'leaves',soundLabel:'솔잎 사이를 지나는 바람',seed:5007,species:'pine',bark:[39,51,49],foliage:[34,65,57],moon:[1080,407,52],shoots:[[-12,1090,691,-430,111],[1938,1067,-579,-623,95],[-63,-32,673,316,73],[2005,-42,-514,307,96]]},
+  {id:'51',title:'단풍나무 사이의 반달',slug:'crescent-through-the-maples',sound:'leaves',soundLabel:'단풍잎을 스치는 바람',seed:5107,species:'maple',bark:[51,47,46],foliage:[99,61,46],moon:[685,772,49],shoots:[[-39,970,520,-725,107],[1928,1040,-711,-418,106],[1948,-80,-802,346,71],[386,-45,-145,497,66]]},
+  {id:'52',title:'벚꽃 가지가 흔들리는 새벽 하늘',slug:'blossom-boughs-at-dawn',dawn:true,sound:'leaves',soundLabel:'꽃잎을 스쳐 가는 바람',seed:5207,species:'blossom',bark:[58,52,57],foliage:[107,81,97],moon:[1310,362,37],shoots:[[-40,833,1118,-491,89],[-50,1030,756,-244,106],[1986,1120,-603,-636,76],[104,-62,530,316,48]]},
 ];
 addScenes(canopies, canopyFactory);
 
@@ -1128,7 +1144,7 @@ function gardenFactory(createCanvas, scene) {
 
 const gardens = [
   {id:'53',title:'이끼가 번진 오래된 돌담',slug:'moss-on-the-old-garden-wall',sound:'forest',soundLabel:'돌담 곁 숲의 작은 물소리',seed:5307,structure:'wall'},
-  {id:'54',title:'숲속 안개가 덮은 돌계단',slug:'quiet-fog-on-the-stone-steps',sound:'wind',soundLabel:'계단을 따라 흐르는 잔바람',seed:5407,structure:'stairs'},
+  {id:'54',title:'숲속 안개가 덮은 돌계단',slug:'quiet-fog-on-the-stone-steps',sound:'leaves',soundLabel:'계단을 따라 흐르는 잔바람',seed:5407,structure:'stairs'},
   {id:'55',title:'불 하나 켜진 숲속 정자',slug:'the-garden-pavilion-lamp',sound:'forest',soundLabel:'정자와 숲 사이의 고요한 숲소리',seed:5507,structure:'pavilion'},
 ];
 addScenes(gardens, gardenFactory);

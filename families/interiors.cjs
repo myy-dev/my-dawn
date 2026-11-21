@@ -289,6 +289,105 @@ function bread(ctx, x, y, size, random) {
   ctx.restore();
 }
 
+// Per-scene staging so the bench/table scenes don't share one frontal layout:
+// view = camera (zoom, plate point at screen centre, tilt in radians), grade = soft-light colour wash,
+// window = extra light source on the wall (moon, dawn or rain), noLamp drops the pendant.
+const STAGES = {
+  kettle: { view: { zoom: 1.15, cx: 1000, cy: 560 }, grade: ['70,110,165', .32], window: { x: 1345, y: 285, w: 430, h: 290, sky: 'rain' } },
+  dripper: { view: { zoom: 1.2, cx: 1100, cy: 520 }, grade: ['205,135,120', .26], window: { x: 1290, y: 135, w: 470, h: 360, sky: 'dawn' }, noLamp: true },
+  bread: { grade: ['215,150,90', .2], window: { x: 1470, y: 110, w: 360, h: 380, sky: 'dawn' } },
+  record: { view: { zoom: 1.25, cx: 1040, cy: 610, tilt: -.035 }, grade: ['220,150,95', .18] },
+  cassette: { view: { zoom: 1.3, cx: 1000, cy: 600 }, grade: ['55,150,165', .28] },
+  book: { view: { zoom: 1.32, cx: 1080, cy: 680, tilt: .018 }, grade: ['90,120,175', .22], window: { x: 1400, y: 95, w: 390, h: 330, sky: 'moon' } },
+  cloth: { window: { x: 1490, y: 80, w: 350, h: 300, sky: 'rain' } },
+  watch: { view: { zoom: 1.55, cx: 1060, cy: 700, tilt: .02 }, grade: ['225,165,95', .22] },
+};
+
+function nightWindow(ctx, random, win) {
+  const { x, y, w, h, sky } = win;
+  rounded(ctx, x - 16, y - 16, w + 32, h + 32, 6, '#16161c');
+  const tones = sky === 'dawn' ? [[0, '#1d2539'], [.55, '#4f4459'], [1, '#c28c78']]
+    : sky === 'rain' ? [[0, '#121b29'], [1, '#33445a']] : [[0, '#0c1424'], [1, '#26374f']];
+  fill(ctx, x, y, w, h, ramp(ctx, x, y, x, y + h, tones));
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(x, y, w, h);
+  ctx.clip();
+  if (sky === 'moon') {
+    haze(ctx, x + w * .7, y + h * .28, 90, 90, '190,208,230', .25);
+    oval(ctx, x + w * .7, y + h * .28, 17, 17, '#dfe5ea');
+  }
+  if (sky === 'dawn') haze(ctx, x + w * .4, y + h, w * .8, h * .35, '240,170,130', .35);
+  for (let px = x - 10; px < x + w;) {
+    const bw = 30 + random() * 70, bh = 20 + random() * h * .35;
+    fill(ctx, px, y + h - bh, bw, bh, sky === 'dawn' ? '#2a2633' : '#101722');
+    for (let wy = y + h - bh + 8; wy < y + h - 6; wy += 14) {
+      if (random() < .18) fill(ctx, px + 6 + random() * (bw - 14), wy, 4, 3, 'rgba(232,190,130,.6)');
+    }
+    px += bw;
+  }
+  ctx.restore();
+  line(ctx, x + w / 2, y, x + w / 2, y + h, '#16161c', 9);
+  line(ctx, x, y + h * .52, x + w, y + h * .52, '#16161c', 7);
+  fill(ctx, x - 26, y + h + 12, w + 52, 14, '#2b2626');
+  const spill = sky === 'dawn' ? '220,160,140' : '120,150,195';
+  haze(ctx, x + w / 2, y + h * 1.25, w * 1.5, h * 1.2, spill, .13);
+}
+
+function windowRain(target, win, drops, phase) {
+  target.save();
+  target.beginPath();
+  target.rect(win.x, win.y, win.w, win.h);
+  target.clip();
+  for (const [dx, dy, speed, length, alpha] of drops) {
+    const f = (dy + phase * speed) % 1;
+    const x = win.x + dx * win.w, y = win.y - 40 + f * (win.h + 80);
+    line(target, x, y, x + 2, y + length, 'rgba(190,205,220,' + alpha + ')', 1.2);
+  }
+  target.restore();
+}
+
+// Wrap a scene with its camera, wall window rain and colour grade.
+function staged(kind, createScene) {
+  const stage = STAGES[kind];
+  if (!stage) return createScene;
+  return createCanvas => {
+    const render = createScene(createCanvas);
+    const random = seedRandom(kind.length * 7919 + 17);
+    const drops = stage.window && stage.window.sky === 'rain'
+      ? Array.from({ length: 70 }, () => [random(), random(), 2 + Math.floor(random() * 3), 10 + random() * 26, .12 + random() * .3]) : [];
+    const view = stage.view;
+    return (target, input) => {
+      const phase = input - Math.floor(input);
+      target.fillStyle = '#0a0b10';
+      target.fillRect(0, 0, W, H);
+      target.save();
+      if (view) {
+        // Keep the whole (rotated) screen inside the plate, or its edges would show stale pixels.
+        const zoom = view.zoom, tilt = Math.abs(view.tilt || 0);
+        const halfW = (W / 2 * Math.cos(tilt) + H / 2 * Math.sin(tilt)) / zoom;
+        const halfH = (W / 2 * Math.sin(tilt) + H / 2 * Math.cos(tilt)) / zoom;
+        const cx = Math.min(W - halfW, Math.max(halfW, view.cx));
+        const cy = Math.min(H - halfH, Math.max(halfH, view.cy));
+        target.translate(W / 2, H / 2);
+        target.rotate(view.tilt || 0);
+        target.scale(zoom, zoom);
+        target.translate(-cx, -cy);
+      }
+      render(target, phase);
+      if (drops.length) windowRain(target, stage.window, drops, phase);
+      target.restore();
+      if (stage.grade) {
+        target.save();
+        target.globalCompositeOperation = 'soft-light';
+        target.fillStyle = 'rgba(' + stage.grade[0] + ',' + stage.grade[1] + ')';
+        target.fillRect(0, 0, W, H);
+        target.restore();
+      }
+    };
+  };
+}
+
 function kitchenScene(kind, seed) {
   return createCanvas => {
     const random = seedRandom(seed);
@@ -313,7 +412,7 @@ function kitchenScene(kind, seed) {
       jar(ctx, 340, 401, 120, 185, '#6a5d4a');
       jar(ctx, 500, 401, 91, 155, '#534f48');
       jar(ctx, 637, 401, 102, 137, '#50575a');
-      lampShade(ctx, 1229, 207, 124);
+      if (!STAGES.dripper.noLamp) lampShade(ctx, 1229, 207, 124);
     } else {
       fill(ctx, 0, 0, W, 224, '#1c2028');
       for (let x = 3; x < W; x += 328) {
@@ -324,6 +423,7 @@ function kitchenScene(kind, seed) {
       haze(ctx, 786, 495, 773, 472, '251,170,97', .37);
     }
 
+    if (STAGES[kind] && STAGES[kind].window) nightWindow(ctx, random, STAGES[kind].window);
     const counter = breadRoom ? 695 : 744;
     wood(ctx, 0, counter, W, H - counter, random, breadRoom ? ['#694e3f', '#513b31', '#282326'] : ['#50423d', '#403736', '#24252d']);
     line(ctx, 0, counter + 2, W, counter + 2, 'rgba(202,158,120,.22)', 4);
@@ -382,9 +482,9 @@ function kitchenScene(kind, seed) {
   };
 }
 
-register('14', '구리 주전자가 식는 부엌', 'copper-kettle-kitchen', 'rain-room', '벽 너머의 잔잔한 빗소리', kitchenScene('kettle', 515));
-register('15', '새벽에 내리는 한 잔의 커피', 'predawn-coffee-dripper', 'rain-room', '창 너머의 낮은 빗소리', kitchenScene('dripper', 956));
-register('16', '빵을 식히는 나무 작업대', 'bread-on-the-cooling-rack', 'wind', '작업실 밖을 스치는 바람', kitchenScene('bread', 708));
+register('14', '구리 주전자가 식는 부엌', 'copper-kettle-kitchen', 'rain-room', '벽 너머의 잔잔한 빗소리', staged('kettle', kitchenScene('kettle', 515)));
+register('15', '새벽에 내리는 한 잔의 커피', 'predawn-coffee-dripper', 'rain-room', '창 너머의 낮은 빗소리', staged('dripper', kitchenScene('dripper', 956)));
+register('16', '빵을 식히는 나무 작업대', 'bread-on-the-cooling-rack', 'room-wind', '작업실 밖을 스치는 바람', staged('bread', kitchenScene('bread', 708)));
 
 
 function fabric(ctx, x, y, w, h, random, colors) {
@@ -560,9 +660,9 @@ function listeningScene(kind, seed) {
   };
 }
 
-register('17', '오래된 턴테이블의 한 바퀴', 'turntable-last-side', 'record', '레코드 표면의 낮은 잡음', listeningScene('record', 188));
-register('18', '푸른 불빛이 켜진 카세트', 'blue-cassette-deck', 'mechanism', '카세트 모터의 낮은 울림', listeningScene('cassette', 126));
-register('19', '빈 상영실의 작은 영사기', 'empty-room-projector', 'mechanism', '영사기의 조용한 모터음', listeningScene('projector', 377));
+register('17', '오래된 턴테이블의 한 바퀴', 'turntable-last-side', 'record', '레코드 표면의 낮은 잡음', staged('record', listeningScene('record', 188)));
+register('18', '푸른 불빛이 켜진 카세트', 'blue-cassette-deck', 'mechanism', '카세트 모터의 낮은 울림', staged('cassette', listeningScene('cassette', 126)));
+register('19', '빈 상영실의 작은 영사기', 'empty-room-projector', 'mechanism', '영사기의 조용한 모터음', staged('projector', listeningScene('projector', 377)));
 
 function leaf(ctx, x, y, length, width, angle, colors) {
   ctx.save();
@@ -915,7 +1015,7 @@ function aquariumScene(createCanvas) {
 
 register('11', '유리 온실에 맺힌 새벽 이슬', 'glasshouse-before-dawn', 'drips', '유리 곁에 맺힌 물방울 소리', greenhouseScene(163));
 register('12', '청록빛이 감도는 수초 수조', 'quiet-aquarium-plants', 'lake', '수초 너머로 번지는 잔물결 소리', aquariumScene);
-register('13', '달빛이 드는 겨울 정원', 'winter-conservatory-moon', 'wind', '온실 밖에서 스치는 바람', winterBayScene);
+register('13', '달빛이 드는 겨울 정원', 'winter-conservatory-moon', 'room-wind', '온실 밖에서 스치는 바람', winterBayScene);
 
 function paintPages(ctx, x, y, random) {
   const cover = [[x - 409, y + 88], [x - 322, y - 141], [x - 39, y - 115], [x + 21, y - 89], [x + 327, y - 167], [x + 460, y + 74], [x + 135, y + 163], [x + 16, y + 156]];
@@ -959,6 +1059,7 @@ function craftScene(kind, seed) {
     const book = kind === 'book';
     const cloth = kind === 'cloth';
     fill(ctx, 0, 0, W, H, ramp(ctx, 0, 0, 1183, 840, [[0, '#23212c'], [.51, '#3f393d'], [1, '#191c26']]));
+    if (STAGES[kind] && STAGES[kind].window) nightWindow(ctx, random, STAGES[kind].window);
 
     if (book) {
       wood(ctx, 60, 251, 770, 26, random, ['#6a5042', '#3a2e30', '#231d25']);
@@ -1037,10 +1138,21 @@ function craftScene(kind, seed) {
       }
     }
     matte(ctx, createCanvas, seed * 19);
+    const glowX = book ? 1114 : cloth ? 866 : 1310;
+    const motes = Array.from({ length: 46 }, () => ({
+      x: glowX + (random() - .5) * 900, y: 549 + (random() - .5) * 560,
+      ax: 25 + random() * 60, ay: 18 + random() * 45, k: 1 + Math.floor(random() * 2),
+      f: random() * TAU, size: .8 + random() * 1.6, alpha: .1 + random() * .24,
+    }));
     return (target, input) => {
       const phase = input - Math.floor(input);
       target.drawImage(plate, 0, 0);
       const angle = phase * TAU;
+      haze(target, glowX, 520, 420, 300, '240,182,112', .025 + .015 * Math.sin(angle * 2));
+      for (const m of motes) {
+        const x = m.x + m.ax * Math.sin(angle * m.k + m.f), y = m.y - m.ay * Math.sin(angle * m.k + m.f * 1.7 + 1);
+        oval(target, x, y, m.size, m.size, `rgba(238,204,158,${m.alpha * (.55 + .45 * Math.sin(angle * 3 + m.f))})`);
+      }
       if (book || cloth) {
         const x = book ? 1565 : 454;
         const y = book ? 694 : 727;
@@ -1061,9 +1173,9 @@ function craftScene(kind, seed) {
   };
 }
 
-register('20', '실을 꿰는 제본 작업대', 'quiet-bookbinding-bench', 'wind', '창호 너머의 희미한 바람', craftScene('book', 606));
-register('21', '천 조각과 재봉등', 'sewing-room-fabric', 'rain-room', '고요하게 깔리는 빗소리', craftScene('cloth', 230));
-register('22', '회중시계를 고치는 방', 'pocket-watch-repair', 'wind', '닫힌 창 너머의 잔잔한 바람', craftScene('watch', 889));
+register('20', '실을 꿰는 제본 작업대', 'quiet-bookbinding-bench', 'room-wind', '창호 너머의 희미한 바람', staged('book', craftScene('book', 606)));
+register('21', '천 조각과 재봉등', 'sewing-room-fabric', 'rain-room', '고요하게 깔리는 빗소리', staged('cloth', craftScene('cloth', 230)));
+register('22', '회중시계를 고치는 방', 'pocket-watch-repair', 'room-wind', '닫힌 창 너머의 잔잔한 바람', staged('watch', craftScene('watch', 889)));
 
 function stoneFloor(ctx, target, paint) {
   fill(ctx, 0, target, W, H - target, ramp(ctx, 0, target, 0, H, [[0, paint[0]], [1, paint[1]]]));
@@ -1288,8 +1400,8 @@ function roomScene(kind, seed) {
   };
 }
 
-register('23', '달빛이 드는 처마 밑 다락', 'attic-moonlit-dormer', 'wind', '기와 지붕 너머를 지나는 바람', roomScene('attic', 464));
-register('24', '복도 끝의 둥근 색유리 창', 'rose-glass-at-hall-end', 'wind', '먼 복도를 스치는 미세한 바람', roomScene('corridor', 799));
+register('23', '달빛이 드는 처마 밑 다락', 'attic-moonlit-dormer', 'room-wind', '기와 지붕 너머를 지나는 바람', roomScene('attic', 464));
+register('24', '복도 끝의 둥근 색유리 창', 'rose-glass-at-hall-end', 'room-wind', '먼 복도를 스치는 미세한 바람', roomScene('corridor', 799));
 register('25', '작은 등이 켜진 새벽 독서실', 'reading-room-before-dawn', 'rain-room', '닫힌 독서실 창의 낮은 빗소리', roomScene('study', 591));
 
 module.exports = editions.sort((a, b) => a.id.localeCompare(b.id));

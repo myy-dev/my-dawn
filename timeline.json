@@ -106,7 +106,7 @@
       "category": "실내",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "room-wind",
       "soundLabel": "온실 밖에서 스치는 바람",
       "soundOffsetSeconds": 5.8
     },
@@ -136,7 +136,7 @@
       "category": "실내",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "room-wind",
       "soundLabel": "작업실 밖을 스치는 바람",
       "soundOffsetSeconds": 5.3
     },
@@ -176,7 +176,7 @@
       "category": "실내",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "room-wind",
       "soundLabel": "창호 너머의 희미한 바람",
       "soundOffsetSeconds": 12.6
     },
@@ -196,7 +196,7 @@
       "category": "실내",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "room-wind",
       "soundLabel": "닫힌 창 너머의 잔잔한 바람",
       "soundOffsetSeconds": 4.3
     },
@@ -206,7 +206,7 @@
       "category": "실내",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "room-wind",
       "soundLabel": "기와 지붕 너머를 지나는 바람",
       "soundOffsetSeconds": 12.1
     },
@@ -216,7 +216,7 @@
       "category": "실내",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "room-wind",
       "soundLabel": "먼 복도를 스치는 미세한 바람",
       "soundOffsetSeconds": 19.9
     },
@@ -286,7 +286,7 @@
       "category": "물가",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "grass",
       "soundLabel": "갈대 사이로 스치는 바람",
       "soundOffsetSeconds": 2.7
     },
@@ -386,7 +386,7 @@
       "category": "숲과 정원",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "leaves",
       "soundLabel": "대나무 잎 사이를 스치는 바람",
       "soundOffsetSeconds": 9
     },
@@ -396,7 +396,7 @@
       "category": "숲과 정원",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "leaves",
       "soundLabel": "돌길을 지나는 잔바람",
       "soundOffsetSeconds": 16.9
     },
@@ -436,7 +436,7 @@
       "category": "숲과 정원",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "grass",
       "soundLabel": "풀잎을 스치는 잔바람",
       "soundOffsetSeconds": 0.2
     },
@@ -446,7 +446,7 @@
       "category": "숲과 정원",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "grass",
       "soundLabel": "억새 사이를 움직이는 바람",
       "soundOffsetSeconds": 8
     },
@@ -456,7 +456,7 @@
       "category": "숲과 정원",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "grass",
       "soundLabel": "꽃밭 가장자리의 부드러운 바람",
       "soundOffsetSeconds": 15.8
     },
@@ -466,7 +466,7 @@
       "category": "숲과 정원",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "grass",
       "soundLabel": "갈대를 흔드는 바람",
       "soundOffsetSeconds": 23.7
     },
@@ -476,7 +476,7 @@
       "category": "숲과 정원",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "leaves",
       "soundLabel": "솔잎 사이를 지나는 바람",
       "soundOffsetSeconds": 7.5
     },
@@ -486,7 +486,7 @@
       "category": "숲과 정원",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "leaves",
       "soundLabel": "단풍잎을 스치는 바람",
       "soundOffsetSeconds": 15.3
     },
@@ -496,7 +496,7 @@
       "category": "숲과 정원",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "leaves",
       "soundLabel": "꽃잎을 스쳐 가는 바람",
       "soundOffsetSeconds": 23.2
     },
@@ -516,7 +516,7 @@
       "category": "숲과 정원",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "leaves",
       "soundLabel": "계단을 따라 흐르는 잔바람",
       "soundOffsetSeconds": 14.8
     },
@@ -536,7 +536,7 @@
       "category": "밤하늘",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "sand",
       "soundLabel": "바람이 모래를 스치는 소리",
       "soundOffsetSeconds": 6.5
     },
@@ -546,7 +546,7 @@
       "category": "밤하늘",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "sand",
       "soundLabel": "바람이 모래를 스치는 소리",
       "soundOffsetSeconds": 14.3
     },
@@ -556,7 +556,7 @@
       "category": "밤하늘",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "sand",
       "soundLabel": "바람이 모래를 스치는 소리",
       "soundOffsetSeconds": 22.1
     },
@@ -566,7 +566,7 @@
       "category": "밤하늘",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "gust",
       "soundLabel": "절벽 사이를 지나는 바람 소리",
       "soundOffsetSeconds": 6
     },
@@ -576,7 +576,7 @@
       "category": "밤하늘",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "gust",
       "soundLabel": "돌기둥 사이를 스치는 바람 소리",
       "soundOffsetSeconds": 13.8
     },
@@ -586,7 +586,7 @@
       "category": "밤하늘",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "gust",
       "soundLabel": "절벽 사이를 지나는 바람 소리",
       "soundOffsetSeconds": 21.6
     },
@@ -596,7 +596,7 @@
       "category": "밤하늘",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "grass",
       "soundLabel": "풀잎을 스치고 지나는 바람 소리",
       "soundOffsetSeconds": 5.5
     },
@@ -606,7 +606,7 @@
       "category": "밤하늘",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "grass",
       "soundLabel": "풀잎을 스치고 지나는 바람 소리",
       "soundOffsetSeconds": 13.3
     },
@@ -616,7 +616,7 @@
       "category": "밤하늘",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "grass",
       "soundLabel": "풀잎을 스치고 지나는 바람 소리",
       "soundOffsetSeconds": 21.1
     },
@@ -716,7 +716,7 @@
       "category": "도시와 교통",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "gust",
       "soundLabel": "옥상에 부는 잔잔한 바람",
       "soundOffsetSeconds": 3.4
     },
@@ -726,7 +726,7 @@
       "category": "도시와 교통",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "gust",
       "soundLabel": "안테나 사이에 부는 바람",
       "soundOffsetSeconds": 11.3
     },
@@ -736,7 +736,7 @@
       "category": "도시와 교통",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "gust",
       "soundLabel": "기와를 스치는 찬 바람",
       "soundOffsetSeconds": 19.1
     },
@@ -796,7 +796,7 @@
       "category": "도시와 교통",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "gust",
       "soundLabel": "넓은 활주로를 가로지르는 바람",
       "soundOffsetSeconds": 18.1
     },
@@ -846,7 +846,7 @@
       "category": "날씨와 전원",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "grass",
       "soundLabel": "밤바람과 들판의 바스락거림",
       "soundOffsetSeconds": 9.2
     },
@@ -856,7 +856,7 @@
       "category": "날씨와 전원",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "gust",
       "soundLabel": "농장 너머로 지나가는 바람",
       "soundOffsetSeconds": 17
     },
@@ -886,7 +886,7 @@
       "category": "날씨와 전원",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "gust",
       "soundLabel": "창고 곁을 스치는 바람",
       "soundOffsetSeconds": 16.5
     },
@@ -896,7 +896,7 @@
       "category": "날씨와 전원",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "gust",
       "soundLabel": "목책 사이를 지나는 바람",
       "soundOffsetSeconds": 0.4
     },
@@ -906,7 +906,7 @@
       "category": "날씨와 전원",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "grass",
       "soundLabel": "보리 이삭에 스치는 바람",
       "soundOffsetSeconds": 8.2
     },
@@ -956,7 +956,7 @@
       "category": "날씨와 전원",
       "cycleSeconds": 24,
       "durationSeconds": null,
-      "sound": "wind",
+      "sound": "grass",
       "soundLabel": "낡은 목책과 들풀을 스치는 바람",
       "soundOffsetSeconds": 23.3
     },

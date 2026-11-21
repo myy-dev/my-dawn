@@ -74,6 +74,7 @@ function sky(ctx, random, horizon, tint = 'inlet', moon = null) {
     cold: ['#071427', '#20394c', '#435f68', '150,190,184'],
     fog: ['#132238', '#344b58', '#596b6d', '163,185,175'],
     warm: ['#141a30', '#393e4b', '#716761', '224,172,133'],
+    dawn: ['#152038', '#4b4a63', '#b98472', '238,166,130'],
   }[tint];
   ctx.fillStyle = flat(ctx, 0, horizon, [[0, colors[0]], [.6, colors[1]], [1, colors[2]]]);
   ctx.fillRect(0, 0, W, horizon + 2);
@@ -87,6 +88,7 @@ function sky(ctx, random, horizon, tint = 'inlet', moon = null) {
     glow(ctx, random() * W, y, 140 + random() * 490, 6 + random() * 27, colors[3], .03 + random() * .075);
   }
   glow(ctx, W * .57, horizon * .92, 1020, horizon * .39, colors[3], .15);
+  if (tint === 'dawn') glow(ctx, W * .45, horizon, 1150, horizon * .3, '246,180,140', .3);
   if (moon) {
     const [x, y, radius] = moon;
     glow(ctx, x, y, radius * 6, radius * 6, '174,200,203', .20);
@@ -114,6 +116,7 @@ function bodyOfWater(ctx, horizon, theme) {
     cold: ['#425d6b', '#1d3848', '#0e1d2e'],
     fog: ['#566d70', '#284958', '#122935'],
     warm: ['#626465', '#35444c', '#1b2a31'],
+    dawn: ['#8a6f72', '#3e4458', '#151f30'],
   }[theme];
   ctx.fillStyle = flat(ctx, horizon, H, [[0, palette[0]], [.43, palette[1]], [1, palette[2]]]);
   ctx.fillRect(0, horizon, W, H - horizon);
@@ -149,14 +152,77 @@ function rock(ctx, random, x, y, size, height, light = '#43535a', dark = '#18263
     [x - size * .36, y - height * (.95 + random() * .31)], [x + size * .34, y - height * (.73 + random() * .27)],
     [x + size * (.76 + random() * .19), y - height * .12], [x + size, y + height * .22],
     [x + size * .36, y + height * .39]];
-  polygon(ctx, points, dark);
-  polygon(ctx, [points[0], points[1], points[2], points[3], points[4], [x + size * .11, y - height * .19]], light);
+  // Rounded boulder: the same outline points, smoothed through their midpoints, lit from the upper left.
+  const outline = () => {
+    const mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+    ctx.beginPath();
+    let start = mid(points[points.length - 1], points[0]);
+    ctx.moveTo(start[0], start[1]);
+    points.forEach((p, i) => {
+      const next = mid(p, points[(i + 1) % points.length]);
+      ctx.quadraticCurveTo(p[0], p[1], next[0], next[1]);
+    });
+    ctx.closePath();
+  };
+  glow(ctx, x + size * .08, y + height * .3, size * 1.2, Math.max(8, height * .24), '4,10,16', .5);
+  outline();
+  const shade = ctx.createLinearGradient(x - size * .55, y - height, x + size * .45, y + height * .4);
+  shade.addColorStop(0, light);
+  shade.addColorStop(.62, dark);
+  shade.addColorStop(1, dark);
+  ctx.fillStyle = shade;
+  ctx.fill();
+  ctx.save();
+  outline();
+  ctx.clip();
+  glow(ctx, x - size * .28, y - height * .78, size * .75, height * .55, '196,210,210', .13);
+  glow(ctx, x + size * .25, y + height * .4, size * 1.1, height * .55, '3,9,15', .38);
   for (let index = 0; index < flecks; index++) {
     const dx = (random() * 2 - 1) * size * .67;
     const yy = y - height * (.15 + random() * (.61 - Math.abs(dx / size) * .6));
-    ctx.fillStyle = random() > .35 ? 'rgba(158,176,177,.12)' : 'rgba(7,18,27,.18)';
-    ctx.fillRect(x + dx, yy, 1 + random() * size * .09, 1 + random() * height * .05);
+    ctx.fillStyle = random() > .35 ? 'rgba(158,176,177,.08)' : 'rgba(7,18,27,.12)';
+    const w = 1 + random() * size * .09, h = 1 + random() * height * .05;
+    ctx.beginPath();
+    ctx.ellipse(x + dx, yy, w / 2 + .5, h / 2 + .5, 0, 0, TAU);
+    ctx.fill();
   }
+  ctx.restore();
+  // A faint cool rim so neighbouring boulders stay separate.
+  outline();
+  ctx.strokeStyle = 'rgba(160,182,188,.13)';
+  ctx.lineWidth = 1.4;
+  ctx.stroke();
+}
+
+// Cliff and bank faces: the same points as polygon(), but curved through midpoints so they match the
+// rounded boulders. Points on the frame edge stay sharp so the shape still meets the border.
+// With shade set, a soft light from the upper left and a darker base are added inside the shape.
+function smoothPolygon(ctx, points, fill, shade = false) {
+  const onEdge = ([x, y]) => x <= 0 || x >= W || y <= 0 || y >= H;
+  const mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+  const trace = () => {
+    ctx.beginPath();
+    const start = mid(points[points.length - 1], points[0]);
+    ctx.moveTo(start[0], start[1]);
+    points.forEach((p, i) => {
+      const next = mid(p, points[(i + 1) % points.length]);
+      if (onEdge(p)) { ctx.lineTo(p[0], p[1]); ctx.lineTo(next[0], next[1]); }
+      else ctx.quadraticCurveTo(p[0], p[1], next[0], next[1]);
+    });
+    ctx.closePath();
+  };
+  trace();
+  ctx.fillStyle = fill;
+  ctx.fill();
+  if (!shade) return;
+  const xs = points.map(p => p[0]), ys = points.map(p => p[1]);
+  const left = Math.min(...xs), right = Math.max(...xs), top = Math.min(...ys), bottom = Math.max(...ys);
+  ctx.save();
+  trace();
+  ctx.clip();
+  glow(ctx, left + (right - left) * .35, top + (bottom - top) * .25, (right - left) * .55, (bottom - top) * .4, '170,192,196', .1);
+  glow(ctx, left + (right - left) * .6, bottom, (right - left) * .8, (bottom - top) * .45, '3,9,15', .35);
+  ctx.restore();
 }
 
 function post(ctx, x, y, top, width, light = '#655b52', dark = '#272b2f') {
@@ -240,14 +306,14 @@ function coast(scene, createCanvas) {
   const foreground = renderSurface(createCanvas, ctx => {
     if (kind === 'cliff') {
       const bank = [[0, 643],[97,638],[234,678],[324,725],[255,776],[208,804],[291,840],[408,868],[344,914],[442,961],[609,1010],[639,1080],[0,1080]];
-      polygon(ctx, bank, flat(ctx, 650, H, [[0,'#333d47'],[.38,'#1c2d36'],[1,'#101821']]));
+      smoothPolygon(ctx, bank, flat(ctx, 650, H, [[0,'#333d47'],[.38,'#1c2d36'],[1,'#101821']]), true);
       for (let index = 0; index < 27; index++) {
         const x = random() ** 1.66 * (230 + index * 12);
         const y = 703 + index * 15;
         rock(ctx, random, x, y, 17 + index * 2.7, 14 + random() * 55, index % 4 === 0 ? '#4a5156' : '#35434a', '#1d2833');
       }
-      polygon(ctx, [[0,102],[103,227],[124,448],[105,585],[170,652],[0,736]], '#171f29');
-      polygon(ctx, [[0,150],[62,333],[35,507],[91,640],[0,678]], '#2a343e');
+      smoothPolygon(ctx, [[0,102],[103,227],[124,448],[105,585],[170,652],[0,736]], '#171f29');
+      smoothPolygon(ctx, [[0,150],[62,333],[35,507],[91,640],[0,678]], '#2a343e', true);
     } else if (kind === 'fjord') {
       polygon(ctx, [[1357,1080],[1449,881],[1540,793],[1920,720],[1920,1080]],
         flat(ctx, 719, H, [[0,'#556576'],[1,'#252b32']]));
@@ -412,7 +478,7 @@ function reflectedGlowFactory(random, x, top, depth, width, color, intensity) {
 const scenes = [
   ['26', '해식 절벽 아래의 밤 파도', 'night-surf-below-the-cliff', 'sea', '절벽 밑에 부서지는 파도', coast, {kind:'cliff',horizon:547,tint:'plum',moon:[1406,257,22],seed:546390}],
   ['27', '작은 어항에 잠든 배들', 'sleeping-boats-in-the-harbor', 'lake', '정박한 배 곁의 잔물결', coast, {kind:'inlet',horizon:535,tint:'warm',moon:null,seed:422803}],
-  ['28', '피오르를 빠져나오는 여객선', 'ferry-leaving-the-fjord', 'sea', '배 뒤로 흐르는 물소리', coast, {kind:'fjord',horizon:590,tint:'cold',moon:[1024,232,22],seed:602457}],
+  ['28', '피오르를 빠져나오는 여객선', 'ferry-leaving-the-fjord', 'sea', '배 뒤로 흐르는 물소리', coast, {kind:'fjord',horizon:590,tint:'dawn',moon:null,seed:602457}],
   ['35', '달빛이 썰물에 드러낸 모래섬', 'sandbars-under-a-low-moon', 'sea', '갯벌로 스며드는 잔물결', coast, {kind:'mud',horizon:468,tint:'plum',moon:[536,325,32],seed:938504}],
   ['37', '얼음 조각이 떠가는 겨울 바닷가', 'winter-sea-with-drifting-ice', 'wind', '겨울 바닷가의 바람 소리', coast, {kind:'ice',horizon:519,tint:'cold',moon:[1241,166,29],seed:846205}],
 ];
@@ -662,10 +728,10 @@ function buildChannel(scene, createCanvas) {
 }
 
 scenes.push(
-  ['31', '염습지에 놓인 새벽 나무길', 'boardwalk-over-the-salt-marsh', 'wind', '갈대 사이로 스치는 바람', buildChannel, {mode:'marsh',horizon:541,tint:'fog',moon:[1218,168,23],seed:561401}],
+  ['31', '염습지에 놓인 새벽 나무길', 'boardwalk-over-the-salt-marsh', 'grass', '갈대 사이로 스치는 바람', buildChannel, {mode:'marsh',horizon:541,tint:'dawn',moon:null,seed:561401}],
   ['32', '돌다리 밑으로 흐르는 밤 운하', 'old-stone-canal-after-midnight', 'lake', '운하에 부딪히는 물소리', buildChannel, {mode:'canal',horizon:575,tint:'warm',moon:null,seed:405009}],
   ['33', '잔물결 위에 불 켠 보트 창고', 'window-of-the-quiet-boathouse', 'lake', '창고 아래 고요한 잔물결', buildChannel, {mode:'boathouse',horizon:583,tint:'plum',moon:[544,297,23],seed:841291}],
-  ['34', '맹그로브 숲길 끝의 물빛', 'mangrove-water-at-first-light', 'forest', '나무뿌리 사이 흐르는 물', buildChannel, {mode:'mangrove',horizon:545,tint:'fog',moon:[1093,239,20],seed:134004}],
+  ['34', '맹그로브 숲길 끝의 물빛', 'mangrove-water-at-first-light', 'forest', '나무뿌리 사이 흐르는 물', buildChannel, {mode:'mangrove',horizon:545,tint:'dawn',moon:null,seed:134004}],
   ['40', '연잎이 흔들리는 나무다리', 'lotus-pond-under-the-footbridge', 'lake', '연잎 사이 번지는 잔물결', buildChannel, {mode:'lotus',horizon:547,tint:'plum',moon:[1284,175,21],seed:436876}],
 );
 
@@ -875,15 +941,15 @@ function buildShelter(scene, createCanvas) {
     if(mode==='mill') millHouse(ctx,random);
     if(mode==='cascade') {
       const shoulder=[[0,277],[185,127],[372,191],[513,180],[700,279],[832,242],[1083,418],[990,514],[1045,616],[973,773],[891,732],[0,838]];
-      polygon(ctx,shoulder,flat(ctx,165,884,[[0,'#44565a'],[.48,'#354649'],[1,'#1c3438']]));
+      smoothPolygon(ctx,shoulder,flat(ctx,165,884,[[0,'#44565a'],[.48,'#354649'],[1,'#1c3438']]),true);
       for(let i=0;i<40;i++) {
         const y=253+i*14.7;
         const x=random()*687*(.71+.34*Math.sin(i));
         rock(ctx,random,x,y,35+random()*101,19+random()*50,i%4?'#40534d':'#52665e','#23383b');
       }
-      polygon(ctx,[[465,298],[548,302],[620,332],[667,346],[728,363],[807,392],[847,425],
+      smoothPolygon(ctx,[[465,298],[548,302],[620,332],[667,346],[728,363],[807,392],[847,425],
         [811,443],[720,434],[688,418],[620,412],[553,391],[504,364]],'#334b4b');
-      polygon(ctx,[[531,325],[638,346],[706,366],[763,387],[779,402],[809,411],[823,429],
+      smoothPolygon(ctx,[[531,325],[638,346],[706,366],[763,387],[779,402],[809,411],[823,429],
         [777,435],[750,419],[740,406],[684,394],[624,369],[562,356]],'#46605b');
       line(ctx,[[700,388],[741,402],[769,423],[813,429]],'rgba(161,188,174,.47)',3.4);
       line(ctx,[[824,437],[859,447],[875,467],[911,475]],'#263e41',8);
@@ -893,7 +959,7 @@ function buildShelter(scene, createCanvas) {
   const foreground=renderSurface(createCanvas,ctx=>{
     if(mode==='grotto') {
       const shell=[[0,0],[W,0],[W,H],[1465,H],[1543,957],[1503,816],[1522,705],[1476,620],[1526,544],[1502,426],[1420,360],[1400,252],[1327,180],[1157,183],[1071,119],[1011,138],[873,139],[782,228],[668,243],[546,506],[515,613],[478,737],[442,855],[488,H],[0,H]];
-      polygon(ctx,shell,flat(ctx,0,H,[[0,'#1b202c'],[.56,'#23333c'],[1,'#182830']]));
+      smoothPolygon(ctx,shell,flat(ctx,0,H,[[0,'#1b202c'],[.56,'#23333c'],[1,'#182830']]));
       for(let i=0;i<57;i++) {
         const side=i%2===0, y=52+random()*1053;
         const x=side?random()**.6*(y<300?876:478):W-random()**.6*(y<300?595:380);
@@ -902,7 +968,7 @@ function buildShelter(scene, createCanvas) {
       }
       for(let i=0;i<7;i++) {
         const x=571 + i*140,y=22+random()*51;
-        polygon(ctx,[[x-18,y],[x+38,y],[x+22,y+33+random()*146],[x+1,y+15]],'#202a32');
+        smoothPolygon(ctx,[[x-18,y-30],[x+38,y-30],[x+30,y+10],[x+22,y+33+random()*146],[x+8,y+20]],'#202a32');
       }
     } else if (mode==='cascade') {
       for(const [x,y,r] of [[53,841,164],[241,936,133],[940,844,82],[1543,1002,154],[1743,1024,152],[1874,942,87]]) rock(ctx,random,x,y,r,r*.52,'#536563','#243741');
@@ -986,8 +1052,8 @@ scenes.push(
   ['29', '조수 웅덩이에 남은 달빛', 'moonlight-in-a-tide-pool', 'sea', '갯바위 틈에 고인 물소리', buildPools, {mode:'tidepool',seed:815942}],
   ['30', '물 채운 다랑논의 푸른 새벽', 'flooded-rice-terraces-before-dawn', 'lake', '논두렁 물길의 잔잔한 소리', buildPools, {mode:'terrace',seed:945628}],
   ['36', '해식동굴 밖 달빛 물결', 'moonlit-water-through-the-grotto', 'sea', '동굴 입구에 닿는 바닷물', buildShelter, {mode:'grotto',horizon:564,tint:'cold',moon:[1015,309,26],seed:273589}],
-  ['38', '깊은 골짜기의 작은 밤 폭포', 'small-waterfall-in-the-dark-gorge', 'cascade', '바위를 타고 쏟아지는 물소리', buildShelter, {mode:'cascade',horizon:588,tint:'fog',moon:[1384,220,23],seed:912603}],
-  ['39', '강가 물레방앗간의 새벽 불빛', 'lamplit-watermill-before-dawn', 'lake', '물레 밑을 지나는 강물', buildShelter, {mode:'mill',horizon:549,tint:'warm',moon:[628,246,18],seed:143607}],
+  ['38', '깊은 골짜기의 작은 밤 폭포', 'small-waterfall-in-the-dark-gorge', 'cascade', '바위를 타고 쏟아지는 물소리', buildShelter, {mode:'cascade',horizon:588,tint:'fog',moon:null,seed:912603}],
+  ['39', '강가 물레방앗간의 새벽 불빛', 'lamplit-watermill-before-dawn', 'lake', '물레 밑을 지나는 강물', buildShelter, {mode:'mill',horizon:549,tint:'dawn',moon:null,seed:143607}],
 );
 
 module.exports = scenes.sort(([left], [right]) => Number(left) - Number(right)).map(([id,title,slug,sound,soundLabel,render,settings]) => ({

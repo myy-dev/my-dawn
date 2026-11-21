@@ -306,7 +306,7 @@ function entry(config, renderer, sound = 'wind', soundLabel = '바람이 모래�
   return { id, title, slug, sound, soundLabel, ...(posterPhase === undefined ? {} : { posterPhase }), createScene: createCanvas => renderer(createCanvas, config) };
 }
 
-module.exports = dunes.map(config => entry(config, renderDunes));
+module.exports = dunes.map(config => entry(config, renderDunes, 'sand'));
 
 const canyons = [
   {
@@ -319,8 +319,8 @@ const canyons = [
   },
   {
     id:'60', title:'바람이 잠든 돌기둥 평원', slug:'silent-hoodoo-plain', seed:61724, theme:'columns',
-    colors:['#0d1524','#252c43','#61506a'], strata:'#a0837c', faces:['#48394a','#382f3f','#252638','#242232'],
-    haze:{x:1520,y:612,w:830,h:300,tint:'165,124,126',alpha:0.23}, moonData:{x:463,y:229,radius:38},
+    colors:['#101a2e','#3a3550','#a36c66'], strata:'#a0837c', faces:['#48394a','#382f3f','#252638','#242232'],
+    haze:{x:1520,y:612,w:830,h:300,tint:'232,150,118',alpha:0.32},
     ground:[[-5,688],[212,705],[384,682],[585,700],[735,678],[968,691],[1247,671],[1438,699],[1552,674],[1817,694],[1925,678]],
     pillars:[[292,468,113,726],[467,521,84,723],[754,389,110,748],[993,558,78,721],[1260,433,138,753],[1530,506,148,721],[1701,595,89,738]],
   },
@@ -450,7 +450,7 @@ const meadows = [
     skyline:[[-4,662],[206,600],[363,613],[505,658],[641,658],[813,717],[1032,749],[1205,752],[1440,714],[1694,687],[1924,711]],
     walkers:[{time:.17,span:.102,dx:245,dy:94,x:701,y:241},{time:.66,span:.093,dx:196,dy:76,x:1291,y:145}],
   },
-  {id:'63', title:'고원 전망대의 빈 나무 의자', slug:'empty-bench-on-the-highland', seed:64579, theme:'bench', colors:['#0c1526','#252b45','#60556b'], hills:['#404050','#303740','#242e38'], moonData:{x:1149,y:262,radius:48,tint:'160,175,207'}, haze:{x:498,y:623,w:791,h:256,tint:'194,137,154',alpha:0.22}, skyline:[[-4,735],[202,746],[399,714],[615,730],[801,721],[1015,714],[1194,695],[1574,764],[1924,725]]},
+  {id:'63', title:'고원 전망대의 빈 나무 의자', slug:'empty-bench-on-the-highland', seed:64579, theme:'bench', colors:['#111a30','#3c3a58','#b07a6c'], hills:['#404050','#303740','#242e38'], haze:{x:498,y:623,w:791,h:256,tint:'236,156,124',alpha:0.34}, skyline:[[-4,735],[202,746],[399,714],[615,730],[801,721],[1015,714],[1194,695],[1574,764],[1924,725]]},
   {id:'64', title:'은하수 아래 바스락이는 억새', slug:'silver-grass-under-the-milky-way', seed:65056, theme:'silver', colors:['#081420','#142937','#49616c'], hills:['#344d54','#2b424a','#1b333d'], milky:{x:345,y:-40,dx:1210,dy:588}, haze:{x:829,y:624,w:899,h:272,tint:'127,171,187',alpha:0.19}, skyline:[[-4,697],[285,716],[443,729],[623,742],[837,767],[1036,769],[1213,752],[1491,714],[1762,711],[1924,685]]},
 ];
 
@@ -545,13 +545,13 @@ function renderMeadow(createCanvas, config) {
 }
 
 module.exports.push(
-  ...canyons.map(config => entry(config, renderCanyon, 'wind',
+  ...canyons.map(config => entry(config, renderCanyon, 'gust',
     config.theme === 'columns' ? '돌기둥 사이를 스치는 바람 소리' : '절벽 사이를 지나는 바람 소리')),
-  ...meadows.map(config => entry(config, renderMeadow, 'wind', '풀잎을 스치고 지나는 바람 소리')),
+  ...meadows.map(config => entry(config, renderMeadow, 'grass', '풀잎을 스치고 지나는 바람 소리')),
 );
 
 const mountains = [
-  {id:'65',title:'구름 바다 위 어두운 산등성이',slug:'high-ridge-above-the-cloud-sea',seed:65302, theme:'sea', colors:['#0a1224','#1e2e42','#5b6278'], haze:{x:1503,y:563,w:951,h:309,tint:'166,158,188',alpha:0.27}, moonData:{x:1413,y:254,radius:41}, shades:['#3d485d','#313b50','#232b3e'], silhouette:[[-6,651],[165,632],[383,542],[480,554],[596,634],[754,687],[945,693],[1254,742],[1926,789]], summit:[[-9,443],[88,382],[176,398],[309,315],[384,350],[503,495],[562,481],[739,589],[1924,724]], cloudsTint:'153,180,201'},
+  {id:'65',title:'구름 바다 위 어두운 산등성이',slug:'high-ridge-above-the-cloud-sea',seed:65302, theme:'sea', colors:['#0f1830','#38405e','#a67a7a'], haze:{x:1503,y:563,w:951,h:309,tint:'230,158,128',alpha:0.33}, shades:['#3d485d','#313b50','#232b3e'], silhouette:[[-6,651],[165,632],[383,542],[480,554],[596,634],[754,687],[945,693],[1254,742],[1926,789]], summit:[[-9,443],[88,382],[176,398],[309,315],[384,350],[503,495],[562,481],[739,589],[1924,724]], cloudsTint:'153,180,201'},
   {id:'66',title:'새벽빛이 감도는 산 너머',slug:'indigo-peaks-meet-first-light',seed:66867,theme:'first',colors:['#10182b','#384059','#9b6967'], haze:{x:659,y:625,w:934,h:366,tint:'221,133,106',alpha:0.36}, shades:['#5f5367','#464054','#303344'], stars:72, silhouette:[[-6,745],[215,722],[398,712],[497,680],[558,695],[766,653],[921,674],[1064,631],[1303,557],[1437,580],[1561,537],[1740,655],[1926,592]], summit:[[-9,528],[155,579],[239,496],[383,507],[468,429],[595,404],[659,489],[812,521],[884,517],[978,615],[1924,624]], cloudsTint:'205,155,156'},
   {id:'67',title:'산마루 텐트 너머의 별',slug:'small-tent-under-highland-stars',seed:67712,theme:'camp',colors:['#081522','#192938','#4b5867'], milky:{x:265,y:5,dx:1458,dy:474}, haze:{x:1488,y:647,w:898,h:273,tint:'125,169,184',alpha:0.22}, shades:['#3c515e','#31404d','#24343f'], silhouette:[[-6,808],[176,754],[304,700],[417,706],[558,676],[766,715],[922,777],[1046,793],[1304,873],[1536,861],[1717,813],[1926,801]], summit:[[-9,594],[159,634],[239,565],[393,536],[478,442],[594,494],[700,480],[834,567],[999,546],[1138,625],[1382,643],[1571,575],[1715,603],[1924,545]], cloudsTint:'151,180,191'},
 ];

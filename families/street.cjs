@@ -81,12 +81,29 @@ function scuff(ctx, random, x, y, w, h, count, alpha = .075) {
 }
 
 function finish(ctx, random) {
-  scuff(ctx, random, 0, 0, width, height, 31000, .075);
+  scuff(ctx, random, 0, 0, width, height, 16000, .06);
+  grade(ctx);
   const v = ctx.createRadialGradient(960, 515, 490, 960, 540, 1090);
   v.addColorStop(0, 'rgba(5,9,15,0)');
   v.addColorStop(.67, 'rgba(5,9,15,.115)');
   v.addColorStop(1, 'rgba(3,6,10,.49)');
   fill(ctx, v);
+}
+
+// One-time tone curve on the static plate: deeper shadows, brighter lamps and windows, a little more colour.
+function grade(ctx) {
+  const image = ctx.getImageData(0, 0, width, height), data = image.data;
+  const pivot = .2, curve = new Uint8ClampedArray(256);
+  for (let i = 0; i < 256; i++) {
+    const x = i / 255;
+    const y = x < pivot ? pivot * (x / pivot) ** 1.3 : pivot + (1 - pivot) * ((x - pivot) / (1 - pivot)) ** .78;
+    curve[i] = Math.round(y * 255);
+  }
+  for (let i = 0; i < data.length; i += 4) {
+    const luma = .3 * data[i] + .59 * data[i + 1] + .11 * data[i + 2];
+    for (let k = 0; k < 3; k++) data[i + k] = curve[Math.max(0, Math.min(255, Math.round(luma + (data[i + k] - luma) * 1.08)))];
+  }
+  ctx.putImageData(image, 0, 0);
 }
 
 function skyline(ctx, random, horizon, tone, windowHue, left = 0, right = width) {
@@ -147,18 +164,42 @@ function pavement(ctx, random, horizon, wet, warmX) {
     const y = horizon + (height - horizon) * (i / 27) ** 1.8;
     stroke(ctx, 'rgba(12,16,19,.31)', 1.1, [0, y, width, y + (y - horizon) * .055]);
   }
-  stroke(ctx, '#424b50', 4, [walkwayLeft, horizon, 450, height]);
-  stroke(ctx, '#414950', 4, [walkwayRight, horizon, 1690, height]);
+  // Paving joints fan out from a vanishing point; many faint seams read as texture, not as guide lines.
+  const vanishX = (walkwayLeft + walkwayRight) / 2;
+  for (let i = -11; i <= 11; i++) {
+    stroke(ctx, 'rgba(10,14,18,' + (.05 + random() * .05) + ')', 1, [vanishX + i * 30, horizon, vanishX + i * 215, height]);
+  }
   scuff(ctx, random, 0, horizon, width, height - horizon, 7900, .13);
   if (wet) {
-    light(ctx, warmX, 845, 420, 117, '214,156,99', .17);
-    for (let i = 0; i < 260; i++) {
-      const y = horizon + 16 + random() * (height - horizon - 16);
-      const x = warmX + (random() - .5) * (108 + (y - horizon) * 2.1);
-      const tint = random() > .31 ? '195,149,97' : '138,166,173';
-      stroke(ctx, 'rgba(' + tint + ',' + random() * .13 + ')', 1 + random() * 2, [x, y, x + 5 + random() * 58, y]);
+    light(ctx, warmX, horizon + (height - horizon) * .42, 260, 230, '214,156,99', .15);
+    // Light on wet asphalt stretches toward the viewer as short vertical streaks.
+    for (let i = 0; i < 320; i++) {
+      const y = horizon + 10 + random() ** 1.3 * (height - horizon - 10);
+      const spread = 70 + (y - horizon) * 1.1;
+      const x = warmX + (random() + random() - 1) * spread;
+      const tint = random() > .28 ? '214,165,108' : '150,178,186';
+      stroke(ctx, 'rgba(' + tint + ',' + random() * .16 + ')', 1 + random() * 2.2, [x, y, x + (random() - .5) * 3, y + 6 + random() * 34]);
     }
   }
+  const near = ctx.createLinearGradient(0, horizon, 0, height);
+  near.addColorStop(0, 'rgba(6,10,14,0)');
+  near.addColorStop(1, 'rgba(6,10,14,.42)');
+  fill(ctx, near, 0, horizon, width, height - horizon);
+}
+
+// Mirror everything above the base line onto wet ground, fading and rippling toward the viewer.
+function wetReflection(ctx, createCanvas, base, strength) {
+  const snap = createCanvas(width, height);
+  snap.getContext('2d').drawImage(ctx.canvas, 0, 0);
+  ctx.save();
+  ctx.globalCompositeOperation = 'screen';
+  for (let y = base; y < height; y += 3) {
+    const d = y - base, source = base - d * 1.15;
+    if (source < 3) break;
+    ctx.globalAlpha = strength * (1 - d / (height - base)) ** 1.4;
+    ctx.drawImage(snap, 0, source - 3, width, 3, Math.sin(y * .23) * (1 + d / 90), y, width, 3);
+  }
+  ctx.restore();
 }
 
 function masonry(ctx, random, x, y, w, h, base, brickW, brickH) {
@@ -336,6 +377,8 @@ function streetView(createCanvas, seed, kind) {
   if (kind === 'shelter') stopShelter(c, rnd);
   if (kind === 'bicycle') bicycleStreet(c);
   if (kind === 'florist') florist(c, rnd);
+  if (kind === 'shelter') wetReflection(c, createCanvas, 757, .42);
+  if (kind === 'florist') wetReflection(c, createCanvas, 739, .42);
   finish(c, rnd);
   const particles = kind === 'bicycle' ? snowSet(rnd, 100) : rainSet(rnd, kind === 'shelter' ? 148 : 83);
   const lit = Array.from({length: 48}, () => ({
@@ -548,9 +591,9 @@ function rooftopView(makeCanvas, seed, kind) {
 }
 
 collection.push(
-  { id: '74', title: '옥상 빨랫줄의 흰 셔츠', slug: 'linen-over-the-night-roofs', sound: 'wind', soundLabel: '옥상에 부는 잔잔한 바람', createScene: maker => rooftopView(maker, 74651, 'laundry') },
-  { id: '75', title: '먼 옥상의 작은 경고등', slug: 'little-rooftop-beacon', sound: 'wind', soundLabel: '안테나 사이에 부는 바람', createScene: maker => rooftopView(maker, 75049, 'radio') },
-  { id: '76', title: '기와 위로 흐르는 굴뚝 연기', slug: 'smoke-above-the-roof-tiles', sound: 'wind', soundLabel: '기와를 스치는 찬 바람', createScene: maker => rooftopView(maker, 76467, 'tile') },
+  { id: '74', title: '옥상 빨랫줄의 흰 셔츠', slug: 'linen-over-the-night-roofs', sound: 'gust', soundLabel: '옥상에 부는 잔잔한 바람', createScene: maker => rooftopView(maker, 74651, 'laundry') },
+  { id: '75', title: '먼 옥상의 작은 경고등', slug: 'little-rooftop-beacon', sound: 'gust', soundLabel: '안테나 사이에 부는 바람', createScene: maker => rooftopView(maker, 75049, 'radio') },
+  { id: '76', title: '기와 위로 흐르는 굴뚝 연기', slug: 'smoke-above-the-roof-tiles', sound: 'gust', soundLabel: '기와를 스치는 찬 바람', createScene: maker => rooftopView(maker, 76467, 'tile') },
 );
 
 function drawOpenArch(ctx, rnd) {
@@ -777,6 +820,16 @@ function infrastructure(makeCanvas, seed, kind) {
       illuminatedDrops(ctx, underLamp, p, false);
     } else {
       fallingStairDrops(ctx, p);
+      // Two short flickers per loop, at fixed points so every pass looks the same.
+      let dim = 0;
+      for (const at of [.31, .74]) {
+        const d = (p - at) * 24;
+        if (d > 0 && d < .55) dim = Math.max(dim, Math.sin(d * 37) > -.2 ? .55 * (1 - d / .55) : .15);
+      }
+      const hum = .5 + .5 * Math.sin(angle * 4);
+      light(ctx, 996, 330, 260, 60, '205,232,222', (.08 + .03 * hum) * (1 - dim));
+      fill(ctx, `rgba(230,240,232,${.35 * (1 - dim)})`, 858, 314, 273, 6);
+      if (dim) fill(ctx, `rgba(8,13,17,${.38 * dim})`, 0, 0, width, height);
     }
   };
 }
@@ -960,7 +1013,7 @@ function transport(makeCanvas, seed, kind) {
 collection.push(
   { id: '80', title: '눈 쌓인 승강장의 먼 신호', slug: 'snow-on-the-empty-platform', sound: 'snow', soundLabel: '눈 쌓인 승강장을 스치는 찬 바람', createScene: maker => transport(maker, 80720, 'platform') },
   { id: '81', title: '언덕을 오르는 막차 전차', slug: 'last-tram-up-the-hill', sound: 'train', soundLabel: '멀어지는 전차의 차륜 소리', createScene: maker => transport(maker, 81948, 'tram') },
-  { id: '82', title: '텅 빈 활주로의 푸른 점등', slug: 'blue-lights-on-an-empty-runway', sound: 'wind', soundLabel: '넓은 활주로를 가로지르는 바람', createScene: maker => transport(maker, 82009, 'runway') },
+  { id: '82', title: '텅 빈 활주로의 푸른 점등', slug: 'blue-lights-on-an-empty-runway', sound: 'gust', soundLabel: '넓은 활주로를 가로지르는 바람', createScene: maker => transport(maker, 82009, 'runway') },
 );
 
 function pane(c, x, y, w, h, color) {
@@ -1127,6 +1180,7 @@ function litFront(makeCanvas, seed, kind) {
   if (kind === 'parking') parkingBooth(c, rnd);
   if (kind === 'vending') vendingLane(c, rnd);
   pavement(c, rnd, 749, true, kind === 'parking' ? 949 : 987);
+  wetReflection(c, makeCanvas, 749, .45);
   finish(c, rnd);
   const drops = rainSet(rnd, kind === 'vending' ? 92 : 60);
   const flakes = addClouds(rnd, 5, 891, 1059, '165,179,184');

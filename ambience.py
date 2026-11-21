@@ -123,13 +123,43 @@ def synthesize(kind, seconds):
     elif kind == "wind":
         bed(0.017, 48, 570, -0.47, 0.37, 0.80 + 0.12 * np.sin(2 * angle - 1.5) + 0.11 * np.sin(3 * angle))
         bed(0.004, 380, 1750, width=0.46, swell=0.82 + 0.23 * np.sin(2 * angle - 0.2))
+    elif kind == "leaves":
+        # Wind in tree crowns: a low bed under a brighter rustle that rises with each gust.
+        gust = 0.5 + 0.5 * np.sin(2 * angle - 1.1) * (0.8 + 0.2 * np.sin(5 * angle))
+        bed(0.012, 50, 520, -0.5, 0.33, 0.82 + 0.15 * gust)
+        bed(0.007, 650, 3400, -0.32, 0.52, 0.35 + 0.9 * gust ** 1.6)
+        events(70, 0.009, 900, 3600, 0.08)
+    elif kind == "grass":
+        # Grass and reeds: softer, more even hiss with slow waves crossing the field.
+        sway = 0.5 + 0.5 * np.sin(3 * angle + 0.4)
+        bed(0.013, 55, 560, -0.5, 0.30, 0.86 + 0.10 * np.sin(2 * angle))
+        bed(0.006, 480, 2700, -0.38, 0.48, 0.45 + 0.7 * sway ** 1.3)
+        events(26, 0.006, 600, 2600, 0.14)
+    elif kind == "gust":
+        # Open heights and structures: deeper swells and a faint whistle that rides the gusts.
+        swell = 0.66 + 0.24 * np.sin(2 * angle - 0.6) + 0.12 * np.sin(5 * angle + 1.2)
+        bed(0.019, 38, 480, -0.55, 0.40, swell)
+        bed(0.004, 360, 1600, width=0.5, swell=swell ** 2)
+        whistle = np.sin(12480 * angle + 2.1 * np.sin(3 * angle))  # 520 Hz, whole cycles per loop
+        stereo += (0.0016 * whistle * np.clip(swell - 0.62, 0, None) ** 1.5 / 0.4 ** 1.5)[:, None]
+    elif kind == "sand":
+        # Dunes: the wind bed plus a fine, dry hiss of moving grains.
+        bed(0.014, 48, 560, -0.48, 0.35, 0.82 + 0.12 * np.sin(2 * angle - 1.2))
+        drift = 0.5 + 0.5 * np.sin(2 * angle - 1.0)
+        bed(0.0045, 1500, 5200, -0.2, 0.55, 0.3 + 0.8 * drift ** 2)
+    elif kind == "room-wind":
+        # Wind heard from indoors: muffled by the glass, over a low room tone.
+        bed(0.015, 40, 300, -0.6, 0.18, 0.84 + 0.12 * np.sin(2 * angle - 1.5) + 0.06 * np.sin(3 * angle))
+        bed(0.004, 30, 110, -0.7, 0.08)
+        events(5, 0.006, 90, 420, 0.5)
     else:
         raise ValueError(f"Unknown ambience: {kind}")
 
     stereo -= stereo.mean(axis=0)
     rms = np.sqrt((stereo * stereo).mean())
-    muted = {"snow", "wind", "lake", "fireworks", "record", "mechanism", "cascade", "laundry"}
-    target_dbfs = -34 if kind == "drips" else (-32 if kind in muted else -29)
+    muted = {"snow", "wind", "lake", "fireworks", "record", "mechanism", "cascade", "laundry",
+             "leaves", "grass", "gust", "sand"}
+    target_dbfs = -34 if kind in {"drips", "room-wind"} else (-32 if kind in muted else -29)
     target = 10 ** (target_dbfs / 20)
     stereo = 0.19 * np.tanh(stereo * (target / rms / 0.19))
     # Taper the waveform at the browser audio loop boundary.
