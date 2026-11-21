@@ -1,0 +1,10 @@
+.DS_Store
+
+# Build output (python3 build_preview.py) and review images
+my-dawn-preview.html
+review/
+
+# Packaged copies, renders and tool caches
+*.zip
+renders/
+.hyperframes/
