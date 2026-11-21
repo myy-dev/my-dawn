@@ -92,11 +92,49 @@ def synthesize(kind, seconds):
         bed(0.004, 270, 1830, -0.42, 0.35, 0.91 + 0.06 * np.sin(2 * angle))
         events(24, 0.008, 380, 1650, 0.12)
     elif kind == "fireworks":
-        # Low surf with a soft, distant swell instead of a sharp impact.
+        # Low surf under the show in sources/10.cjs: the 12-second shell list plays twice per loop.
         tide = 0.82 + 0.14 * np.sin(4 * angle - 0.85) + 0.08 * np.sin(5 * angle)
-        bed(0.017, 56, 880, -0.55, 0.27, tide)
+        bed(0.010, 56, 880, -0.55, 0.27, tide)
         shore = (0.5 + 0.5 * np.sin(4 * angle - 1.5)) ** 1.5
-        bed(0.007, 270, 1850, -0.48, 0.43, 0.42 + 0.77 * shore)
+        bed(0.004, 270, 1850, -0.48, 0.43, 0.42 + 0.77 * shore)
+        time = np.arange(count) / RATE
+        thump = noise(38, 420, -0.6)
+        echo = noise(36, 280, -0.7)
+        hiss = noise(900, 3400, -0.2)
+        shells = [(1.0, "peony", 300), (1.5, "ring", 280), (2.6, "peony", 300), (3.9, "willow", 340),
+                  (5.2, "strobe", 270), (6.1, "ring", 260), (7.3, "peony", 320), (8.1, "strobe", 330),
+                  (9.3, "willow", 370), (9.55, "peony", 300), (9.75, "peony", 290), (10.0, "ring", 280),
+                  (10.15, "strobe", 260)]
+        delay = 0.25  # sound reaches the shore a quarter second after the flash
+        show = np.zeros(count)
+        for repeat in (0, 12):
+            for burst, shell, radius in shells:
+                # Launch: an airy rising hiss in the 0.9 s before the burst.
+                since = (time - (burst + repeat - 0.9)) % seconds
+                rise = np.where(since < 0.9, np.sin(np.pi * since / 0.9) ** 2, 0)
+                show += 0.10 * rise * hiss
+                # Burst: a low thump, sized by the shell, and a softer echo off the far shore.
+                age = (time - (burst + repeat + delay)) % seconds
+                envelope = np.where(age < 2.2, (1 - np.exp(-age * 300)) * np.exp(-age * 2.6), 0)
+                size = radius / 300
+                show += size * envelope * (0.9 * thump + 0.5 * np.sin(2 * np.pi * (52 - 14 * age) * age))
+                late = (age - 0.42) % seconds
+                show += 0.22 * size * np.where(late < 2.2, np.exp(-late * 2.2) * (1 - np.exp(-late * 60)), 0) * echo
+                # Strobes crackle and willows sizzle while their sparks fall.
+                if shell in ("strobe", "willow"):
+                    start, span, clicks = (0.7, 1.6, 260) if shell == "strobe" else (1.0, 2.4, 70)
+                    for _ in range(clicks):
+                        at = burst + repeat + delay + start + span * rng.random() ** 0.8
+                        index = int(at * RATE) % count
+                        length = int(0.004 * RATE)
+                        tick = rng.uniform(0.05, 0.16) * rng.uniform(-1, 1, length) * np.linspace(1, 0, length)
+                        show[(index + np.arange(length)) % count] += 0.35 * tick
+        # Match the picture's fade over the last 0.8 s of each show.
+        cycle = time % 12
+        show *= np.clip((12 - cycle) / 0.8, 0, 1)
+        show *= 0.06
+        stereo[:, 0] += show
+        stereo[:, 1] += show
     elif kind == "lake":
         swell = 0.86 + 0.12 * np.sin(5 * angle + 0.8) + 0.10 * np.sin(3 * angle)
         bed(0.016, 92, 1480, -0.54, 0.39, swell)
@@ -157,7 +195,7 @@ def synthesize(kind, seconds):
 
     stereo -= stereo.mean(axis=0)
     rms = np.sqrt((stereo * stereo).mean())
-    muted = {"snow", "wind", "lake", "fireworks", "record", "mechanism", "cascade", "laundry",
+    muted = {"snow", "wind", "lake", "record", "mechanism", "cascade", "laundry",
              "leaves", "grass", "gust", "sand"}
     target_dbfs = -34 if kind in {"drips", "room-wind"} else (-32 if kind in muted else -29)
     target = 10 ** (target_dbfs / 20)

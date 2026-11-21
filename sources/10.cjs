@@ -1,293 +1,117 @@
 'use strict';
 
-const width = 1920;
-const height = 1080;
-const horizon = 746;
-const loopSeconds = 24;
-const tau = Math.PI * 2;
-const moonX = 1518;
-const moonY = 195;
-
-const bursts = [
-  { second: 4.8, x: 620, y: 389, radius: 150, color: [201, 170, 119] },
-  { second: 11.2, x: 1168, y: 419, radius: 136, color: [190, 142, 159] },
-  { second: 17.6, x: 884, y: 349, radius: 166, color: [143, 181, 176] },
-];
-
-const clamp = (value, lower = 0, upper = 1) => Math.max(lower, Math.min(upper, value));
-const mix = (start, end, amount) => start + (end - start) * amount;
-const smooth = v => {
-  const x = clamp(v);
-  return x * x * (3 - 2 * x);
-};
-
-function randomFrom(seed) {
-  return () => {
-    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
-    return seed / 4294967296;
-  };
-}
-
-function colorWithAlpha(color, alpha) {
-  return `rgba(${color.join(',')},${clamp(alpha).toFixed(4)})`;
-}
-
-function bloom(ctx, x, y, radiusX, radiusY, color, opacity) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.scale(radiusX, radiusY);
-  const wash = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
-  wash.addColorStop(0, colorWithAlpha(color, opacity));
-  wash.addColorStop(0.25, colorWithAlpha(color, opacity * 0.62));
-  wash.addColorStop(0.65, colorWithAlpha(color, opacity * 0.16));
-  wash.addColorStop(1, colorWithAlpha(color, 0));
-  ctx.fillStyle = wash;
-  ctx.fillRect(-1, -1, 2, 2);
-  ctx.restore();
-}
-
-function stroke(ctx, x0, y0, x1, y1, color, thickness) {
-  ctx.beginPath();
-  ctx.moveTo(x0, y0);
-  ctx.lineTo(x1, y1);
-  ctx.lineWidth = thickness;
-  ctx.strokeStyle = color;
-  ctx.stroke();
-}
-
-function ridge(ctx, y, amplitude, frequency, color) {
-  ctx.beginPath();
-  ctx.moveTo(0, horizon + 2);
-  for (let x = 0; x <= width; x += 4) {
-    const leftHeadland = 25 * Math.exp(-((x - 110) ** 2) / 88400);
-    const rightHill = 12 * Math.exp(-((x - width) ** 2) / 70600);
-    const roll = Math.sin(x * 0.0102 + 0.9) * 6 + Math.cos(x * 0.029) * 1.8;
-    const ragged = Math.sin(x * 0.104) * 0.7 + Math.sin(x * 0.313) * 0.36;
-    ctx.lineTo(x, y + roll * frequency + ragged - (leftHeadland + rightHill) * amplitude);
-  }
-  ctx.lineTo(width, horizon + 2);
-  ctx.closePath();
-  ctx.fillStyle = color;
-  ctx.fill();
-}
-
-function drawMoon(createCanvas, ctx) {
-  bloom(ctx, moonX, moonY, 160, 130, [106, 142, 179], 0.093);
-  bloom(ctx, moonX, moonY, 55, 51, [119, 150, 186], 0.12);
-
-  const moon = createCanvas(74, 74);
-  const surface = moon.getContext('2d');
-  const shimmer = surface.createLinearGradient(14, 12, 55, 62);
-  shimmer.addColorStop(0, '#a6b4c6');
-  shimmer.addColorStop(0.52, '#8297ae');
-  shimmer.addColorStop(1, '#5d7994');
-  surface.fillStyle = shimmer;
-  surface.beginPath();
-  surface.arc(37, 37, 26, 0, tau);
-  surface.fill();
-  surface.globalCompositeOperation = 'destination-out';
-  surface.beginPath();
-  surface.arc(48, 30, 24, 0, tau);
-  surface.fill();
-  ctx.drawImage(moon, moonX - 37, moonY - 37);
-}
-
-function makeBackdrop(createCanvas, random) {
-  const canvas = createCanvas(width, height);
-  const ctx = canvas.getContext('2d');
-  const sky = ctx.createLinearGradient(0, 0, 0, horizon);
-  sky.addColorStop(0, '#0a111f');
-  sky.addColorStop(0.48, '#111d2d');
-  sky.addColorStop(0.80, '#233444');
-  sky.addColorStop(0.94, '#354652');
-  sky.addColorStop(1, '#3e4e58');
-  ctx.fillStyle = sky;
-  ctx.fillRect(0, 0, width, horizon + 1);
-
-  bloom(ctx, 995, 710, 960, 126, [121, 108, 115], 0.09);
-  bloom(ctx, 294, 593, 670, 251, [29, 46, 68], 0.20);
-  bloom(ctx, 1644, 594, 660, 240, [49, 72, 98], 0.12);
-
-  for (let i = 0; i < 120; i++) {
-    const y = 428 + random() ** 0.66 * 310;
-    const x = random() * 2400 - 240;
-    bloom(ctx, x, y, 48 + 330 * random(), 3 + 26 * random(), [80, 103, 121], 0.012 + 0.017 * random());
-  }
-  for (let i = 0; i < 275; i++) {
-    const x = 12 + random() * (width - 24);
-    const y = random() ** 1.35 * 571;
-    const light = random();
-    const opacity = (0.06 + light ** 2 * 0.33) * (1 - y / 950);
-    const radius = 0.25 + 1.4 * light ** 4;
-    if (light > 0.965) bloom(ctx, x, y, radius * 4, radius * 4, [178, 199, 221], 0.12);
-    ctx.beginPath();
-    ctx.arc(x, y, radius, 0, tau);
-    ctx.fillStyle = colorWithAlpha([199, 216, 226], opacity);
-    ctx.fill();
-  }
-  drawMoon(createCanvas, ctx);
-  ridge(ctx, 736, 0.9, 0.85, '#1c2b37');
-  ridge(ctx, 744, 0.51, 0.44, '#101e2a');
-
-  for (const [x, y, opacity] of [[203, 737, 0.32], [224, 739, 0.25], [305, 740, 0.23], [392, 742, 0.35], [1754, 742, 0.24]]) {
-    ctx.fillStyle = colorWithAlpha([192, 159, 104], opacity);
-    ctx.fillRect(x, y, 2.7, 1.4);
-  }
-
-  const water = ctx.createLinearGradient(0, horizon, 0, height);
-  water.addColorStop(0, '#172633');
-  water.addColorStop(0.22, '#182a38');
-  water.addColorStop(0.70, '#122230');
-  water.addColorStop(1, '#0d1925');
-  ctx.fillStyle = water;
-  ctx.fillRect(0, horizon, width, height - horizon);
-
-  bloom(ctx, 1230, horizon + 16, 910, 114, [84, 102, 112], 0.08);
-  bloom(ctx, moonX + 13, 937, 149, 133, [93, 121, 143], 0.085);
-  return canvas;
-}
-
-function makeRipples(random) {
-  return Array.from({ length: 520 }, () => {
-    const depth = random() ** 1.23;
-    const spread = 39 + depth * 141;
-    const moonlit = random() > 0.62;
-    return {
-      x: moonlit ? moonX + (random() + random() - 1) * spread : random() * width,
-      y: horizon + depth * (height - horizon),
-      length: (2.5 + depth * depth * 53) * (0.65 + random() * 0.95),
-      amplitude: (1.6 + depth * 6) * random(),
-      tone: moonlit ? [116, 143, 163] : [98, 123, 143],
-      light: (0.045 + random() * 0.11) * (moonlit ? 1 : 0.5),
-      offset: random() * tau,
-      speed: depth > 0.64 ? 2 : 1,
-      thickness: 0.45 + 0.78 * depth * depth,
-    };
-  });
-}
-
-function makeParticles(shot, random) {
-  return Array.from({ length: 164 }, (_, index) => {
-    const core = index < 49;
-    const angle = index * Math.PI * (3 - Math.sqrt(5)) + (random() - 0.5) * 0.41;
-    const radius = core ? 0.04 + 0.54 * random() ** 1.1 : 0.53 + 0.45 * random() ** 0.46;
-    return {
-      vx: shot.radius * radius * Math.cos(angle),
-      vy: shot.radius * radius * Math.sin(angle) * (0.85 + random() * 0.17),
-      life: (core ? 2.54 : 2.82) + random() * (core ? 1.14 : 0.9),
-      delay: random() * 0.14,
-      thickness: (core ? 0.85 : 0.68) + random() * 1.05,
-      brightness: (core ? 0.46 : 0.54) + random() * 0.36,
-      gravity: 3.4 + random() * 6.4,
-      tail: 0.13 + random() * 0.20,
-    };
-  });
-}
-
-function drawRipples(ctx, ripples, t) {
-  ctx.lineCap = 'round';
-  for (const ripple of ripples) {
-    const angle = ripple.offset + t * ripple.speed;
-    const sway = ripple.amplitude * Math.sin(angle);
-    const shift = Math.sin(angle + 0.9) * 1.35;
-    const opacity = ripple.light * (0.72 + 0.28 * Math.sin(angle + 0.1));
-    stroke(ctx, ripple.x + sway, ripple.y + shift, ripple.x + sway + ripple.length, ripple.y + shift,
-      colorWithAlpha(ripple.tone, opacity), ripple.thickness);
-  }
-}
-
-function drawLaunch(ctx, shot, age) {
-  const u = (age + 1.32) / 1.32;
-  const lift = (1 - (1 - u) ** 1.35);
-  const x = shot.x - 39 * (1 - lift) ** 1.2;
-  const y = mix(horizon - 34, shot.y + 2, lift);
-  const opacity = 0.51 * smooth(u / 0.24) * (1 - smooth((u - 0.76) / 0.24));
-  bloom(ctx, x, y, 10, 15, shot.color, opacity * 0.18);
-  stroke(ctx, x - 2.8, y + 8 + (1 - u) * 14, x, y, colorWithAlpha(shot.color, opacity * 0.65), 1.35);
-}
-
-function drawBrokenReflection(ctx, shot, x, y, wave, pulse) {
-  const fragments = [
-    { x: -35, y: -13, span: 57, opacity: 0.62 },
-    { x: 2, y: 2, span: 71, opacity: 0.78 },
-    { x: 27, y: 16, span: 43, opacity: 0.56 },
-  ];
-  for (const [index, fragment] of fragments.entries()) {
-    const cycle = wave * 3 + index * 1.87 + shot.x * 0.013;
-    const left = x + fragment.x + 7 * Math.sin(cycle);
-    const right = left + fragment.span * (0.87 + 0.13 * Math.sin(cycle + 1.12));
-    const level = y + fragment.y + 1.6 * Math.sin(cycle + 2.3);
-    const strength = pulse * fragment.opacity * (0.83 + 0.17 * Math.sin(cycle + 0.5));
-
-    const tint = ctx.createLinearGradient(left, level, right, level);
-    tint.addColorStop(0, colorWithAlpha(shot.color, 0));
-    tint.addColorStop(0.23, colorWithAlpha(shot.color, strength));
-    tint.addColorStop(0.40, colorWithAlpha(shot.color, strength * 0.76));
-    tint.addColorStop(0.55, colorWithAlpha(shot.color, 0));
-    tint.addColorStop(0.72, colorWithAlpha(shot.color, strength * 0.54));
-    tint.addColorStop(1, colorWithAlpha(shot.color, 0));
-    stroke(ctx, left, level, right, level + 1.0, tint, 2.8);
-  }
-}
-
-function drawBurst(ctx, shot, age, time) {
-  const pulse = smooth(age / 0.38) * Math.exp(-age * 0.85) * (1 - smooth((age - 2.9) / 1));
-  const driftX = age * 3.5;
-  const centerX = shot.x + driftX;
-  bloom(ctx, centerX + 12, shot.y + 4, 164, 117, shot.color, pulse * 0.071);
-  bloom(ctx, centerX, shot.y + 2.5 * age * age, 34 + age * 8, 29 + age * 5, shot.color, pulse * 0.16);
-
-  const reflectionY = horizon + (horizon - shot.y) * 0.53;
-  bloom(ctx, centerX, reflectionY + 5, 114 + age * 11, 33 + age * 3, shot.color, pulse * 0.068);
-  drawBrokenReflection(ctx, shot, centerX - 19, reflectionY, time, pulse);
-  for (const spark of shot.sparks) {
-    const local = age - spark.delay;
-    if (local <= 0 || local >= spark.life) continue;
-    const carry = 1 - Math.exp(-local * 0.66);
-    const past = Math.max(0, local - spark.tail);
-    const oldCarry = 1 - Math.exp(-past * 0.66);
-    const x = centerX + carry * spark.vx;
-    const y = shot.y + carry * spark.vy + local * local * spark.gravity;
-    const tailX = centerX + oldCarry * spark.vx - (local - past) * 3.5;
-    const tailY = shot.y + oldCarry * spark.vy + past * past * spark.gravity;
-    const intensity = smooth(local / 0.46) * (1 - smooth((local - 0.63) / (spark.life - 0.63)));
-    const opacity = intensity * spark.brightness;
-    stroke(ctx, tailX, tailY, x, y, colorWithAlpha(shot.color, opacity * 0.17), spark.thickness * 4.2);
-    stroke(ctx, tailX, tailY, x, y, colorWithAlpha(shot.color, opacity * 0.91), spark.thickness);
-
-    const reflectedY = horizon + (horizon - y) * 0.53;
-    const shimmer = time * 2 + reflectedY * 0.115;
-    const breakX = Math.sin(shimmer) * 9 + Math.sin(reflectedY * 0.037 - time) * 4.5;
-    const waterOpacity = opacity * (0.14 + 0.064 * Math.sin(shimmer - 1.0));
-    const reflectedX = x + breakX;
-    stroke(ctx, reflectedX - 2.3, reflectedY, reflectedX + 3.5, reflectedY + 0.6,
-      colorWithAlpha(shot.color, waterOpacity), 1.1);
-  }
-}
+// Fireworks over still water: a 12-second show (eight shells and a five-shell finale) that plays twice
+// per 24-second loop, so it lines up with the 24-second ambience. Ported from the HyperFrames scene.
+const W = 1920, H = 1080, horizon = 700, showSeconds = 12, loopSeconds = 24;
+// Every slow motion (stars, shore lights, ripples) turns a whole number of times per show, so the loop is seamless.
+const K = Math.PI * 2 / showSeconds;
 
 function createScene(createCanvas) {
-  const random = randomFrom(271828);
-  const backdrop = makeBackdrop(createCanvas, random);
-  const ripples = makeRipples(random);
-  const shots = bursts.map(shot => ({ ...shot, sparks: makeParticles(shot, random) }));
+const sky=createCanvas(W,horizon);const s=sky.getContext('2d');
+// A 1/8-size copy of the sky; scaling it back up blurs it for the soft light on the water.
+const soft=createCanvas(W/8,horizon/8);const sg=soft.getContext('2d');
+let seed=271828;function rnd(){seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;}
+const stars=Array.from({length:260},()=>({x:rnd()*W,y:rnd()*(horizon-70),r:.3+rnd()*1.3,a:.12+rnd()*.55,phase:rnd()*6.28}));
+const colors=['255,192,96','255,105,167','102,232,223','184,162,255','232,238,255'];
+const moon={x:1720,y:120};
+// peony: projected sphere. ring: tilted circle. willow: slow, long, drooping trails. strobe: sparks blink late in life.
+const shots=[
+{t:1.0,x:960,y:300,r:300,c:0,type:'peony'},
+{t:1.5,x:520,y:340,r:280,c:1,type:'ring',tilt:.45,rot:-.35},
+{t:2.6,x:1340,y:290,r:300,c:2,type:'peony'},
+{t:3.9,x:820,y:280,r:340,c:0,type:'willow'},
+{t:5.2,x:400,y:320,r:270,c:3,type:'strobe'},
+{t:6.1,x:1250,y:390,r:260,c:2,type:'ring',tilt:.6,rot:.4},
+{t:7.3,x:640,y:270,r:320,c:1,type:'peony'},
+{t:8.1,x:1150,y:250,r:330,c:4,type:'strobe'},
+// Finale: five shells inside one second, then the sky settles before the loop point.
+{t:9.3,x:960,y:320,r:370,c:0,type:'willow'},
+{t:9.55,x:500,y:330,r:300,c:2,type:'peony'},
+{t:9.75,x:1420,y:330,r:290,c:1,type:'peony'},
+{t:10.0,x:740,y:220,r:280,c:3,type:'ring',tilt:.5,rot:.2},
+{t:10.15,x:1200,y:400,r:260,c:4,type:'strobe'}];
+for(const b of shots){
+const ring=b.type==='ring', willow=b.type==='willow', n=ring?170:willow?230:270;
+b.k=willow?.8:1.1;
+// Front/back sparks of a sphere project toward the center, so a peony fills in instead of reading as a hoop.
+b.p=Array.from({length:n},(_,i)=>{
+const angle=i/n*Math.PI*2+rnd()*.06, depth=rnd()*2-1, ember=!ring&&i%4===0;
+let ux=Math.cos(angle),uy=Math.sin(angle),v;
+if(ring){v=.95+rnd()*.1;uy*=b.tilt;const cr=Math.cos(b.rot),sr=Math.sin(b.rot);[ux,uy]=[ux*cr-uy*sr,ux*sr+uy*cr];}
+else v=ember?.025+rnd()*.38:Math.sqrt(1-depth*depth)*(.72+rnd()*.35);
+return {ux:ux*v,uy:uy*v,
+life:willow?3.2+rnd()*1.3:ember?2.1+rnd()*1.4:1.8+rnd()*1.5,phase:rnd()*7,
+thick:willow?.5+rnd()*.9:ember?.65+rnd()*.8:.65+rnd()*1.6,
+gravity:willow?40+rnd()*12:ember?10+rnd()*10:22+rnd()*14,
+tail:willow?.35+rnd()*.25:.12+rnd()*.15};});
+b.end=Math.max(...b.p.map(q=>q.life));}
+const lights=Array.from({length:46},()=>({x:rnd()*W,y:horizon-3-rnd()*6,a:.25+rnd()*.5,warm:rnd()<.75,phase:rnd()*6.28}));
+const hill=x=>horizon-30+Math.sin(x*.0042+1.3)*16+Math.sin(x*.011)*8, shore=x=>horizon-16+Math.sin(x*.019)*4+Math.sin(x*.043)*3;
+function line(g,x,y,px,py,color,alpha,width){g.strokeStyle=`rgba(${color},${Math.max(0,alpha)})`;g.lineWidth=width;g.beginPath();g.moveTo(px,py);g.lineTo(x,y);g.stroke();}
+function glow(g,x,y,r,c,a){const gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,`rgba(${c},${a})`);gr.addColorStop(.2,`rgba(${c},${a*.3})`);gr.addColorStop(1,`rgba(${c},0)`);g.fillStyle=gr;g.fillRect(x-r,y-r,r*2,r*2);}
+function renderAt(ctx,t){
+const bg=s.createLinearGradient(0,0,0,horizon);bg.addColorStop(0,'#020613');bg.addColorStop(.6,'#081326');bg.addColorStop(1,'#1a2438');s.fillStyle=bg;s.fillRect(0,0,W,horizon);
+for(const st of stars){s.fillStyle=`rgba(208,224,255,${st.a*(.75+.25*Math.sin(t*K+st.phase))})`;s.beginPath();s.arc(st.x,st.y,st.r,0,7);s.fill();}
+glow(s,moon.x,moon.y,70,'157,188,235',.09);s.fillStyle='#d2dbea';s.beginPath();s.arc(moon.x,moon.y,19,0,7);s.fill();s.fillStyle='#040b19';s.beginPath();s.arc(moon.x+9,moon.y-6,18,0,7);s.fill();
+// Fireworks fade over the last 0.8 s so the loop restarts from a dark sky.
+const A=t>11.2?Math.max(0,(12-t)/.8):1;
+s.fillStyle='#0b1323';s.beginPath();s.moveTo(0,horizon);for(let x=0;x<=W;x+=24)s.lineTo(x,hill(x));s.lineTo(W,horizon);s.fill();
+// Smoke left by each shell drifts with the wind and thins out.
+for(const b of shots){const age=t-b.t;if(age<.3||age>8)continue;const m=Math.min(1,(age-.3)/1.2)*Math.exp(-age/4)*A;
+glow(s,b.x+age*14,b.y+10-age*3,b.r*(.55+age*.12),'92,104,128',.05*m);}
+s.globalCompositeOperation='lighter';
+for(const b of shots){let age=t-b.t;const c=colors[b.c];if(age<-.95||age>b.end)continue;
+if(age<0){const u=(age+.95)/.95, pos=v=>{const e=1-(1-v)*(1-v);return [b.x-45*(1-e)+Math.sin(v*17+b.x)*3,horizon-5+(b.y-horizon+5)*e];};
+for(let k=8;k>=1;k--){const v=u-k*.03;if(v<0)continue;const [tx,ty]=pos(v);s.fillStyle=`rgba(${c},${.55*(1-k/9)*A})`;s.fillRect(tx-1,ty-1,2,2);}
+const [x,y]=pos(u),[px,py]=pos(Math.max(0,u-.06));line(s,x,y,px,py,'255,240,215',.85*A,1.6);glow(s,x,y,14,c,.6*A);continue;}
+glow(s,b.x,b.y,b.r*1.3,c,.05*Math.exp(-age*1.3)*A);glow(s,b.x+age*18,b.y-12,100+age*60,c,.015*Math.exp(-age*.7)*A);
+if(age<.25)glow(s,b.x,b.y,b.r*.3,c,.5*Math.pow(1-age/.25,2)*A);
+glow(s,b.x+age*8,b.y+age*age*14,38+age*14,c,.12*Math.exp(-age*2.5)*A);
+const strobe=b.type==='strobe', willow=b.type==='willow';
+for(const q of b.p){if(age>q.life)continue;const life=Math.max(0,1-age/q.life);
+const ex=(1-Math.exp(-age*b.k))*b.r, tail=willow?q.tail+age*.09:(q.tail+Math.min(age,1)*.09)*(.35+.65*life), old=Math.max(0,age-tail), prev=(1-Math.exp(-old*b.k))*b.r;
+let x=b.x+q.ux*ex+age*8,y=b.y+q.uy*ex+age*age*q.gravity;
+let px=b.x+q.ux*prev+old*8,py=b.y+q.uy*prev+old*old*q.gravity;
+let a=(willow?.8*Math.pow(life,.45):Math.pow(life,.7)*(.65+.35*Math.sin(age*18+q.phase)**2))*A;
+const lit=strobe&&age>.7&&Math.sin(age*31+q.phase*9)>.35;
+if(strobe&&age>.7&&!lit)a*=.08;
+if(!willow&&!strobe&&age>1.3)a*=.45+.55*Math.sin(age*23+q.phase*5)**2;
+// Soft halo ramps in over 0.4 s so a fresh shell doesn't open as a white blob.
+line(s,x,y,px,py,c,a*.13*Math.min(1,age/.4),q.thick*6);
+if(willow){// Willow trails pass through their midpoint so they bend with gravity.
+const mid=(age+old)/2, me=(1-Math.exp(-mid*b.k))*b.r, mx=b.x+q.ux*me+mid*8, my=b.y+q.uy*me+mid*mid*q.gravity;
+line(s,mx,my,px,py,c,a*.6,q.thick);line(s,x,y,mx,my,c,a,q.thick);}
+else line(s,x,y,px,py,c,a,q.thick);if(age<.65){s.fillStyle=`rgba(255,249,222,${a*.5})`;s.fillRect(x,y,1.8,1.8);}
+if(lit){s.fillStyle=`rgba(255,250,235,${a})`;s.fillRect(x-1.3,y-1.3,2.6,2.6);}
+if(willow&&age>.8&&q.phase>4){line(s,x-2,y+9,x,y,c,a*.3,.6);}
+}
+}
+s.globalCompositeOperation='source-over';
+// A distant shore, kept low and dark.
+s.fillStyle='#040a13';s.beginPath();s.moveTo(0,horizon);for(let x=0;x<=W;x+=18)s.lineTo(x,shore(x));s.lineTo(W,horizon);s.fill();
+for(const l of lights){if(l.y<shore(l.x)+2)continue;s.fillStyle=`rgba(${l.warm?'255,196,130':'190,215,255'},${l.a*(.85+.15*Math.sin(t*2*K+l.phase))})`;s.fillRect(l.x,l.y,1.6,1.6);}
+ctx.fillStyle='#030913';ctx.fillRect(0,0,W,H);ctx.drawImage(sky,0,0);
+// Reflection: rows mirror the sky (compressed, since the water band is short), each row shifted by the ripple.
+const span=640;ctx.globalAlpha=.6;for(let y=horizon;y<H;y+=2){let d=(y-horizon)/(H-horizon),sy=Math.max(0,horizon-d*span),dx=Math.sin(y*.2+t*4*K)*(3+d*15)+Math.sin(y*.071-t*2*K)*8;ctx.drawImage(sky,0,sy,W,2,dx,y,W,2);}
+// Soft spill: the blurred sky, mirrored with the same compression, added on top.
+sg.drawImage(sky,0,0,soft.width,soft.height);const k=(H-horizon)/span;
+ctx.save();ctx.beginPath();ctx.rect(0,horizon,W,H-horizon);ctx.clip();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.35;
+ctx.setTransform(1,0,0,-k,0,horizon*(1+k));ctx.drawImage(soft,0,0,W,horizon);ctx.restore();
+ctx.globalAlpha=1;const water=ctx.createLinearGradient(0,horizon,0,H);water.addColorStop(0,'rgba(3,10,20,.1)');water.addColorStop(1,'rgba(2,7,15,.55)');ctx.fillStyle=water;ctx.fillRect(0,horizon,W,H-horizon);
+for(let i=0;i<45;i++){let y=horizon+14+i*(H-horizon-14)/45;ctx.strokeStyle=`rgba(110,156,195,${.025+.02*Math.sin(i*5+t*2*K)})`;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+const vignette=ctx.createRadialGradient(960,430,320,960,440,1120);vignette.addColorStop(0,'rgba(0,0,0,0)');vignette.addColorStop(1,'rgba(0,0,0,.5)');ctx.fillStyle=vignette;ctx.fillRect(0,0,W,H);
+}
 
   return (ctx, phase) => {
     const u = ((phase % 1) + 1) % 1;
-    const second = u * loopSeconds;
-    const wave = u * tau;
-    ctx.drawImage(backdrop, 0, 0);
-    drawRipples(ctx, ripples, wave);
-    for (const shot of shots) {
-      const age = second - shot.second;
-      if (age > -1.32 && age < 0) drawLaunch(ctx, shot, age);
-      if (age > 0 && age < 3.9) drawBurst(ctx, shot, age, wave);
-    }
+    renderAt(ctx, (u * loopSeconds) % showSeconds);
   };
 }
 
 module.exports = {
-  title: '달빛 아래, 먼 불꽃',
-  slug: 'distant-fireworks',
+  title: '물 위로 터지는 불꽃',
+  slug: 'fireworks-over-still-water',
   sound: 'fireworks',
+  posterPhase: 10.4 / 24,
   createScene,
 };
