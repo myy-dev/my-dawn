@@ -23,9 +23,14 @@ function createScene(createCanvas) {
   ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
   // Milky Way rising almost vertically from the hills at the right
   const band = t => [lerp(1500, 700, t) + 120 * Math.sin(t * 3), lerp(HORIZON + 30, -200, t)];
-  for (let i = 0; i < 300; i++) { const t = rnd(), [x, y] = band(t), off = (rnd() - .5) * 340; glow(ctx, x + off, y, 60 + rnd() * 140, 60 + rnd() * 120, rnd() < .7 ? '160,170,210' : '220,200,170', .045); }
-  for (let i = 0; i < 3000; i++) { const t = rnd(), [x, y] = band(t); const px = x + (rnd() - .5) * 300; if (y > HORIZON) continue; ctx.fillStyle = `rgba(230,236,255,${.15 + rnd() * .5})`; ctx.fillRect(px, y + (rnd() - .5) * 40, 1, 1); }
-  for (let i = 0; i < 30; i++) { const t = .05 + rnd() * .7, [x, y] = band(t); glow(ctx, x + (rnd() - .5) * 60, y, 20 + rnd() * 40, 50 + rnd() * 80, '2,4,10', .16); }
+  // the band: a broad soft spine first, then fine mottling spread like a bell curve across it, so it reads
+  // as one glowing river of stars rather than separate blotches
+  const gauss = () => (rnd() + rnd() + rnd() - 1.5) / 1.5;
+  for (let i = 0; i <= 60; i++) { const [x, y] = band(i / 60); glow(ctx, x, y, 230, 120, '150,164,210', .05 * (1 - i / 80)); }
+  for (let i = 0; i < 1100; i++) { const t = rnd(), [x, y] = band(t); glow(ctx, x + gauss() * 160, y + gauss() * 30, 24 + rnd() * 46, 18 + rnd() * 36, rnd() < .75 ? '170,180,220' : '230,210,180', .03 * (1 - t * .6)); }
+  for (let i = 0; i < 4000; i++) { const t = rnd(), [x, y] = band(t); if (y > HORIZON) continue; ctx.fillStyle = `rgba(230,236,255,${.15 + rnd() * .5})`; ctx.fillRect(x + gauss() * 150, y + gauss() * 20, 1, 1); }
+  // the dark dust lane: a thin wandering rift just off the spine, made of small elongated shadows
+  for (let i = 0; i < 70; i++) { const t = .03 + i / 70 * .7, [x, y] = band(t); glow(ctx, x - 30 + 40 * Math.sin(t * 9), y, 14 + rnd() * 10, 26 + rnd() * 20, '2,4,10', .12); }
   paint.starfield(ctx, rnd, 1200, HORIZON);
   // distant hills in layers with mist between
   for (let l = 0; l < 4; l++) {

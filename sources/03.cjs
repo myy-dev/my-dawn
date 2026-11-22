@@ -22,9 +22,9 @@ function cliff(ctx, rnd) {
   fill(ctx, [[-20, topY(-20)], ...Array.from({ length: 80 }, (_, i) => { const x = lerp(-20, end, i / 79); return [x, topY(x)]; }), [end, footY(end)], [-20, footY(-20)]], '#14161c');
   // facets
   for (let i = 0; i < 520; i++) {
-    const x = rnd() * end, yTop = topY(x) + 6, yBot = footY(x), y = lerp(yTop, yBot, rnd()), w = 10 + rnd() * 40, h = 30 + rnd() * 110;
+    const x = rnd() * end, yTop = topY(x) + 6, yBot = footY(x), y = lerp(yTop, yBot, rnd()), w = 12 + rnd() * 22, h = 90 + rnd() * 180;
     if (y + h > yBot + 10 || x + w > end - (end - 1320) * (y - 330) / 330) continue;
-    const facing = rnd(), light = .4 + .9 * facing * (1 - (y - 330) / 600);
+    const facing = rnd(), light = .55 + .5 * facing * (1 - (y - 330) / 600);
     const pts = [[x, y], [x + w, y + w * (rnd() - .5) * .3], [x + w * (.9 + rnd() * .2), y + h], [x - w * .1, y + h * (.9 + rnd() * .1)]];
     fill(ctx, pts, shade([30, 32, 40].map(c => c * light), 0));
     if (facing > .7) { ctx.strokeStyle = 'rgba(150,160,170,.18)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(...pts[0]); ctx.lineTo(...pts[3]); ctx.stroke(); }

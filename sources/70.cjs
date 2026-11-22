@@ -28,10 +28,10 @@ function createScene(createCanvas) {
   ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
   paint.starfield(ctx, rnd, 70, HORIZON * .4);
   glow(ctx, 200, HORIZON, 700, 140, '255,190,180', .3);
-  paint.terrain(ctx, cam, height, { z0: 2, z1: 1500, cols: 260, rows: 280, bias: 2.4, fan: 1.05, cx: 0 }, (p, n) => {
-    const lit = Math.min(1, Math.max(0, (n[0] * LOW[0] + n[1] * LOW[1] + n[2] * LOW[2] - LOW[1]) * 2 + .38));
+  paint.terrain(ctx, cam, height, { z0: 2, z1: 1500, cols: 300, rows: 280, bias: 2.4, fan: 1.5, cx: 0 }, (p, n) => {
+    const lit = Math.min(1, Math.max(0, (n[0] * LOW[0] + n[1] * LOW[1] + n[2] * LOW[2] - LOW[1]) * 3.2 + .36));
     const fog = Math.min(1, p[2] / 1300) ** .8;
-    const c = [lerp(64, 206, lit), lerp(72, 190, lit), lerp(110, 204, lit)];
+    const c = [lerp(40, 218, lit), lerp(52, 200, lit), lerp(108, 212, lit)];
     return shade(c.map((v, i) => lerp(v, [176, 150, 168][i], fog * .7)), 0);
   });
   // the fence: posts half buried, a sagging wire between them, over the rise

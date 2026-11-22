@@ -63,7 +63,13 @@ function stairs(ctx, rnd) {
   // the canopy lip, a thick concrete edge across the top
   fill(ctx, [P([-HALF - .3, 2.9, MOUTH]), P([HALF + .3, 2.9, MOUTH]), P([HALF + .3, 2.55, MOUTH]), P([-HALF - .3, 2.55, MOUTH])], '#4a4e54');
   // the low parapet walls at the mouth with railings
-  for (const s of [-1, 1]) { paint.box(ctx, cam, { at: [s * (HALF + .08), 0, MOUTH + 1], sa: .08, sb: 1, h: .5 }, n => (n === 'top' ? '#6a6e74' : '#4a4e54')); }
+  // iron railings round the opening instead of solid parapets: posts and a top rail, dark against the light
+  for (const s of [-1, 1]) {
+    ctx.strokeStyle = '#1c2026'; ctx.lineCap = 'round';
+    for (let z = .8; z <= MOUTH + .6; z += .4) { const a = P([s * (HALF + .1), 0, z]), b = P([s * (HALF + .1), 1, z]); ctx.lineWidth = Math.max(2, 18 / z); ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke(); }
+    const r0 = P([s * (HALF + .1), 1, .8]), r1 = P([s * (HALF + .1), 1, MOUTH + .6]); ctx.lineWidth = 8; ctx.beginPath(); ctx.moveTo(...r0); ctx.lineTo(...r1); ctx.stroke();
+    ctx.strokeStyle = 'rgba(180,200,220,.35)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(r0[0], r0[1] - 3); ctx.lineTo(r1[0], r1[1] - 3); ctx.stroke();
+  }
   return { bottomZ, bottomY, ceil };
 }
 

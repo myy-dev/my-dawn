@@ -39,12 +39,19 @@ function createScene(createCanvas) {
   paint.terrain(ctx, cam, height, { z0: 20, z1: 1600, cols: 240, rows: 240, bias: 2.2, fan: 1.05, cx: 0 }, (p, n) => {
     const fog = Math.min(1, p[2] / 1600);
     if (p[1] < -18.9) {                                               // salt crust: pale, cracked into polygons
-      return shade([70, 74, 84].map((c, i) => lerp(c, [30, 36, 50][i], fog * .7)), (noise(p[0] / 30, p[2] / 30, 11) - .5) * 12);
+      return shade([118, 128, 150].map((c, i) => lerp(c, [40, 48, 70][i], fog * .6)), (noise(p[0] / 30, p[2] / 30, 11) - .5) * 10);
     }
     const lit = Math.min(1, Math.max(0, (n[0] * SKY[0] + n[1] * SKY[1] + n[2] * SKY[2] - SKY[1] * .55) * 2.4 + .08));
-    const base = [lerp(10, 60, lit ** 1.6), lerp(12, 58, lit ** 1.6), lerp(20, 72, lit ** 1.6)];
+    const base = [lerp(12, 92, lit ** 1.3), lerp(14, 96, lit ** 1.3), lerp(30, 128, lit ** 1.3)];
     return shade(base.map((c, i) => lerp(c, [24, 30, 44][i], fog * .85)), 0);
   });
+  // the lake's outline traced smoothly: along rays from the basin centre, find where the floor ends
+  const rim = [];
+  for (let i = 0; i < 90; i++) { const ang = i / 90 * TAU; let r = 0; while (r < 300 && height(BASIN[0] + Math.cos(ang) * r, BASIN[1] + Math.sin(ang) * r) <= -18.9) r += 1; rim.push(P([BASIN[0] + Math.cos(ang) * r, -19, BASIN[1] + Math.sin(ang) * r])); }
+  ctx.beginPath(); rim.forEach((p2, i) => { const n2 = rim[(i + 1) % rim.length], m = [(p2[0] + n2[0]) / 2, (p2[1] + n2[1]) / 2]; i ? ctx.quadraticCurveTo(p2[0], p2[1], ...m) : ctx.moveTo(...m); }); ctx.closePath();
+  const lg = ctx.createLinearGradient(0, Math.min(...rim.map(p2 => p2[1])), 0, Math.max(...rim.map(p2 => p2[1]))); lg.addColorStop(0, '#5a6278'); lg.addColorStop(1, '#8a92a8');
+  ctx.fillStyle = lg; ctx.fill();
+  ctx.strokeStyle = 'rgba(30,34,50,.6)'; ctx.lineWidth = 2; ctx.stroke();
   // cracks in the salt crust: short jagged lines across the lake floor
   for (let i = 0; i < 160; i++) { const a0 = rnd() * TAU, r0 = Math.sqrt(rnd()) * 100, x = BASIN[0] + Math.cos(a0) * r0, z = BASIN[1] + Math.sin(a0) * r0; if (height(x, z) > -18.9) continue; const pts = [P([x, -19, z])]; let ang = rnd() * TAU; for (let s2 = 0; s2 < 4; s2++) { ang += (rnd() - .5) * 1.2; const q = [x + Math.cos(ang) * (s2 + 1) * 2.5, -19, z + Math.sin(ang) * (s2 + 1) * 2.5]; pts.push(P(q)); } ctx.strokeStyle = 'rgba(14,16,24,.55)'; ctx.lineWidth = 1; ctx.beginPath(); pts.forEach((p2, j) => (j ? ctx.lineTo(...p2) : ctx.moveTo(...p2))); ctx.stroke(); }
   // the acacia on the lake floor: a trunk forking into a flat dark crown

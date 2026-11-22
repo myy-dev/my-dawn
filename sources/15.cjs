@@ -77,12 +77,27 @@ function brew(ctx) {
   fill(ctx, [[cx - 160, dBot - 4], [cx + 160, dBot - 4], [cx + 170, dBot + 10], [cx - 170, dBot + 10]], '#a86a50');
   // gooseneck kettle to the right: matte black, the long thin spout curving toward the dripper
   const kx = 1500, ky = 880;
-  fill(ctx, [[kx - 140, ky - 210], [kx + 140, ky - 210], [kx + 160, ky], [kx - 160, ky]], vertical(ctx, ky - 210, ky, [[0, '#3a3a3e'], [1, '#18181a']]));
-  ctx.fillStyle = '#2a2a2e'; ctx.beginPath(); ctx.ellipse(kx, ky - 210, 140, 24, 0, 0, TAU); ctx.fill();
-  ctx.strokeStyle = 'rgba(200,190,200,.35)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(kx - 120, ky - 190); ctx.lineTo(kx - 132, ky - 20); ctx.stroke();
-  ctx.strokeStyle = '#2a2a2e'; ctx.lineWidth = 12; ctx.lineCap = 'round';
-  ctx.beginPath(); ctx.moveTo(kx - 150, ky - 40); ctx.quadraticCurveTo(kx - 260, ky - 60, kx - 290, ky - 300); ctx.quadraticCurveTo(kx - 300, ky - 340, kx - 340, ky - 330); ctx.stroke();
-  ctx.lineWidth = 16; ctx.beginPath(); ctx.moveTo(kx + 120, ky - 170); ctx.quadraticCurveTo(kx + 230, ky - 130, kx + 140, ky - 30); ctx.stroke();
+  // body: a squat rounded pot that swells out from a narrow base and curves in to a small lid
+  const body = () => { ctx.beginPath(); ctx.moveTo(kx - 120, ky); ctx.bezierCurveTo(kx - 190, ky - 40, kx - 190, ky - 170, kx - 90, ky - 205); ctx.lineTo(kx + 90, ky - 205); ctx.bezierCurveTo(kx + 190, ky - 170, kx + 190, ky - 40, kx + 120, ky); ctx.closePath(); };
+  ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(kx + 20, ky + 4, 170, 20, 0, 0, TAU); ctx.fill();
+  const g = ctx.createLinearGradient(kx - 190, 0, kx + 190, 0); g.addColorStop(0, '#3a3a40'); g.addColorStop(.3, '#26262a'); g.addColorStop(.75, '#141416'); g.addColorStop(1, '#0c0c0e');
+  body(); ctx.fillStyle = g; ctx.fill();
+  // the window's light on the curve: a soft vertical sheen near the left shoulder and a pink rim
+  ctx.save(); body(); ctx.clip();
+  glow(ctx, kx - 110, ky - 110, 26, 100, '230,200,220', .35);
+  ctx.strokeStyle = 'rgba(240,170,170,.35)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(kx - 92, ky - 203); ctx.bezierCurveTo(kx - 186, ky - 168, kx - 186, ky - 44, kx - 120, ky - 2); ctx.stroke();
+  ctx.restore();
+  // shoulder ring, lid and knob
+  ctx.fillStyle = '#1e1e22'; ctx.beginPath(); ctx.ellipse(kx, ky - 205, 92, 16, 0, 0, TAU); ctx.fill();
+  ctx.fillStyle = '#2c2c30'; ctx.beginPath(); ctx.ellipse(kx, ky - 214, 70, 12, 0, 0, TAU); ctx.fill();
+  ctx.fillStyle = '#8a6a4a'; ctx.beginPath(); ctx.ellipse(kx, ky - 228, 18, 10, 0, 0, TAU); ctx.fill(); ctx.fillRect(kx - 6, ky - 228, 12, 14);
+  // the gooseneck spout: from low on the body, a long thin S rising and bending toward the dripper
+  ctx.strokeStyle = '#202024'; ctx.lineWidth = 13; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(kx - 160, ky - 50); ctx.bezierCurveTo(kx - 250, ky - 60, kx - 250, ky - 250, kx - 300, ky - 310); ctx.quadraticCurveTo(kx - 320, ky - 336, kx - 350, ky - 326); ctx.stroke();
+  ctx.strokeStyle = 'rgba(230,200,220,.35)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(kx - 168, ky - 54); ctx.bezierCurveTo(kx - 254, ky - 66, kx - 254, ky - 254, kx - 304, ky - 314); ctx.stroke();
+  // the handle: a wooden loop at the back
+  ctx.strokeStyle = '#6a4a32'; ctx.lineWidth = 18; ctx.beginPath(); ctx.moveTo(kx + 140, ky - 170); ctx.bezierCurveTo(kx + 260, ky - 160, kx + 250, ky - 40, kx + 150, ky - 40); ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,220,180,.25)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(kx + 146, ky - 176); ctx.bezierCurveTo(kx + 262, ky - 168, kx + 254, ky - 48, kx + 156, ky - 46); ctx.stroke();
   return { tip: [cx, dBot + 12], surface: cy - 150 };
 }
 

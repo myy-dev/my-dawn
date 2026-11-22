@@ -42,12 +42,17 @@ function createScene(createCanvas) {
   for (let i = 0; i < 7; i++) { const x = 760 + i * 70 + (rnd() - .5) * 30, y = 900 + (rnd() - .5) * 20; fill(ctx, paint.wobble([[x - 40, y], [x + 40, y - 4], [x + 44, y + 16], [x - 36, y + 18]], 3, 631 + i, 8), shade([96, 96, 92], (rnd() - .5) * 20)); }
   // the bench: two trestles, three seat slats, a back of two rails, the right end of the back sagging
   const bench = (x, y, z) => P([x, y, z]);
-  const Z = 3.4, X0 = -.6, X1 = 1.2, SEAT = .45;
-  for (const x of [X0 + .15, X1 - .15]) { for (const dz of [-.2, .2]) { const a = bench(x, 0, Z + dz), b = bench(x, SEAT, Z + dz); ctx.strokeStyle = '#3a3430'; ctx.lineWidth = 9; ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke(); } const a = bench(x, SEAT + .02, Z + .22), b = bench(x, .95, Z + .32); ctx.lineWidth = 8; ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke(); }
+  const Z = 3.2, X0 = -.9, X1 = 1.5, SEAT = .45;
+  // the bench sits on its own layer, laid over the grass so its legs and slats read clearly
+  const front = make(W, H);
+  { const ctx = front.getContext('2d');
+  for (const x of [X0 + .15, X1 - .15]) { for (const dz of [-.2, .2]) { const a = bench(x, 0, Z + dz), b = bench(x, SEAT, Z + dz); ctx.strokeStyle = '#3a3430'; ctx.lineWidth = 18; ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke(); } const a = bench(x, SEAT + .02, Z + .22), b = bench(x, .95, Z + .32); ctx.lineWidth = 16; ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke(); const ar0 = bench(x, .68, Z - .24), ar1 = bench(x, .7, Z + .3); ctx.lineWidth = 12; ctx.beginPath(); ctx.moveTo(...ar0); ctx.lineTo(...ar1); ctx.stroke(); ctx.lineWidth = 10; ctx.beginPath(); ctx.moveTo(...ar0); ctx.lineTo(...bench(x, SEAT, Z - .2)); ctx.stroke(); }
   for (let s = 0; s < 3; s++) { const z = Z - .18 + s * .14; const a = bench(X0, SEAT, z), b = bench(X1, SEAT - .03 * (s === 2), z); ctx.strokeStyle = shade([120, 112, 102], s * 6 - 8); ctx.lineWidth = 13; ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke(); ctx.strokeStyle = 'rgba(255,230,200,.18)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(a[0], a[1] - 5); ctx.lineTo(b[0], b[1] - 5); ctx.stroke(); }
   for (const [y, sag] of [[.72, .03], [.92, .1]]) { const a = bench(X0, y, Z + .28), m = bench((X0 + X1) / 2, y - sag * .3, Z + .29), b = bench(X1, y - sag, Z + .3); ctx.strokeStyle = '#7a7268'; ctx.lineWidth = 11; ctx.beginPath(); ctx.moveTo(...a); ctx.quadraticCurveTo(...m, ...b); ctx.stroke(); }
+  }
   paint.applyTexture(ctx, make, 6301, .34, 0, 0, W, H, true);
   // grass in clumps around the bench and along the front, drawn per frame for the wind
+  const benchFoot = P([0, 0, Z + .25])[1];
   const blades = Array.from({ length: 1300 }, () => { const x = rnd() * W, y = lerp(800, H + 20, rnd() ** .8), h = 30 + (y - 780) * .35 * (.5 + rnd()); return { x, y, h, lag: rnd() * TAU, tone: (rnd() - .5) * 26, seed: rnd() }; });
   const flows = mists.map((m, i) => ({ ...m, lag: rnd(), turns: (i % 2 ? 1 : -1) }));
 
@@ -57,12 +62,16 @@ function createScene(createCanvas) {
     for (const m of flows) for (let j = 0; j < 4; j++) { const x = ((j / 4 + phase * m.turns + m.lag) % 1 + 1) % 1 * (W + 800) - 400; glow(target, x, m.y, 500, 16, '240,220,230', m.a * .5); }
     // wind: a gust passing across the grass twice a loop
     target.lineCap = 'round';
-    for (const b of blades) {
+    // grass behind the bench, then the bench, then the grass in front of its feet
+    const blade = b => {
       const gust = .5 + .5 * Math.sin(TAU * (phase * 2 - b.x / W));
       const sway = (Math.sin(TAU * phase * 6 + b.lag) * .08 + gust * .35) * b.h;
       target.strokeStyle = shade([66, 82, 56], b.tone + gust * 10); target.lineWidth = 1.2 + b.h * .015;
       target.beginPath(); target.moveTo(b.x, b.y); target.quadraticCurveTo(b.x + sway * .3, b.y - b.h * .6, b.x + sway, b.y - b.h * (1 - gust * .12)); target.stroke();
-    }
+    };
+    for (const b of blades) if (b.y <= benchFoot) blade(b);
+    target.drawImage(front, 0, 0);
+    for (const b of blades) if (b.y > benchFoot) blade(b);
   };
 }
 

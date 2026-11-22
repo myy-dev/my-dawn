@@ -31,7 +31,8 @@ function panes() {
   return out;
 }
 
-function garden(ctx, rnd, branchSway) {
+// The still part of the garden (sky, moon, snow, hedges, sundial), drawn once.
+function gardenStill(ctx, rnd) {
   ctx.fillStyle = vertical(ctx, 0, H, [[0, '#0a1222'], [.5, '#1e2a44'], [1, '#2a3450']]); ctx.fillRect(0, 0, W, H);
   paint.starfield(ctx, rnd, 120, 500);
   const moon = P([-2, 9, 40]);
@@ -42,11 +43,12 @@ function garden(ctx, rnd, branchSway) {
   const sd = P([-1, 0, 14]), k = cam.focal / 14;
   fill(ctx, [[sd[0] - .15 * k, sd[1]], [sd[0] + .15 * k, sd[1]], [sd[0] + .1 * k, sd[1] - 1 * k], [sd[0] - .1 * k, sd[1] - 1 * k]], '#4a4e5a');
   fill(ctx, [[sd[0] - .3 * k, sd[1] - 1 * k], [sd[0] + .3 * k, sd[1] - 1 * k], [sd[0] + .3 * k, sd[1] - 1.08 * k], [sd[0] - .3 * k, sd[1] - 1.08 * k]], '#c8d4e4');
-  // bare trees, their twigs moving
+}
+// The bare trees, drawn each frame with their twigs swaying; the same seed every frame keeps their shape.
+function gardenTrees(ctx, rnd, branchSway) {
   ctx.strokeStyle = '#141a24'; ctx.lineCap = 'round';
   const tree = (x, y, a, len, w, d) => { const sw = branchSway * (4 - d) * .02, ex = x + Math.cos(a + sw) * len, ey = y + Math.sin(a + sw) * len; ctx.lineWidth = w; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(ex, ey); ctx.stroke(); if (d) for (let i = 0; i < 2; i++) tree(ex, ey, a + (i ? .45 : -.4) + (rnd() - .5) * .3, len * .72, w * .65, d - 1); };
-  const r2 = paint.seeded(1302);
-  for (const [tx, tz] of [[-4, 20], [3, 26], [-9, 24]]) { const b = P([tx, 0, tz]); const kk = cam.focal / tz; const save = rnd; tree(b[0], b[1], -Math.PI / 2, 2.4 * kk, .3 * kk, 6); void save; void r2; }
+  for (const [tx, tz] of [[-4, 20], [3, 26], [-9, 24]]) { const b = P([tx, 0, tz]); const kk = cam.focal / tz; tree(b[0], b[1], -Math.PI / 2, 2.4 * kk, .3 * kk, 6); }
 }
 
 function createScene(createCanvas) {
@@ -86,13 +88,16 @@ function createScene(createCanvas) {
     fc.fillStyle = '#3a2a20'; fc.beginPath(); fc.ellipse(t[0], t[1] - .56 * k, .28 * k, .07 * k, 0, 0, TAU); fc.fill(); fc.fillStyle = '#4a3a2e'; fc.beginPath(); fc.ellipse(t[0], t[1] - .58 * k, .28 * k, .07 * k, 0, 0, TAU); fc.fill(); }
   const cup = P([-.9, .6, 3.4]), ck = cam.focal / 3.4; fc.fillStyle = '#d8d4cc'; fc.beginPath(); fc.ellipse(cup[0], cup[1], .07 * ck, .018 * ck, 0, 0, TAU); fc.fill(); fill(fc, [[cup[0] - .045 * ck, cup[1] - .005 * ck], [cup[0] + .045 * ck, cup[1] - .005 * ck], [cup[0] + .04 * ck, cup[1] - .07 * ck], [cup[0] - .04 * ck, cup[1] - .07 * ck]], '#c8c4bc');
   const list = panes();
+  // the garden seen through the glass: its still part once, and a reusable canvas for each frame
+  const still = make(W, H); gardenStill(still.getContext('2d'), paint.seeded(1303));
+  const view = make(W, H), vc = view.getContext('2d');
 
   return (target, input) => {
     const phase = input - Math.floor(input);
     target.drawImage(plate, 0, 0);
     const sway = Math.sin(TAU * phase * 2);
     // the garden, visible through each pane
-    const view = make(W, H); garden(view.getContext('2d'), paint.seeded(1303), sway);
+    vc.drawImage(still, 0, 0); gardenTrees(vc, paint.seeded(1304), sway);
     for (const [x0, x1, y0, y1] of list) { target.save(); pathOf(target, [P([x0, y1, WALL_Z]), P([x1, y1, WALL_Z]), P([x1, y0, WALL_Z]), P([x0, y0, WALL_Z])]); target.clip(); target.drawImage(view, 0, 0); target.restore(); }
     // the window's moonlight on the floor: each pane projected back along the moon's rays to y = 0
     target.save(); target.globalCompositeOperation = 'lighter';

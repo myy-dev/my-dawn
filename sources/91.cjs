@@ -61,14 +61,21 @@ function bale(ctx, rnd, base) {
   for (const f of faces) {
     const mid = v3.lerp(f.pts[0], f.pts[2], .5), light = Math.min(1, .12 + lampLight(mid, f.n));
     const q = f.pts.map(P);
-    fill(ctx, q, shade([150 * (.25 + light), 124 * (.25 + light), 70 * (.25 + light)], (rnd() - .5) * 14));
+    // the face bulges a little: each edge bows outward from the face's centre, so the bale reads as packed straw
+    const cx = (q[0][0] + q[2][0]) / 2, cy = (q[0][1] + q[2][1]) / 2;
+    ctx.beginPath(); ctx.moveTo(...q[0]);
+    for (let e = 0; e < 4; e++) { const a2 = q[e], b2 = q[(e + 1) % 4], m = [(a2[0] + b2[0]) / 2, (a2[1] + b2[1]) / 2]; ctx.quadraticCurveTo(m[0] + (m[0] - cx) * .12, m[1] + (m[1] - cy) * .12, ...b2); }
+    ctx.closePath(); ctx.fillStyle = shade([132 * (.25 + light), 110 * (.25 + light), 66 * (.25 + light)], (rnd() - .5) * 14); ctx.fill();
+    // a darker shadow toward the bottom of each face, where it meets the bale below
+    ctx.save(); ctx.clip(); const g = ctx.createLinearGradient(0, Math.min(q[0][1], q[1][1]), 0, Math.max(q[2][1], q[3][1])); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(20,12,4,.35)'); ctx.fillStyle = g; ctx.fillRect(cx - 400, cy - 400, 800, 800); ctx.restore();
+    // loose straw poking out of the edges
+    for (let i = 0; i < 10; i++) { const t = rnd(), e = Math.floor(rnd() * 4), a2 = q[e], b2 = q[(e + 1) % 4], p0 = [lerp(a2[0], b2[0], t), lerp(a2[1], b2[1], t)], ang = rnd() * TAU, len = 4 + rnd() * 8; ctx.strokeStyle = `rgba(${220 * (.3 + light)},${190 * (.3 + light)},${120 * (.3 + light)},.8)`; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(...p0); ctx.lineTo(p0[0] + Math.cos(ang) * len, p0[1] + Math.sin(ang) * len); ctx.stroke(); }
     // straw grain on the face
     for (let i = 0; i < 26; i++) {
       const u = rnd(), v = rnd(), p0 = [lerp(lerp(q[0][0], q[1][0], u), lerp(q[3][0], q[2][0], u), v), lerp(lerp(q[0][1], q[1][1], u), lerp(q[3][1], q[2][1], u), v)];
       ctx.strokeStyle = `rgba(${210 * (.3 + light)},${180 * (.3 + light)},${110 * (.3 + light)},.5)`; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(...p0); ctx.lineTo(p0[0] + (rnd() - .5) * 10, p0[1] + (rnd() - .5) * 4); ctx.stroke();
     }
-    ctx.strokeStyle = 'rgba(20,14,8,.5)'; ctx.lineWidth = 1; pathOf(ctx, q); ctx.stroke();
   }
   for (const t of [.3, .7]) {
     ctx.strokeStyle = 'rgba(40,30,20,.7)'; ctx.lineWidth = 1.2;

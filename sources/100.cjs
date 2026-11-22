@@ -88,10 +88,12 @@ function stream(ctx, rnd) {
     // a Lombardy poplar: a narrow flame of foliage built from small clumps, thinner at the top
     const s = P(base), k = cam.focal / cam.project(base)[2], hgt = (16 + rnd() * 8) * k, haze = Math.min(.9, base[2] / 1500 + .2);
     const tone = shade(paint.aerial([30, 40, 38], haze, HAZE)).slice(5, -3);
-    for (let c = 0; c < 14; c++) {
-      const t = c / 14, w = hgt * .09 * (1 - t * .7);
-      glow(ctx, s[0] + (rnd() - .5) * w, s[1] - hgt * (.15 + t * .8), w * (1 + rnd() * .4), hgt * .08, tone, .9);
-    }
+    // a narrow spindle of foliage with a ragged edge: lit on the left toward the dawn, darker on the right
+    const wMax = hgt * .11, edgePts = (sd) => Array.from({ length: 16 }, (_, j) => { const t = j / 15, y = s[1] - hgt * (.12 + t * .88), w = wMax * Math.sin(Math.PI * Math.min(1, t * 1.15 + .05)) ** .8 * (1 - t * .35); return [s[0] + sd * w * (.85 + .3 * rnd()), y]; });
+    const L = edgePts(-1), R = edgePts(1);
+    ctx.fillStyle = `rgb(${tone})`; ctx.beginPath(); ctx.moveTo(s[0], s[1] - hgt * .1); L.forEach(p2 => ctx.lineTo(...p2)); R.reverse().forEach(p2 => ctx.lineTo(...p2)); ctx.fill();
+    ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.moveTo(s[0], s[1] - hgt * .1); R.reverse().forEach(p2 => ctx.lineTo(...p2)); ctx.lineTo(s[0] + wMax * .1, s[1] - hgt); ctx.fill();
+    ctx.strokeStyle = `rgb(${tone})`; ctx.lineWidth = Math.max(1, wMax * .12); ctx.beginPath(); ctx.moveTo(s[0], s[1]); ctx.lineTo(s[0], s[1] - hgt * .14); ctx.stroke();
   }
 }
 

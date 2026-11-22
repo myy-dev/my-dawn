@@ -12,16 +12,30 @@ const { W, H, TAU, lerp, glow, shade, noise, pathOf } = paint;
 function fill(ctx, points, style) { pathOf(ctx, points); ctx.fillStyle = style; ctx.fill(); }
 
 // A cliff face built from many angled facets (plates of slate), each a quad with its own tilt and tone.
+// A cliff face of slate: tall slabs standing side by side, stepping back from the gap. Each slab follows the
+// gap's wandering edge, has a darker body, a thin lit edge on the side facing the gap, and slanted bedding
+// cracks across it. Drawn from the outermost slab inward so nearer slabs overlap.
 function cliff(ctx, rnd, side) {
   const inner = y => 960 + side * (120 + 260 * (y / H) ** 1.4 + 60 * noise(y / 120, side, 3));
-  for (let i = 0; i < 520; i++) {
-    const y = rnd() * (H + 100) - 50, depth = rnd(), x0 = inner(y) + side * depth * 700;
-    const w = 26 + rnd() * 80, h = 60 + rnd() * 200, tilt = (rnd() - .5) * .25;
-    const face = side * (rnd() - .3);                          // facing the gap (lit faintly) or away
-    const base = [52, 60, 76].map(c => c * (.35 + .5 * Math.max(0, face) * (1 - depth) + .1 * rnd()));
-    const pts = [[x0, y], [x0 + side * w, y + w * tilt], [x0 + side * w * .9, y + h + w * tilt], [x0 - side * w * .05, y + h]];
-    fill(ctx, pts, shade(base, 0));
-    if (rnd() < .25) { ctx.strokeStyle = `rgba(170,190,220,${.1 + rnd() * .15})`; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(...pts[0]); ctx.lineTo(...pts[1]); ctx.stroke(); }
+  const slabs = [];
+  let d = 0;
+  while (d < 1100) { const w = 40 + rnd() * 120; slabs.push({ d, w, jag: rnd() * 100, tone: rnd() }); d += w * (.7 + rnd() * .2); }
+  for (const sl of slabs.reverse()) {
+    const edge = y => inner(y) + side * (sl.d + 18 * noise(y / 60, sl.jag, 5) - 9);
+    const back = y => edge(y) + side * sl.w;
+    const pts = [];
+    for (let y = -40; y <= H + 40; y += 24) pts.push([edge(y), y]);
+    for (let y = H + 40; y >= -40; y -= 24) pts.push([back(y), y]);
+    const near = 1 - Math.min(1, sl.d / 900);
+    fill(ctx, pts, shade([34, 40, 54].map(c => c * (.55 + .5 * near + .2 * sl.tone)), 0));
+    // the lit edge: a thin strip on the gap side, brighter toward the moonbeam's height
+    const lip = [];
+    for (let y = -40; y <= H + 40; y += 24) lip.push([edge(y), y]);
+    for (let y = H + 40; y >= -40; y -= 24) lip.push([edge(y) + side * (4 + 6 * near), y]);
+    fill(ctx, lip, `rgba(150,170,210,${.12 + .25 * near})`);
+    // bedding cracks: slanted lines across the slab
+    ctx.strokeStyle = `rgba(8,10,18,${.35 + .3 * near})`; ctx.lineWidth = 1.5;
+    for (let c = 0; c < 9; c++) { const y = rnd() * H, x0 = edge(y), x1 = back(y + 20); ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y + 26 + rnd() * 20); ctx.stroke(); }
   }
   return inner;
 }

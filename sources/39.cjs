@@ -94,7 +94,9 @@ function createScene(createCanvas) {
       }
     }
   }
-  const lit = mill(ctx, paint.seeded(3902), P);
+  // the mill goes on its own layer, laid over the rippling water so the water never covers its base
+  const front = make(W, H), fc = front.getContext('2d');
+  const lit = mill(fc, paint.seeded(3902), P);
   mill(rc, paint.seeded(3902), M);
   rc.globalCompositeOperation = 'source-atop'; rc.fillStyle = 'rgba(10,12,20,.4)'; rc.fillRect(0, 0, W, H);
   paint.applyTexture(ctx, make, 3901, .32, 0, 0, W, H, true);
@@ -105,6 +107,7 @@ function createScene(createCanvas) {
     const phase = input - Math.floor(input);
     target.drawImage(plate, 0, 0);
     paint.ripple(target, refl, HORIZON, phase, { amp: 1.4, bands: 3 });
+    target.drawImage(front, 0, 0);
     // the wheel turns a whole number of bucket spacings per loop, so the loop is seamless
     target.save(); target.beginPath(); target.rect(0, HORIZON, W, H - HORIZON); target.clip(); target.globalAlpha = .45; wheel(target, -phase * TAU / 16 * 8, M); target.restore();
     wheel(target, -phase * TAU / 16 * 8, P);           // eight buckets per loop keeps the spokes (every fourth) aligned
