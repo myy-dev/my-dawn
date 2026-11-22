@@ -1,5 +1,7 @@
 'use strict';
 
+const paint = require('../lib/paint.cjs');
+
 const width = 1920;
 const height = 1080;
 const tau = Math.PI * 2;
@@ -37,32 +39,17 @@ function gradient(ctx, x0, y0, x1, y1, stops) {
 }
 
 function glow(ctx, x, y, rx, ry, rgb, alpha) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.scale(rx, ry);
-  const fill = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
-  fill.addColorStop(0, `rgba(${rgb},${alpha})`);
-  fill.addColorStop(0.34, `rgba(${rgb},${alpha * 0.54})`);
-  fill.addColorStop(1, `rgba(${rgb},0)`);
-  ctx.fillStyle = fill;
-  ctx.fillRect(-1, -1, 2, 2);
-  ctx.restore();
+  paint.glow(ctx, x, y, rx, ry, rgb, alpha);
 }
 
+// Native-resolution material texture (soft-light) instead of a stretched 480x270 speck film.
 function grain(createCanvas, seed) {
-  const canvas = createCanvas(480, 270);
-  const ctx = canvas.getContext('2d');
-  const bits = ctx.createImageData(canvas.width, canvas.height);
-  const rng = random(seed);
-  for (let offset = 0; offset < bits.data.length; offset += 4) {
-    const tone = rng() < 0.52 ? 4 : 231;
-    bits.data[offset] = tone;
-    bits.data[offset + 1] = tone;
-    bits.data[offset + 2] = tone;
-    bits.data[offset + 3] = Math.round(rng() ** 1.9 * 12);
-  }
-  ctx.putImageData(bits, 0, 0);
-  return canvas;
+  paint.textureTile(createCanvas, seed);
+  return { seed };
+}
+
+function applyGrain(ctx, layer) {
+  paint.applyTexture(ctx, null, layer.seed, .42, 0, 0, width, height, true);
 }
 
 function moon(ctx, config) {
@@ -195,8 +182,10 @@ function ridge(points, seed, jitter = 8, steps = 8) {
     const [right, endY] = points[index + 1];
     return Array.from({ length: steps }, (_, at) => {
       const unit = at / steps;
-      const wobble = at ? Math.sin(unit * Math.PI) * (rng() - 0.5) * jitter : 0;
-      return [x + unit * (right - x), y + unit * (endY - y) + wobble];
+      rng();
+      const px = x + unit * (right - x);
+      const wobble = at ? paint.edge(px, seed) * jitter * .9 : 0;
+      return [px, y + unit * (endY - y) + wobble];
     });
   });
 }
@@ -297,7 +286,7 @@ function renderDunes(createCanvas, config) {
     out.drawImage(backdrop, 0, 0);
     clouds(out, vapour, bands, angle);
     out.drawImage(land, 0, 0);
-    out.drawImage(grainLayer,0,0,width,height);
+    applyGrain(out, grainLayer);
   };
 }
 
@@ -438,7 +427,7 @@ function renderCanyon(createCanvas, config) {
     clouds(out,vapour,high,angle);
     out.drawImage(geometry,0,0);
     clouds(out,vapour,low,angle);
-    out.drawImage(grainLayer,0,0,width,height);
+    applyGrain(out, grainLayer);
   };
 }
 
@@ -540,7 +529,7 @@ function renderMeadow(createCanvas, config) {
     clouds(out,vapour,bands,angle);
     out.drawImage(landscape,0,0);
     drawTallGrass(out,grass,angle,config.theme==='silver'?'162,179,176':'107,144,145');
-    out.drawImage(grainLayer,0,0,width,height);
+    applyGrain(out, grainLayer);
   };
 }
 
@@ -667,7 +656,7 @@ function renderMountain(createCanvas,config) {
       ], angle);
     }
     if(config.theme==='camp') glow(out,413,882,106,50,'218,151,100',(0.35+0.05*Math.sin(angle))*0.39);
-    out.drawImage(grainLayer,0,0,width,height);
+    applyGrain(out, grainLayer);
   };
 }
 
@@ -808,7 +797,7 @@ function renderIce(createCanvas,config) {
       const dip=Math.sin(a*2+k)*3;
       line(out,[[x+offset*0.83,y+dip],[x+offset+v*.36,y+dip+1]],`rgba(180,216,226,${alpha*(0.58+0.42*Math.sin(a+k))})`,0.9);
     }
-    out.drawImage(grainLayer,0,0,width,height);
+    applyGrain(out, grainLayer);
   };
 }
 

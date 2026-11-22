@@ -1,5 +1,6 @@
 'use strict';
 
+const paint = require('../lib/paint.cjs');
 const W = 1920;
 const H = 1080;
 const TAU = Math.PI * 2;
@@ -41,15 +42,7 @@ function flat(ctx, start, end, stops) {
 }
 
 function glow(ctx, x, y, rx, ry, color, alpha) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.scale(rx, ry);
-  const light = ctx.createRadialGradient(0, 0, 0.03, 0, 0, 1);
-  light.addColorStop(0, 'rgba(' + color + ',' + alpha + ')');
-  light.addColorStop(1, 'rgba(' + color + ',0)');
-  ctx.fillStyle = light;
-  ctx.fillRect(-1, -1, 2, 2);
-  ctx.restore();
+  paint.glow(ctx, x, y, rx, ry, color, alpha);
 }
 
 function renderSurface(createCanvas, paint) {
@@ -58,13 +51,11 @@ function renderSurface(createCanvas, paint) {
   return image;
 }
 
+// Surface texture at native resolution. The loop still draws the same random() values as the old speck
+// spray did, so everything placed after it in the scene stays where it was.
 function grain(ctx, random, count, top = 0, bottom = H) {
-  for (let index = 0; index < count; index++) {
-    const x = random() * W;
-    const y = top + random() * (bottom - top);
-    ctx.fillStyle = random() < 0.55 ? 'rgba(196,207,207,0.033)' : 'rgba(0,4,12,0.073)';
-    ctx.fillRect(x, y, 0.6 + random() * 3.7, 0.5 + random() * 1.4);
-  }
+  for (let index = 0; index < count * 5; index++) random();
+  paint.applyTexture(ctx, null, count + top, .5, 0, top, W, bottom - top);
 }
 
 function sky(ctx, random, horizon, tint = 'inlet', moon = null) {
@@ -99,11 +90,15 @@ function sky(ctx, random, horizon, tint = 'inlet', moon = null) {
   grain(ctx, random, 9700, 0, horizon);
 }
 
+// Treeline-like edge: broad swells plus fine crowns, instead of independent random spikes every 9 px.
+const TREELINE = [[200, 1], [48, .62], [14, .5], [6, .3]];
+
 function ridge(ctx, random, baseline, scale, color, profile, roughness = .21) {
   const points = [];
   for (let x = -40; x <= W + 55; x += 9) {
     const u = x / W;
-    const silhouette = profile(u) + (random() - .48) * roughness;
+    random(); // keep the scene's random sequence unchanged
+    const silhouette = profile(u) + paint.edge(x, Math.round(baseline * 7 + scale), TREELINE) * roughness * .75;
     points.push([x, baseline - scale * silhouette]);
   }
   polygon(ctx, [...points, [W + 80, baseline + 30], [-40, baseline + 30]], color);

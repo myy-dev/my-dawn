@@ -1,5 +1,7 @@
 'use strict';
 
+const paint = require('../lib/paint.cjs');
+
 const width = 1920;
 const height = 1080;
 const tau = 2 * Math.PI;
@@ -61,23 +63,14 @@ function lineGradient(ctx, top, bottom, start = 0, end = height) {
 }
 
 function light(ctx, x, y, rx, ry, hue, opacity) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.scale(rx, ry);
-  const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
-  g.addColorStop(0, 'rgba(' + hue + ',' + opacity + ')');
-  g.addColorStop(.29, 'rgba(' + hue + ',' + opacity * .47 + ')');
-  g.addColorStop(1, 'rgba(' + hue + ',0)');
-  fill(ctx, g, -1, -1, 2, 2);
-  ctx.restore();
+  paint.glow(ctx, x, y, rx, ry, hue, Math.max(0, Math.min(1, opacity)));
 }
 
+// Surface wear as native-resolution texture. The loop still draws the same random() values as the old
+// speck spray, so everything placed after it stays put.
 function scuff(ctx, random, x, y, w, h, count, alpha = .075) {
-  for (let i = 0; i < count; i++) {
-    const posX = x + w * random(), posY = y + h * random();
-    const colour = random() < .54 ? '8,12,17' : '147,154,144';
-    fill(ctx, 'rgba(' + colour + ',' + alpha * random() + ')', posX, posY, .5 + random() * 5, .5 + random() * 2);
-  }
+  for (let i = 0; i < count * 6; i++) random();
+  paint.applyTexture(ctx, null, count, Math.min(.6, alpha * 4.2), x, y, w, h);
 }
 
 function finish(ctx, random) {

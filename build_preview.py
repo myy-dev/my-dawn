@@ -28,8 +28,18 @@ def js(value):
     return json.dumps(value, ensure_ascii=False)
 
 
+# Shared helpers that scene files load with require(); keys are the paths as written in the scene files.
+SHARED = {"../lib/paint.cjs": "lib/paint.cjs"}
+
+
 def module(path):
-    return "(() => {\nconst module = { exports: {} };\n" + read(path) + "\nreturn module.exports;\n})()"
+    return (
+        "(() => {\nconst module = { exports: {} };\n"
+        "const require = name => {\n"
+        "  if (!(name in sharedModules)) throw new Error('Unknown module ' + name);\n"
+        "  return sharedModules[name];\n};\n"
+        + read(path) + "\nreturn module.exports;\n})()"
+    )
 
 
 def build(output):
@@ -69,7 +79,10 @@ def build(output):
             assets.append(asset(f"assets/audio/{sound}.wav", f"audio-{sound}"))
             sounds.add(sound)
 
-    script = "const baseScenes = {\n" + ",\n".join(base_modules) + "\n};\n"
+    script = "const sharedModules = {};\n" + "".join(
+        f"sharedModules[{js(name)}] = {module(path)};\n" for name, path in SHARED.items()
+    )
+    script += "const baseScenes = {\n" + ",\n".join(base_modules) + "\n};\n"
     script += "const sceneFamilies = {\n" + ",\n".join(
         f"{js(name)}: {source}" for name, source in family_modules.items()
     ) + "\n};\n"
@@ -78,7 +91,11 @@ def build(output):
         ? sceneFamilies[entry.family].find(work => work.id === entry.id)
         : baseScenes[entry.id];
       if (!scene || scene.sound !== entry.sound) throw new Error('Invalid scene: ' + entry.id);
-      return {{ ...entry, scene }};
+      // Every scene ends with the shared finishing pass (lens, bloom, film base, grain, vignette).
+      const createScene = sharedModules['../lib/paint.cjs'].finished(scene.createScene, {{
+        amount: entry.finish ?? 1, cycleSeconds: entry.cycleSeconds,
+      }});
+      return {{ ...entry, scene: {{ ...scene, createScene }} }};
     }});"""
 
     document = read("web/index.html")

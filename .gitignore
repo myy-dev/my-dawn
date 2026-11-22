@@ -8,3 +8,4 @@ review/
 *.zip
 renders/
 .hyperframes/
+.claude/

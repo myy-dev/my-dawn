@@ -1,5 +1,6 @@
 'use strict';
 
+const paint = require('../lib/paint.cjs');
 const W = 1920;
 const H = 1080;
 const TAU = 2 * Math.PI;
@@ -34,16 +35,7 @@ function wash(ctx, first, middle, last) {
 }
 
 function light(ctx, x, y, radiusX, radiusY, rgb, opacity) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.scale(radiusX, radiusY);
-  const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
-  gradient.addColorStop(0, alpha(rgb, opacity));
-  gradient.addColorStop(0.32, alpha(rgb, opacity * 0.72));
-  gradient.addColorStop(1, alpha(rgb, 0));
-  ctx.fillStyle = gradient;
-  ctx.fillRect(-1, -1, 2, 2);
-  ctx.restore();
+  paint.glow(ctx, x, y, radiusX, radiusY, rgb, Math.max(0, Math.min(1, opacity)));
 }
 
 function stroke(ctx, x, y, endX, endY, color, width) {
@@ -62,17 +54,17 @@ function disk(ctx, x, y, rx, ry, color, rotation = 0) {
   ctx.fill();
 }
 
-function shade(ctx, random, strength = 1) {
+// Vignette, plus surface texture when drawn on an opaque plate. The loop still draws the same random()
+// values the old speck spray used, so later placements in the scene don't move.
+function shade(ctx, random, strength = 1, textured = false) {
   const vignette = ctx.createRadialGradient(W * 0.48, H * 0.46, 235, W * 0.48, H * 0.46, 1190);
   vignette.addColorStop(0, 'rgba(2,6,10,0)');
   vignette.addColorStop(0.68, alpha([2, 6, 10], 0.12 * strength));
   vignette.addColorStop(1, alpha([2, 6, 10], 0.63 * strength));
   ctx.fillStyle = vignette;
   ctx.fillRect(0, 0, W, H);
-  for (let index = 0; index < 12500; index++) {
-    ctx.fillStyle = index % 2 ? 'rgba(122,145,150,0.034)' : 'rgba(3,8,13,0.075)';
-    ctx.fillRect(random() * W, random() * H, 1 + random() * 2.5, 1);
-  }
+  for (let index = 0; index < 12500 * 3; index++) random();
+  if (textured) paint.applyTexture(ctx, null, 4100, .42);
 }
 
 function leaf(ctx, x, y, size, angle, color) {
@@ -106,7 +98,8 @@ function hill(ctx, y, amplitude, frequency, phase, color) {
   ctx.beginPath();
   ctx.moveTo(-30, H);
   for (let x = -30; x <= W + 30; x += 20) {
-    const h = y + amplitude * (Math.sin(x * frequency + phase) + Math.sin(x * frequency * 2.6 + 1) * 0.25);
+    const h = y + amplitude * (Math.sin(x * frequency + phase) + Math.sin(x * frequency * 2.6 + 1) * 0.2
+      + paint.edge(x, Math.round(phase * 311)) * 0.55);
     ctx.lineTo(x, h);
   }
   ctx.lineTo(W + 30, H);
@@ -368,6 +361,7 @@ function trailFactory(createCanvas, scene) {
       if (species === 'birch') disk(out, x, y, item.radius, item.radius * 0.78, alpha([189, 211, 218], envelope * item.opacity));
       else leaf(out, x, y, item.radius * 2.5, p * TAU * 2, alpha(species === 'ginkgo' ? [204, 160, 83] : [134, 174, 112], envelope * item.opacity));
     }
+    paint.applyTexture(out, null, 4100, .42, 0, 0, W, H, true);
     out.drawImage(rim, 0, 0);
   };
 }
@@ -531,7 +525,7 @@ function macroFactory(createCanvas, scene) {
       }
     }
   }
-  shade(ctx, random, 1.02);
+  shade(ctx, random, 1.02, true);
   const [feature, f] = plate(createCanvas);
   const fx = scene.subject === 'bells' ? 925 : scene.subject === 'silk' ? 1040 : 658;
   const fy = scene.subject === 'silk' ? 518 : 970;
@@ -719,6 +713,7 @@ function meadowFactory(createCanvas, scene) {
       const bend = item.h * (-0.1 + wind * 0.072 + Math.sin(t * TAU + item.p * 3.4) * 0.055);
       stem(out, item.x, item.y, item.h, bend, type, item.tone, bend / item.h);
     }
+    paint.applyTexture(out, null, 4100, .42, 0, 0, W, H, true);
     out.drawImage(rim, 0, 0);
   };
 }
@@ -879,6 +874,7 @@ function canopyFactory(createCanvas, scene) {
       else if (scene.species === 'blossom') disk(out, x, y, item.r, item.r * 0.51, alpha([200, 173, 165], env * 0.65), p * TAU * 2);
       else light(out, x, y, item.r * 5, item.r * 5, [163, 191, 190], env * 0.24);
     }
+    paint.applyTexture(out, null, 4100, .42, 0, 0, W, H, true);
     out.drawImage(rim, 0, 0);
   };
 }
@@ -1138,6 +1134,7 @@ function gardenFactory(createCanvas, scene) {
       if (variant === 'wall') disk(out, x, y, item.r, item.r * 0.8, alpha([159, 187, 130], h * 0.36));
       else leaf(out, x, y, item.r * 4, h * Math.PI * 2, alpha([173, 175, 121], h * 0.38));
     }
+    paint.applyTexture(out, null, 4100, .42, 0, 0, W, H, true);
     out.drawImage(rim, 0, 0);
   };
 }

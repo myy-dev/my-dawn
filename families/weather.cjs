@@ -1,5 +1,6 @@
 'use strict';
 
+const shared = require('../lib/paint.cjs');
 const W = 1920;
 const H = 1080;
 const TAU = Math.PI * 2;
@@ -52,12 +53,7 @@ function gradient(ctx, y0, y1, stops) {
 }
 
 function glow(ctx, x, y, radius, rgb, opacity) {
-  const ramp = ctx.createRadialGradient(x, y, 0, x, y, radius);
-  ramp.addColorStop(0, rgba(rgb, opacity));
-  ramp.addColorStop(.26, rgba(rgb, opacity * .44));
-  ramp.addColorStop(1, rgba(rgb, 0));
-  ctx.fillStyle = ramp;
-  ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+  shared.glow(ctx, x, y, radius, radius, rgb, Math.max(0, Math.min(1, opacity)));
 }
 
 const PALETTES = {
@@ -137,9 +133,9 @@ function paintSky(ctx, config, paint, rng) {
 
 function ridgeAt(x, center, amplitude, phase) {
   return center
-    + Math.sin(x * .0024 + phase) * amplitude * .52
-    + Math.sin(x * .005 - phase * .53) * amplitude * .21
-    + Math.sin(x * .0094 + phase * 1.33) * amplitude * .07;
+    + Math.sin(x * .0024 + phase) * amplitude * .42
+    + Math.sin(x * .005 - phase * .53) * amplitude * .17
+    + shared.edge(x, Math.round(phase * 977)) * amplitude * .42;
 }
 
 function paintLand(ctx, config, paint, rng) {
@@ -1002,6 +998,7 @@ function createLandscape(createCanvas, config) {
   else if (config.family === 'crop') paintCrop(base, config, rng, paint);
   else if (config.family === 'orchard') paintOrchard(base, config, rng, paint);
   else paintYard(base, config, rng, createCanvas);
+  shared.applyTexture(base, createCanvas, config.seed * 13, .4);
 
   const cloudCount = config.weather === 'fog' ? 5 : 3;
   const clouds = [];
