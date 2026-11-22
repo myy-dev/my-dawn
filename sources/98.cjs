@@ -7,7 +7,7 @@
 // seed heads, each rimmed white with hoar. The far field is out of focus, a wash of blue shadow and the
 // first warm light low behind it. The wind moves the grass a little.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, pathOf, shade, wobble } = paint;
+const { W, H, TAU, lerp, glow, pathOf, wobble } = paint;
 
 function fill(ctx, points, style) { pathOf(ctx, points); ctx.fillStyle = style; ctx.fill(); }
 function vertical(ctx, y0, y1, stops) {

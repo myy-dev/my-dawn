@@ -7,7 +7,7 @@
 // breathes in and out a little and the stems sway with it, and the beads flicker as the angle to the sun
 // changes.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, pathOf, shade } = paint;
+const { W, H, TAU, lerp, glow } = paint;
 
 function vertical(ctx, y0, y1, stops) {
   const g = ctx.createLinearGradient(0, y0, 0, y1);

@@ -29,7 +29,9 @@ function lot(ctx, rnd) {
   for (let f = 0; f < 12; f++) for (let c = 0; c < 14; c++) if (rnd() < .18) { const p = blk((c + .5) / 14, (f + .5) / 12); ctx.fillStyle = rnd() < .8 ? '#e0a868' : '#a8c4e8'; ctx.fillRect(p[0] - 3, p[1] - 2, 6, 4); }
   for (let i = 0; i < 80; i++) { const x = -60 + i * 1.6, p = P([x, 0, 70]), h = (4 + rnd() * 5) * cam.focal / 70; ctx.fillStyle = shade([20, 26, 24], (rnd() - .5) * 8); ctx.beginPath(); ctx.ellipse(p[0], p[1] - h * .6, h * .4, h * .6, 0, 0, TAU); ctx.fill(); }
   // tarmac
-  fill(ctx, [P([-40, 0, 1]), P([40, 0, 1]), P([40, 0, 70]), P([-40, 0, 70])], vertical(ctx, HORIZON, H, [[0, '#2a2c32'], [1, '#18191c']]));
+  // the tarmac: its near edge follows a line in front of the camera, bending away on the left (the camera
+  // is turned right, so a straight near edge at z = 1 would run behind it there)
+  fill(ctx, [P([-40, 0, 70]), P([40, 0, 70]), P([40, 0, 1]), P([0, 0, 1.2]), P([-8, 0, 5]), P([-20, 0, 12]), P([-40, 0, 20])], vertical(ctx, HORIZON, H, [[0, '#2a2c32'], [1, '#18191c']]));
   // fence along the back
   for (let x = -40; x < 40; x += 2.5) { const a = P([x, 0, 68]), b = P([x, 2, 68]); ctx.strokeStyle = 'rgba(30,32,36,.9)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke(); }
   ctx.beginPath(); ctx.moveTo(...P([-40, 2, 68])); ctx.lineTo(...P([40, 2, 68])); ctx.stroke();

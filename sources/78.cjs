@@ -102,8 +102,8 @@ function createScene(createCanvas) {
         glow(target, (a[0] + b[0]) / 2, a[1], 20, 10, '255,220,160', .25);
       }
       // the body silhouette above the parapet
-      if (head < 70 && head + 64 > 2) { const n = P([FACE - .3, TOP + 3.6, Math.min(70, Math.max(2, head))]), f = P([FACE - .3, TOP + 1.7, Math.max(2, Math.min(70, head + 64))]);
-      const z0 = Math.min(70, Math.max(2, head)), z1 = Math.max(2, Math.min(70, head + 64)); fill(target, [P([FACE - .3, TOP + 3.6, z0]), P([FACE - .3, TOP + 3.6, z1]), P([FACE - .3, TOP + 1.7, z1]), P([FACE - .3, TOP + 1.7, z0])], 'rgba(14,16,22,.6)'); void n; void f; }
+      if (head < 70 && head + 64 > 2) {
+      const z0 = Math.min(70, Math.max(2, head)), z1 = Math.max(2, Math.min(70, head + 64)); fill(target, [P([FACE - .3, TOP + 3.6, z0]), P([FACE - .3, TOP + 3.6, z1]), P([FACE - .3, TOP + 1.7, z1]), P([FACE - .3, TOP + 1.7, z0])], 'rgba(14,16,22,.6)'); }
       // flicker of its light on the street
       glow(target, 1300, 900, 700, 200, '255,220,170', .06 * Math.sin(Math.PI * t) * (.6 + .4 * Math.sin(TAU * phase * 40)));
     }

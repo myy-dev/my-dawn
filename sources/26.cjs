@@ -7,7 +7,7 @@
 // and it breaks over the ledge in front of us, foam running back in lace across the rock and spray thrown
 // up where it hits the boulders.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, edge, glow, pathOf, shade, camera, wobble, v3 } = paint;
+const { W, H, TAU, lerp, edge, glow, pathOf, shade, camera, wobble } = paint;
 
 const cam = camera({ x: 0, y: 2.2, z: 0, yaw: -.12, pitch: -.02, focal: 1100, cx: 960, cy: 520 });
 const P = p => { const s = cam.project(p); return [s[0], s[1]]; };

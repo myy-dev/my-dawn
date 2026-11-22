@@ -7,7 +7,7 @@
 // rising and falling a hair with the record's warp. Beside it a stack of sleeves leans, a glass of water,
 // a small lamp with a fabric shade; behind, the window's blinds let in thin blue bars of early light.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, pathOf, shade, planks } = paint;
+const { W, H, TAU, glow, pathOf, shade, planks } = paint;
 
 function fill(ctx, points, style) { pathOf(ctx, points); ctx.fillStyle = style; ctx.fill(); }
 function vertical(ctx, y0, y1, stops) {
@@ -122,7 +122,7 @@ function createScene(createCanvas) {
     fill(target, [[hx - 40, hy - 6], [hx + 10, hy - 14], [hx + 16, hy + 10], [hx - 34, hy + 18]], '#2a2a2e');
     target.fillStyle = '#ff9a5a'; target.beginPath(); target.arc(470, 950, 4 + Math.sin(TAU * phase * 8) * .5, 0, TAU); target.fill();
     // dust motes in the lamp light
-    for (let i = 0; i < 24; i++) { const t = (phase + i / 24) % 1, x = 1300 + Math.sin(i * 3.1 + TAU * phase) * 300, y = 120 + ((i * 47 + t * 500) % 600); glow(target, x, y, 3, 3, '255,230,190', .5); }
+    for (let i = 0; i < 24; i++) { const lap = ((i * 47 + phase * 600) % 600) / 600, x = 1300 + Math.sin(i * 3.1 + TAU * phase) * 300, y = 120 + lap * 600; const a = .5 * Math.sin(Math.PI * lap); if (a > .01) glow(target, x, y, 3, 3, '255,230,190', a); }
   };
 }
 

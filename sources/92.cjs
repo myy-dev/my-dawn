@@ -8,7 +8,7 @@
 // combs the grass in passing waves.
 const paint = require('../lib/paint.cjs');
 const { W, H, TAU, lerp, edge, glow, pathOf, shade, camera, v3 } = paint;
-const { add, mul } = v3;
+const { add } = v3;
 
 const cam = camera({ x: 0, y: 1.5, z: 0, yaw: .05, pitch: -.02, focal: 1150, cx: 960, cy: 570 });
 const P = p => { const s = cam.project(p); return [s[0], s[1]]; };

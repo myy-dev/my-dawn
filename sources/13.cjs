@@ -7,7 +7,7 @@
 // with a folded blanket, a lemon tree in a tub, a small table with a cup gone cold. The bare branches
 // outside move in the wind and their shadows move in the window shapes on the floor.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, pathOf, shade, camera, v3 } = paint;
+const { W, H, TAU, glow, pathOf, shade, camera, v3 } = paint;
 
 const cam = camera({ x: 0, y: 1.5, z: 0, yaw: -.3, pitch: .04, focal: 950, cx: 960, cy: 560 });
 const P = p => { const s = cam.project(p); return [s[0], s[1]]; };
@@ -57,10 +57,11 @@ function createScene(createCanvas) {
   const plate = make(W, H), ctx = plate.getContext('2d');
   // the room: dark walls, a tiled floor, the window wall's frames
   ctx.fillStyle = '#14161c'; ctx.fillRect(0, 0, W, H);
-  const floor = [P([-7, 0, 1]), P([4, 0, 1]), P([4, 0, WALL_Z]), P([-7, 0, WALL_Z])];
+  const NEAR = 1.6;   // nearest floor row: in front of the camera across the whole floor width
+  const floor = [P([-7, 0, NEAR]), P([4, 0, NEAR]), P([4, 0, WALL_Z]), P([-7, 0, WALL_Z])];
   fill(ctx, floor, '#2a2c34');
-  for (let i = -7; i <= 4; i += .5) { ctx.strokeStyle = 'rgba(0,0,0,.4)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(...P([i, 0, 1])); ctx.lineTo(...P([i, 0, WALL_Z])); ctx.stroke(); }
-  for (let z = 1; z <= WALL_Z; z += .5) { ctx.beginPath(); ctx.moveTo(...P([-7, 0, z])); ctx.lineTo(...P([4, 0, z])); ctx.stroke(); }
+  for (let i = -7; i <= 4; i += .5) { ctx.strokeStyle = 'rgba(0,0,0,.4)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(...P([i, 0, NEAR])); ctx.lineTo(...P([i, 0, WALL_Z])); ctx.stroke(); }
+  for (let z = NEAR; z <= WALL_Z; z += .5) { ctx.beginPath(); ctx.moveTo(...P([-7, 0, z])); ctx.lineTo(...P([4, 0, z])); ctx.stroke(); }
   paint.applyTexture(ctx, make, 1301, .3, 0, 0, W, H, true);
   // furniture in front of the window: a wicker chair with a blanket, a tub with a lemon tree, a little table
   const furniture = make(W, H), fc = furniture.getContext('2d');

@@ -16,7 +16,7 @@ function fill(ctx, points, style) { pathOf(ctx, points); ctx.fillStyle = style; 
 // gap's wandering edge, has a darker body, a thin lit edge on the side facing the gap, and slanted bedding
 // cracks across it. Drawn from the outermost slab inward so nearer slabs overlap.
 function cliff(ctx, rnd, side) {
-  const inner = y => 960 + side * (120 + 260 * (y / H) ** 1.4 + 60 * noise(y / 120, side, 3));
+  const inner = y => 960 + side * (120 + 260 * (Math.max(0, y) / H) ** 1.4 + 60 * noise(y / 120, side, 3));
   const slabs = [];
   let d = 0;
   while (d < 1100) { const w = 40 + rnd() * 120; slabs.push({ d, w, jag: rnd() * 100, tone: rnd() }); d += w * (.7 + rnd() * .2); }
@@ -27,7 +27,24 @@ function cliff(ctx, rnd, side) {
     for (let y = -40; y <= H + 40; y += 24) pts.push([edge(y), y]);
     for (let y = H + 40; y >= -40; y -= 24) pts.push([back(y), y]);
     const near = 1 - Math.min(1, sl.d / 900);
-    fill(ctx, pts, shade([34, 40, 54].map(c => c * (.55 + .5 * near + .2 * sl.tone)), 0));
+    // body: darker low down where the walls close in, a cooler blue-grey high up where they meet the sky
+    const body = ctx.createLinearGradient(0, 0, 0, H);
+    const tone = [34, 40, 54].map(c => c * (.55 + .5 * near + .25 * sl.tone));
+    body.addColorStop(0, shade(tone.map((c, i) => c * [1.15, 1.2, 1.3][i]), 0)); body.addColorStop(.6, shade(tone, 0)); body.addColorStop(1, shade(tone.map(c => c * .55), 0));
+    fill(ctx, pts, body);
+    // wet streaks: water seeping down the face leaves darker, glossy vertical runs with a faint sheen
+    for (let w = 0; w < 4; w++) {
+      const y0 = rnd() * H * .6, y1 = y0 + 200 + rnd() * 500, f = .15 + rnd() * .7;
+      const at = y => lerp(edge(y), back(y), f) + 6 * Math.sin(y / 40 + w);
+      ctx.strokeStyle = 'rgba(6,8,16,.35)'; ctx.lineWidth = 6 + rnd() * 10; ctx.beginPath(); for (let y = y0; y <= y1; y += 20) (y === y0 ? ctx.moveTo(at(y), y) : ctx.lineTo(at(y), y)); ctx.stroke();
+      ctx.strokeStyle = `rgba(160,180,220,${.05 + .1 * near})`; ctx.lineWidth = 1.5; ctx.beginPath(); for (let y = y0; y <= y1; y += 20) (y === y0 ? ctx.moveTo(at(y) - side * 3, y) : ctx.lineTo(at(y) - side * 3, y)); ctx.stroke();
+    }
+    // moss and a fern or two caught on ledges near the floor
+    if (near > .5) for (let m = 0; m < 3; m++) {
+      const y = H * (.55 + rnd() * .4), x = lerp(edge(y), back(y), .1 + rnd() * .3);
+      glow(ctx, x, y, 30 + rnd() * 30, 8, '50,70,46', .6);
+      for (let f = 0; f < 5; f++) { const a = -Math.PI / 2 - side * (.3 + f * .25); ctx.strokeStyle = 'rgba(46,70,44,.85)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x + Math.cos(a) * 18, y + Math.sin(a) * 18, x + Math.cos(a + side * .5) * 34, y + Math.sin(a + side * .5) * 26); ctx.stroke(); }
+    }
     // the lit edge: a thin strip on the gap side, brighter toward the moonbeam's height
     const lip = [];
     for (let y = -40; y <= H + 40; y += 24) lip.push([edge(y), y]);
@@ -74,14 +91,14 @@ function createScene(createCanvas) {
     target.save(); target.globalCompositeOperation = 'lighter';
     const g = target.createLinearGradient(0, 0, 0, H); g.addColorStop(0, `rgba(150,170,210,${.2 * breath})`); g.addColorStop(1, `rgba(150,170,210,${.05 * breath})`);
     target.fillStyle = g; target.beginPath(); target.moveTo(900, 0); target.lineTo(940, 0); target.lineTo(1220, H); target.lineTo(980, H); target.fill();
-    for (const m of motes) { const t = (m.t + phase * .2 * m.turns) % 1, x = lerp(lerp(900, 980, m.u), lerp(940, 1220, m.u), t) + Math.sin(TAU * phase * m.turns + m.lag) * 8, y = t * H; glow(target, x, y, 2.5, 2.5, '210,220,250', .45 * Math.sin(Math.PI * t)); }
+    for (const m of motes) { const t = (m.t + phase * m.turns) % 1, x = lerp(lerp(900, 980, m.u), lerp(940, 1220, m.u), t) + Math.sin(TAU * phase * m.turns + m.lag) * 8, y = t * H; glow(target, x, y, 2.5, 2.5, '210,220,250', .45 * Math.sin(Math.PI * t)); }
     for (let i = 0; i < 4; i++) glow(target, lerp(920, 1100, i / 3) + Math.sin(TAU * (phase + i * .25)) * 30, 300 + i * 160, 120, 50, '150,170,210', .06);
     target.restore();
     // drips from the rock: fall, then rings in the pool
     for (const d of drips) {
       const t = (phase * d.turns + d.offset) % 1;
-      if (t < .25) { const y = lerp(d.top, 870, (t / .25) ** 2); target.fillStyle = 'rgba(190,210,240,.8)'; target.fillRect(d.x - 1, y, 2, 8); }
-      else { const r = (t - .25) / .75; target.strokeStyle = `rgba(170,190,230,${.5 * (1 - r)})`; target.lineWidth = 1.2; target.beginPath(); target.ellipse(d.x, 878, 6 + r * 90, 2 + r * 18, 0, 0, TAU); target.stroke(); }
+      if (t < .25) { if (t < .004) continue; const y = lerp(d.top, 870, (t / .25) ** 2); target.fillStyle = `rgba(190,210,240,${.8 * Math.min(1, t / .04)})`; target.fillRect(d.x - 1, y, 2, 8); }
+      else { const r = (t - .25) / .75; if (r > .996) continue; target.strokeStyle = `rgba(170,190,230,${.5 * (1 - r)})`; target.lineWidth = 1.2; target.beginPath(); target.ellipse(d.x, 878, 6 + r * 90, 2 + r * 18, 0, 0, TAU); target.stroke(); }
     }
   };
 }

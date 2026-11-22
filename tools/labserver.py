@@ -7,6 +7,7 @@ import http.server
 import os
 import re
 import sys
+import urllib.parse
 
 REPO, PORT = sys.argv[1], int(sys.argv[2])
 OUT = os.path.join(REPO, "review", "lab")
@@ -15,11 +16,12 @@ os.makedirs(OUT, exist_ok=True)
 
 class Handler(http.server.SimpleHTTPRequestHandler):
     def translate_path(self, path):
-        clean = path.split("?")[0]
-        if clean.startswith("/lab/out/"):
-            return os.path.join(OUT, clean[len("/lab/out/"):])
-        if clean.startswith("/tools/"):
-            return os.path.join(REPO, clean[1:])
+        clean = urllib.parse.unquote(path.split("?")[0])
+        for prefix, root in (("/lab/out/", OUT), ("/tools/", os.path.join(REPO, "tools"))):
+            if clean.startswith(prefix):
+                target = os.path.realpath(os.path.join(root, clean[len(prefix):]))
+                # stay inside the folder being served: ".." in the request never reaches past it
+                return target if target.startswith(os.path.realpath(root) + os.sep) else os.path.join(root, "__missing__")
         return super().translate_path(path)
 
     def end_headers(self):

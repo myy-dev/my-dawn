@@ -7,7 +7,7 @@
 // slope, swallowing and giving back the upper steps; a breath of wind stirs the ferns beside the stairs.
 const paint = require('../lib/paint.cjs');
 const { W, H, TAU, lerp, glow, pathOf, shade, camera, wobble, v3 } = paint;
-const { add } = v3;
+
 
 const cam = camera({ x: 0, y: 1.5, z: 0, yaw: 0, pitch: .16, focal: 1050, cx: 960, cy: 640 });
 const P = p => { const s = cam.project(p); return [s[0], s[1]]; };

@@ -6,7 +6,7 @@
 // toward the open sea, its bow wave spreading in a long V behind it that rocks the reflections. The sky at
 // the fjord's mouth is turning apricot; mist lies on the water along the foot of the walls.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, edge, glow, pathOf, shade, camera, v3 } = paint;
+const { W, H, lerp, edge, glow, pathOf, camera, v3 } = paint;
 const { add } = v3;
 
 const cam = camera({ x: 0, y: 4, z: 0, yaw: 0, pitch: .02, focal: 1150, cx: 960, cy: 540 });
@@ -34,7 +34,7 @@ function wall(ctx, rnd, Q, side, tone) {
   return pts;
 }
 
-function walls(ctx, rnd, Q, reflected) {
+function walls(ctx, rnd, Q) {
   for (const side of [-1, 1]) {
     const face = wall(ctx, rnd, Q, side, vertical(ctx, 0, H, [[0, '#3a3a48'], [.5, '#22242e'], [1, '#14161c']]));
     ctx.save(); pathOf(ctx, face); ctx.clip();
@@ -52,7 +52,6 @@ function walls(ctx, rnd, Q, reflected) {
     ctx.fillStyle = side < 0 ? 'rgba(255,190,150,.06)' : 'rgba(10,10,20,.25)'; ctx.fillRect(0, 0, W, H);
     ctx.restore();
   }
-  void reflected;
 }
 
 // The ferry: a long white hull with a dark waterline, two decks of lit windows, a funnel.
@@ -77,11 +76,11 @@ function createScene(createCanvas) {
   glow(ctx, W / 2, HORIZON, 400, 120, '255,210,170', .4);
   ctx.fillStyle = vertical(ctx, HORIZON, H, [[0, '#9a8c90'], [.2, '#3a3c4c'], [1, '#0e1218']]);
   ctx.fillRect(0, HORIZON, W, H - HORIZON);
-  walls(ctx, paint.seeded(2802), P, false);
+  walls(ctx, paint.seeded(2802), P);
   ferry(ctx, P);
   const refl = make(W, H), rc = refl.getContext('2d');
   rc.save(); rc.translate(0, HORIZON * 2); rc.scale(1, -1); rc.drawImage(plate, 0, 0, W, HORIZON, 0, 0, W, HORIZON); rc.restore();
-  walls(rc, paint.seeded(2802), M, true);
+  walls(rc, paint.seeded(2802), M);
   ferry(rc, M);
   rc.globalCompositeOperation = 'source-atop'; rc.fillStyle = 'rgba(8,12,22,.4)'; rc.fillRect(0, 0, W, H);
   paint.applyTexture(ctx, make, 2801, .3, 0, 0, W, H, true);

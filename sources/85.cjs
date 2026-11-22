@@ -75,10 +75,9 @@ function machines(ctx, rnd) {
   }
   // a stack of crates and a bicycle leaning on the right wall
   for (let i = 0; i < 3; i++) paint.box(ctx, cam, { at: [1.45, i * .32, 8.6], sa: .3, sb: .22, h: .3 }, n => shade([[60, 100, 60], [200, 120, 40], [40, 80, 140]][i], n === 'front' ? 0 : -20));
-  const bk = cam.focal / 6.5, bc = P([-1.5, .35, 6.5]);
+  const bk = cam.focal / 6.5;
   ctx.strokeStyle = '#141418'; ctx.lineWidth = 3; for (const dz of [-.5, .5]) { const c = P([-1.6, .35, 6.5 + dz]); ctx.beginPath(); ctx.ellipse(c[0], c[1], .1 * bk, .33 * bk, 0, 0, TAU); ctx.stroke(); }
   ctx.beginPath(); ctx.moveTo(...P([-1.6, .35, 6])); ctx.lineTo(...P([-1.6, .85, 6.4])); ctx.lineTo(...P([-1.6, .35, 7])); ctx.moveTo(...P([-1.6, .85, 6.4])); ctx.lineTo(...P([-1.6, .95, 6.9])); ctx.stroke();
-  void bc;
   return fronts;
 }
 

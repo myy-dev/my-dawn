@@ -52,27 +52,20 @@ def build(output):
     sounds = set()
     assets = []
     base_modules = []
-    family_modules = {}
     for entry in entries:
         id_ = entry["id"]
         cycle = entry["cycleSeconds"]
         length = entry["durationSeconds"]
         sound = entry["sound"]
-        family = entry.get("family")
         if (
             not isinstance(id_, str) or not re.fullmatch(r"[0-9]{2,3}", id_) or id_ in ids
             or type(cycle) not in (int, float) or not 0.1 <= cycle < float("inf")
             or (length is not None and (type(length) not in (int, float) or not 0.1 <= length < float("inf")))
             or not re.fullmatch(r"[a-z-]+", sound)
-            or (family is not None and not re.fullmatch(r"[a-z-]+", family))
         ):
             raise ValueError(f"Invalid settings for scene {id_}")
         ids.add(id_)
-        if family:
-            if family not in family_modules:
-                family_modules[family] = module(f"families/{family}.cjs")
-        else:
-            base_modules.append(f"{js(id_)}: {module(f'sources/{id_}.cjs')}")
+        base_modules.append(f"{js(id_)}: {module(f'sources/{id_}.cjs')}")
 
         assets.append(asset(f"assets/stills/{id_}.jpg", f"still-{id_}"))
         if sound not in sounds:
@@ -83,18 +76,12 @@ def build(output):
         f"sharedModules[{js(name)}] = {module(path)};\n" for name, path in SHARED.items()
     )
     script += "const baseScenes = {\n" + ",\n".join(base_modules) + "\n};\n"
-    script += "const sceneFamilies = {\n" + ",\n".join(
-        f"{js(name)}: {source}" for name, source in family_modules.items()
-    ) + "\n};\n"
     script += f"""const scenes = {js(entries)}.map(entry => {{
-      const scene = entry.family
-        ? sceneFamilies[entry.family].find(work => work.id === entry.id)
-        : baseScenes[entry.id];
+      const scene = baseScenes[entry.id];
       if (!scene || scene.sound !== entry.sound) throw new Error('Invalid scene: ' + entry.id);
       // Every scene ends with the shared finishing pass (lens, bloom, film base, grain, vignette).
       const createScene = sharedModules['../lib/paint.cjs'].finished(scene.createScene, {{
         amount: entry.finish ?? 1, cycleSeconds: entry.cycleSeconds,
-        look: () => globalThis.__dawnLook || entry.look || scene.look || 'film',
       }});
       return {{ ...entry, scene: {{ ...scene, createScene }} }};
     }});"""

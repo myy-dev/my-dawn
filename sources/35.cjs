@@ -7,7 +7,7 @@
 // a headland dark at one end. A few wading birds pick along a channel's edge. The water still slides
 // seaward in the channels and the ripples on it glint.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, edge, glow, pathOf, shade, camera } = paint;
+const { W, H, TAU, edge, glow, pathOf, camera } = paint;
 
 const cam = camera({ x: 0, y: 1.8, z: 0, yaw: .05, pitch: -.01, focal: 1100, cx: 960, cy: 500 });
 const P = p => { const s = cam.project(p); return [s[0], s[1]]; };
@@ -36,8 +36,9 @@ function sky(ctx, rnd) {
 }
 
 // Channels: braided ribbons of water meandering seaward across the flats.
-const channels = [];
+// Draws the flats and returns the channels' centre lines (each instance gets its own list).
 function flats(ctx, rnd) {
+  const channels = [];
   ctx.fillStyle = vertical(ctx, HORIZON, H, [[0, '#5a5048'], [.3, '#3e3630'], [1, '#1a1612']]);
   ctx.fillRect(0, HORIZON + 2, W, H);
   // sand ripples: fine curved ridges, lit on the side toward the moon
@@ -58,6 +59,7 @@ function flats(ctx, rnd) {
     fill(ctx, left.concat(right.reverse()), vertical(ctx, HORIZON, H, [[0, '#c4a080'], [.2, '#5a5260'], [1, '#1e2030']]));
     channels.push(centre);
   }
+  return channels;
 }
 
 function birds(ctx) {
@@ -76,7 +78,7 @@ function createScene(createCanvas) {
   const rnd = paint.seeded(35011);
   const plate = make(W, H), ctx = plate.getContext('2d');
   sky(ctx, rnd);
-  flats(ctx, rnd);
+  const channels = flats(ctx, rnd);
   birds(ctx);
   paint.applyTexture(ctx, make, 3501, .32, 0, 0, W, H, true);
   paint.lighting(make, { skyline: HORIZON, ambient: [.76, .74, .8], lights: [paint.LIGHT.glade(MOON[0], HORIZON, .35, 380, 700)] })(ctx);

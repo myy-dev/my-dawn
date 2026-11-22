@@ -7,7 +7,7 @@
 // it the wall holds wooden peels and baskets, and a small window shows the first grey-blue of morning.
 // Steam rises from the warm bread; a breath of wind from outside stirs the lamp.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, pathOf, shade, camera, planks, v3 } = paint;
+const { W, H, TAU, lerp, glow, pathOf, camera, planks } = paint;
 
 const cam = camera({ x: 0, y: 1.5, z: .2, yaw: .05, pitch: .15, focal: 1150, cx: 960, cy: 540 });
 const P = p => { const s = cam.project(p); return [s[0], s[1]]; };

@@ -7,7 +7,7 @@
 // run between them. From a few chimneys at the backs of the kitchens, wood smoke rises, leans in the cold
 // wind and drifts over the roofs in long fading streams. One paper door glows from a lamp inside.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, pathOf, shade, camera, v3 } = paint;
+const { W, H, TAU, lerp, glow, pathOf, shade, camera } = paint;
 
 const cam = camera({ x: 0, y: 9, z: -6, yaw: 0, pitch: .42, focal: 1100, cx: 960, cy: 500 });
 const P = p => { const s = cam.project(p); return [s[0], s[1]]; };
@@ -25,9 +25,9 @@ function roof(ctx, rnd, { cx, cy, cz, L, d, h, lift, tone }) {
   const ridgeY = u => h + lift * (2 * u - 1) ** 4;               // u 0..1 along the ridge
   const eaveY = u => lift * .9 * (2 * u - 1) ** 6;
   const slope = side => (u, v) => {
-    const x = cx + lerp(-L - .4 * Math.abs(2 * u - 1) ** 6 * 0, L, u) , z = cz + side * lerp(0, d + .3 * (2 * u - 1) ** 6, v);
+    const x = cx + lerp(-L, L, u), z = cz + side * lerp(0, d + .3 * (2 * u - 1) ** 6, v);
     const y = cy + lerp(ridgeY(u), eaveY(u), v) - .35 * Math.sin(Math.PI * v) * (1 - .3 * Math.abs(2 * u - 1));
-    return P([x - L * 0 + (u - .5) * .0, y, z]);
+    return P([x, y, z]);
   };
   for (const side of [1, -1]) {
     // the far slope first (side +1 is away from the camera)

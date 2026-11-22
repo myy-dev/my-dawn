@@ -7,7 +7,7 @@
 // beside it in a stony bed. The trunks of the wood rise behind in the haze; a few drops fall from the
 // canopy and the stream glints.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, pathOf, shade, camera, wobble, v3 } = paint;
+const { W, H, TAU, glow, pathOf, shade, camera, wobble, v3 } = paint;
 const { add } = v3;
 
 const cam = camera({ x: 0, y: 1.1, z: 0, yaw: .3, pitch: -.04, focal: 1100, cx: 960, cy: 560 });

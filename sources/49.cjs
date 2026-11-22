@@ -6,7 +6,7 @@
 // reeds and a line of willows in the mist. A pair of herons stands in the shallows. The reeds rock in the
 // wind in sheets; small ripples cross the water and the mist drifts.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, edge, glow, pathOf, shade } = paint;
+const { W, H, TAU, edge, glow, shade } = paint;
 
 const HORIZON = 600;
 

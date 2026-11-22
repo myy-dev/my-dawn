@@ -7,7 +7,7 @@
 // sky. Wind runs uphill in waves: each tuft bends in turn and its plume flashes brighter as it tilts toward
 // the moon.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, pathOf, shade, camera } = paint;
+const { W, H, TAU, glow, pathOf, shade, camera } = paint;
 
 const cam = camera({ x: 0, y: 1.2, z: 0, yaw: -.05, pitch: .12, focal: 1100, cx: 960, cy: 640 });
 const P = p => { const s = cam.project(p); return [s[0], s[1]]; };

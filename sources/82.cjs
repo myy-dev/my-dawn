@@ -7,7 +7,7 @@
 // and the flat land beyond. A windsock on its mast swings and fills in the wind. The control tower's
 // lit cab stands off to one side, a beacon on top sweeping its beam round. The sky's lower edge pales.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, pathOf, shade, camera } = paint;
+const { W, H, TAU, lerp, glow, pathOf, camera } = paint;
 
 const cam = camera({ x: -24, y: 2.2, z: 0, yaw: .16, pitch: .02, focal: 1000, cx: 960, cy: 520 });
 const P = p => { const s = cam.project(p); return [s[0], s[1]]; };
@@ -69,7 +69,7 @@ function createScene(createCanvas) {
     for (const l of lights) { const tw = .8 + .2 * Math.sin(TAU * (phase * 3 + l.z * .013)); const r = Math.max(2.6, .4 * l.k); glow(target, l.p[0], l.p[1], r * 4, r * 2.5, l.c, .75 * tw); glow(target, l.p[0], l.p[1], r * .8, r * .8, '255,255,255', .9 * tw); }
     // the beacon on the tower: a beam sweeping round twice a loop, flashing when it faces us
     const a = TAU * phase * 2, facing = Math.max(0, Math.cos(a)) ** 6;
-    glow(target, f.beacon[0], f.beacon[1], 10 + 50 * facing, 10 + 50 * facing, a % TAU < Math.PI ? '120,255,160' : '255,255,240', .3 + .7 * facing);
+    glow(target, f.beacon[0], f.beacon[1], 10 + 50 * facing, 10 + 50 * facing, Math.floor(phase * 2 + .5) % 2 ? '120,255,160' : '255,255,240', .3 + .7 * facing);
     target.save(); target.globalCompositeOperation = 'lighter';
     const dx = Math.sin(a) * 900, dy = -Math.abs(Math.cos(a)) * 30 - 10;
     const g = target.createLinearGradient(f.beacon[0], f.beacon[1], f.beacon[0] + dx, f.beacon[1] + dy);

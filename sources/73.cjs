@@ -90,9 +90,8 @@ function awning(ctx, rnd) {
   for (let i = 0; i <= 28; i++) {
     const u = i / 28, top = map(u, 1), k = cam.focal / cam.project([lerp(x0, x1, u), 2, FRONT - out])[2];
     const s = Math.floor(u * stripes);
-    const bot = [top[0], top[1] + .22 * k], scal = [top[0], top[1] + (.22 + .06 * Math.abs(Math.sin(u * stripes * Math.PI))) * k];
+    const scal = [top[0], top[1] + (.22 + .06 * Math.abs(Math.sin(u * stripes * Math.PI))) * k];
     hem.push({ top, bot: scal, s });
-    void bot;
   }
   for (let i = 0; i < hem.length - 1; i++) { const a = hem[i], b = hem[i + 1]; fill(ctx, [a.top, b.top, b.bot, a.bot], a.s % 2 ? '#c8c4b0' : '#244a38'); }
   // the iron arms

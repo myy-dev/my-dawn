@@ -59,13 +59,12 @@ function dormer(ctx, rnd) {
 
 function things(ctx, rnd) {
   // the trunk: a domed lid with straps and brass corners
-  const t = [-1.6, 0, 6.4], tk = cam.focal / cam.project(t)[2], tp = P(t);
+  const t = [-1.6, 0, 6.4], tk = cam.focal / cam.project(t)[2];
   paint.box(ctx, cam, { at: t, sa: .5, sb: .3, h: .45 }, n => (n === 'top' ? '#4a3020' : n === 'front' ? '#3a2618' : '#2a1c12'));
   const lid = P([t[0], .45, t[2] - .3]);
   ctx.fillStyle = '#4a3222'; ctx.beginPath(); ctx.ellipse(lid[0], lid[1], .5 * tk, .14 * tk, 0, Math.PI, TAU); ctx.fill();
   for (const dx of [-.3, .3]) { const a = P([t[0] + dx, 0, t[2] - .3]), b = P([t[0] + dx, .45, t[2] - .3]); ctx.strokeStyle = '#2a1a10'; ctx.lineWidth = .06 * tk; ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke(); }
   for (const dx of [-.5, .5]) { const p = P([t[0] + dx, .45, t[2] - .3]); ctx.fillStyle = '#a8883a'; ctx.fillRect(p[0] - 6, p[1] - 4, 12, 14); }
-  void tp;
   // the dress form: a torso on a pole and tripod
   const d = [1.5, 0, 6.8], dk = cam.focal / cam.project(d)[2], db = P(d);
   ctx.strokeStyle = '#2a2420'; ctx.lineWidth = .03 * dk; ctx.beginPath(); ctx.moveTo(db[0], db[1]); ctx.lineTo(db[0], db[1] - 1 * dk); ctx.moveTo(db[0], db[1] - .1 * dk); ctx.lineTo(db[0] - .2 * dk, db[1]); ctx.moveTo(db[0], db[1] - .1 * dk); ctx.lineTo(db[0] + .2 * dk, db[1]); ctx.stroke();
@@ -96,9 +95,8 @@ function createScene(createCanvas) {
   const drop = p => { const t = p[1] / -MOON[1]; return P([p[0] + MOON[0] * t, 0, p[2] + MOON[2] * t]); };
   const patch = [[WIN.x0, WIN.y1, WIN.z], [WIN.x1, WIN.y1, WIN.z], [WIN.x1, WIN.y0, WIN.z], [WIN.x0, WIN.y0, WIN.z]].map(drop);
   ctx.save(); ctx.globalCompositeOperation = 'lighter'; fill(ctx, patch, 'rgba(110,130,170,.4)'); ctx.restore();
-  const mx = (patch[0][0] + patch[1][0]) / 2, my = (patch[0][1] + patch[3][1]) / 2;
+  const my = (patch[0][1] + patch[3][1]) / 2;
   ctx.strokeStyle = 'rgba(20,24,36,.6)'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo((patch[0][0] + patch[1][0]) / 2, patch[0][1]); ctx.lineTo((patch[3][0] + patch[2][0]) / 2, patch[3][1]); ctx.moveTo((patch[0][0] + patch[3][0]) / 2, my); ctx.lineTo((patch[1][0] + patch[2][0]) / 2, my); ctx.stroke();
-  void mx;
   things(ctx, rnd);
   paint.applyTexture(ctx, make, 2301, .32, 0, 0, W, H, true);
   paint.lighting(make, { ambient: [.6, .66, .86], lights: [paint.LIGHT.lamp((q[0][0] + q[1][0]) / 2, (q[0][1] + q[2][1]) / 2, .3, 500, 500, [.7, .8, 1.1])] })(ctx);
@@ -115,7 +113,7 @@ function createScene(createCanvas) {
     target.beginPath(); target.moveTo(...q[0]); target.lineTo(...q[1]); target.lineTo(...patch[1]); target.lineTo(...patch[2]); target.lineTo(...patch[3]); target.lineTo(...patch[0]); target.closePath(); target.fill();
     for (const m of motes) {
       const top = [lerp(q[0][0], q[1][0], m.u), q[0][1]], bot = [lerp(patch[0][0], patch[1][0], m.u), lerp(patch[0][1], patch[3][1], m.v)];
-      const t = (m.t + phase * .1 * m.turns) % 1, x = lerp(top[0], bot[0], t) + Math.sin(TAU * phase * m.turns + m.lag) * 10, y = lerp(top[1], bot[1], t);
+      const t = (m.t + phase * m.turns) % 1, x = lerp(top[0], bot[0], t) + Math.sin(TAU * phase * m.turns + m.lag) * 10, y = lerp(top[1], bot[1], t);
       glow(target, x, y, 2.5, 2.5, '210,220,250', .5 * Math.sin(Math.PI * t));
     }
     target.restore();

@@ -6,7 +6,7 @@
 // the sky's rose and gold. A rail runs along one side of the walk. Far off, a line of low hills and a
 // thread of dunes. The grass leans in the wind in long waves; the creeks shine.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, edge, glow, pathOf, shade, camera, planks, v3 } = paint;
+const { W, H, lerp, edge, glow, pathOf, shade, camera, planks, v3 } = paint;
 const { add, mul } = v3;
 
 const cam = camera({ x: .2, y: 1.7, z: 0, yaw: -.08, pitch: -.03, focal: 1100, cx: 960, cy: 540 });

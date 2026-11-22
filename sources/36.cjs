@@ -7,7 +7,7 @@
 // and out of the cave: the water inside rises and falls, its surface catching the moonlight in moving
 // patches and slapping softly against the walls.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, edge, glow, pathOf, shade, wobble } = paint;
+const { W, H, TAU, edge, glow, pathOf, wobble } = paint;
 
 const HORIZON = 560;
 const MOON = [1010, 390];

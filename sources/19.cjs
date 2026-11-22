@@ -78,7 +78,7 @@ function createScene(createCanvas) {
     const [sx0, sy0] = scr[0], [sx1, sy1] = scr[2];
     const g = target.createLinearGradient(0, sy0, 0, sy1); g.addColorStop(0, '#9aa4b4'); g.addColorStop(.45, '#c8ccd2'); g.addColorStop(.5, '#6a7486'); g.addColorStop(1, '#3a4252');
     target.globalAlpha = flicker; target.fillStyle = g; target.fillRect(sx0, sy0, sx1 - sx0, sy1 - sy0);
-    for (let i = 0; i < 12; i++) { const y = lerp(sy0, sy1, .52 + i * .04), x = sx0 + ((i * 97 + phase * (sx1 - sx0) * (i % 2 ? 1 : 2)) % (sx1 - sx0)); target.strokeStyle = 'rgba(220,226,236,.5)'; target.lineWidth = 2; target.beginPath(); target.moveTo(x - 60, y); target.quadraticCurveTo(x, y - 4, x + 60, y); target.stroke(); }
+    for (let i = 0; i < 12; i++) { const y = lerp(sy0, sy1, .52 + i * .04), lap = ((i * 97 + phase * (sx1 - sx0) * (i % 2 ? 1 : 2)) % (sx1 - sx0)) / (sx1 - sx0), x = sx0 + lap * (sx1 - sx0); const a = .5 * Math.min(1, Math.sin(Math.PI * lap) * 4); if (a < .01) continue; target.strokeStyle = `rgba(220,226,236,${a})`; target.lineWidth = 2; target.beginPath(); target.moveTo(x - 60, y); target.quadraticCurveTo(x, y - 4, x + 60, y); target.stroke(); }
     target.globalAlpha = 1; target.restore();
     glow(target, (sx0 + sx1) / 2, sy1 + 40, (sx1 - sx0) * .7, 120, '160,170,190', .12 * flicker);
     // the beam: a cone from the lens to the screen's corners, brighter near the lens
@@ -91,7 +91,7 @@ function createScene(createCanvas) {
     target.beginPath(); target.moveTo(...lens); target.lineTo(...scr[0]); target.lineTo(...scr[1]); target.closePath(); target.fill();
     // dust in the beam, drifting slowly, brightest near the lens
     for (const m of motes) {
-      const t = (m.t + phase * .05 * m.turns) % 1, cx = lerp(lens[0], (sx0 + sx1) / 2, t), cy = lerp(lens[1], (sy0 + sy1) / 2, t);
+      const t = (m.t + phase * m.turns) % 1, cx = lerp(lens[0], (sx0 + sx1) / 2, t), cy = lerp(lens[1], (sy0 + sy1) / 2, t);
       const spread = t * (sy1 - sy0) * .5, x = cx + m.off * spread * .3 + Math.sin(TAU * phase * m.turns + m.lag) * 6, y = cy + m.v * spread;
       glow(target, x, y, 2 + (1 - t) * 3, 2 + (1 - t) * 3, '230,236,255', .55 * (1 - t) * flicker);
     }

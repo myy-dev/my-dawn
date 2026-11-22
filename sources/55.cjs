@@ -45,7 +45,6 @@ function pavilion(ctx, rnd, Q) {
   fill(ctx, [0, 1, 2, 3, 4, 5].map(i => Q(pt(i, 0, .12))), '#3a3834');
   fill(ctx, [0, 1, 2].flatMap(i => [Q(pt(i, 0, .12))]).concat([2, 1, 0].map(i => Q(pt(i, -.5, .14)))), '#2a2826');
   // pillars on stone footings, round, lit from inside by the lantern
-  const visible = [5, 0, 1, 2, 3, 4].filter(i => pt(i, 0)[2] < C[2] + R * .4);
   for (const i of [0, 1, 2, 3, 4, 5]) {
     const base = Q(pt(i, 0)), top = Q(pt(i, PILLAR)), w = Math.max(3, 260 / cam.project(pt(i, 0))[2]);
     const g = ctx.createLinearGradient(base[0] - w, 0, base[0] + w, 0);
@@ -53,7 +52,6 @@ function pavilion(ctx, rnd, Q) {
     fill(ctx, [[base[0] - w, base[1]], [base[0] + w, base[1]], [top[0] + w * .9, top[1]], [top[0] - w * .9, top[1]]], g);
     fill(ctx, [[base[0] - w * 1.5, base[1]], [base[0] + w * 1.5, base[1]], [base[0] + w * 1.3, base[1] - w], [base[0] - w * 1.3, base[1] - w]], '#5a5850');
   }
-  void visible;
   // railing between the front pillars
   for (const [a, b] of [[0, 1], [1, 2], [5, 0]]) {
     for (const h of [.5, .8]) { ctx.strokeStyle = '#4a2418'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(...Q(pt(a, h))); ctx.lineTo(...Q(pt(b, h))); ctx.stroke(); }

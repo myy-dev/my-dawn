@@ -115,9 +115,8 @@ function createScene(createCanvas) {
     const phase = input - Math.floor(input);
     target.drawImage(plate, 0, 0);
     // drips from the dripper's tip into the cup: several per loop
-    for (let d = 0; d < 6; d++) {
-      const t = (phase * 6 + d / 6 * 0) % 1;
-      if (d) break;
+    {
+      const t = (phase * 6) % 1;
       const y = lerp(b.tip[1], b.surface - 10, Math.min(1, t * 2.2));
       if (t < .45) { target.fillStyle = 'rgba(60,30,16,.9)'; target.beginPath(); target.ellipse(b.tip[0], y, 4, 7, 0, 0, TAU); target.fill(); }
       else { const r = (t - .45) / .55; target.strokeStyle = `rgba(200,150,110,${.5 * (1 - r)})`; target.lineWidth = 1.5; target.beginPath(); target.ellipse(b.tip[0], b.surface - 8, 8 + r * 70, 2 + r * 12, 0, 0, TAU); target.stroke(); }

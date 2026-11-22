@@ -7,8 +7,8 @@
 // boats under tarpaulins line one bank. The water carries every light in long trembling columns, and the
 // arch's reflection completes a full circle with the bridge.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, pathOf, shade, camera, v3 } = paint;
-const { add } = v3;
+const { W, H, TAU, glow, pathOf, shade, camera, v3 } = paint;
+
 
 const cam = camera({ x: 0, y: 1.3, z: 0, yaw: 0, pitch: .04, focal: 1100, cx: 960, cy: 600 });
 const P = p => { const s = cam.project(p); return [s[0], s[1]]; };
@@ -51,11 +51,10 @@ function bridge(ctx, rnd, Q) {
   const body = [Q([-HALF - 2, deck, BRIDGE]), Q([HALF + 2, deck, BRIDGE]), Q([HALF + 2, 0, BRIDGE]), ...arch.slice().reverse().map(([x, y]) => Q([x, y, BRIDGE])), Q([-HALF - 2, 0, BRIDGE])];
   fill(ctx, body, '#3a3834');
   for (let i = 0; i < 24; i++) {
-    const a = arch[i], b = arch[i + 1], n = [a[0] / (HALF * .85), a[1] / rise];
+    const a = arch[i], b = arch[i + 1];
     const q = [Q([a[0], a[1], BRIDGE - .01]), Q([b[0], b[1], BRIDGE - .01]), Q([b[0] * 1.14, b[1] * 1.14 + .2, BRIDGE - .01]), Q([a[0] * 1.14, a[1] * 1.14 + .2, BRIDGE - .01])];
     fill(ctx, q, shade([96, 90, 82], (rnd() - .5) * 20 + (i === 12 ? 20 : 0)));
     ctx.strokeStyle = 'rgba(10,10,10,.7)'; ctx.lineWidth = 1.2; pathOf(ctx, q); ctx.stroke();
-    void n;
   }
   fill(ctx, [Q([-HALF - 2, deck + .9, BRIDGE]), Q([HALF + 2, deck + .9, BRIDGE]), Q([HALF + 2, deck, BRIDGE]), Q([-HALF - 2, deck, BRIDGE])], '#4a4640');
   return [Q([-HALF - 1.5, deck + 2.6, BRIDGE]), Q([HALF + 1.5, deck + 2.6, BRIDGE])];

@@ -7,7 +7,7 @@
 // The moon is hidden in the cloud behind the mill, so the tower is lit along one edge and dark in front.
 const paint = require('../lib/paint.cjs');
 const { W, H, TAU, lerp, edge, glow, pathOf, shade, camera, lambert, v3 } = paint;
-const { add, mul, unit, UP } = v3;
+const { add, mul, unit } = v3;
 
 const cam = camera({ x: 0, y: 1.6, z: 0, yaw: .12, pitch: -.12, focal: 1250, cx: 960, cy: 600 });
 const P = p => { const s = cam.project(p); return [s[0], s[1]]; };

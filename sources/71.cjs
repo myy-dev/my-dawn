@@ -9,7 +9,7 @@
 // rings open in the puddles; far down the street the bus's red tail lights shrink away into the rain.
 const paint = require('../lib/paint.cjs');
 const { W, H, TAU, lerp, glow, pathOf, shade, camera, v3 } = paint;
-const { add, mul } = v3;
+
 
 const cam = camera({ x: -.6, y: 1.6, z: 0, yaw: -.1, pitch: -.04, focal: 1000, cx: 960, cy: 560 });
 const P = p => { const s = cam.project(p); return [s[0], s[1]]; };
@@ -154,7 +154,7 @@ function createScene(createCanvas) {
       const t = (phase * 2 + b * .5) % 1, z = lerp(22, 130, t * t), a = Math.sin(Math.PI * t);
       for (const [dx] of tail) { const p = P([-4.5 + dx, .9, z]); glow(target, p[0], p[1], 10, 6, '255,40,30', .9 * a); glow(target, p[0], p[1] + (H - p[1]) * .25, 4, 30, '255,40,30', .25 * a); }
     }
-    for (const r of rings) { const t = (phase * r.turns + r.offset) % 1; target.strokeStyle = `rgba(200,206,220,${.35 * (1 - t)})`; target.lineWidth = 1; target.beginPath(); target.ellipse(r.at[0], r.at[1], 4 + t * 26, 1 + t * 6, 0, 0, TAU); target.stroke(); }
+    for (const r of rings) { const t = (phase * r.turns + r.offset) % 1; target.strokeStyle = `rgba(200,206,220,${.35 * (1 - t) * Math.min(1, t * 12)})`; target.lineWidth = 1; target.beginPath(); target.ellipse(r.at[0], r.at[1], 4 + t * 26, 1 + t * 6, 0, 0, TAU); target.stroke(); }
     // water running down the shelter glass
     target.save(); pathOf(target, s.glass); target.clip();
     const xs = s.glass.map(p => p[0]), ys = s.glass.map(p => p[1]);

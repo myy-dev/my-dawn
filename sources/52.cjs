@@ -6,7 +6,7 @@
 // short stalks, five notched petals each, white flushed with pink, a red eye at the centre; buds and a
 // few new leaves among them. The boughs rock in the morning air and petals come loose and drift across.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, pathOf, shade } = paint;
+const { W, H, TAU, glow, shade } = paint;
 
 function vertical(ctx, y0, y1, stops) {
   const g = ctx.createLinearGradient(0, y0, 0, y1);

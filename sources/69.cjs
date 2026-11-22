@@ -7,7 +7,7 @@
 // moon is low over a line of dark spruce on the far shore and lays a long glossy path across the ice.
 // Snow dust drifts across the surface in thin snakes; a new crack now and then flashes and spreads.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, shade, camera, noise, pathOf } = paint;
+const { W, H, TAU, lerp, glow, camera, pathOf } = paint;
 
 const cam = camera({ x: 0, y: 1.4, z: 0, yaw: -.1, pitch: -.02, focal: 1000, cx: 960, cy: 520 });
 const P = p => { const s = cam.project(p); return [s[0], s[1]]; };
@@ -21,7 +21,7 @@ function crack(rnd, start, dir, len, depth) {
   const lines = [], pts = [start]; let p = start, a = dir;
   for (let s = 0; s < len; s++) {
     a += (rnd() - .5) * .5; const step = .6 + rnd() * 1.4 + p[2] * .01;
-    p = [p[0] + Math.sin(a) * step, 0, p[2] + Math.cos(a) * step]; if (p[2] < 1.6 || p[2] > SHORE * .8) break; pts.push(p);
+    p = [p[0] + Math.sin(a) * step, 0, p[2] + Math.cos(a) * step]; if (p[2] < 1.6 || p[2] > SHORE * .8 || Math.abs(p[0]) > p[2] * 1.5 + 4) break; pts.push(p);
     if (depth < 3 && rnd() < .08) lines.push(...crack(rnd, p, a + (rnd() < .5 ? -1 : 1) * (.4 + rnd() * .7), Math.floor(len * .4), depth + 1));
   }
   lines.push({ pts, depth });

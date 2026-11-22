@@ -6,7 +6,7 @@
 // overhead in dark masses of leathery leaves. Ahead, where the channel opens, the lagoon is pale gold. The
 // still water doubles every arch of root. Light flickers on the water and on the undersides of the leaves.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, pathOf, shade, camera } = paint;
+const { W, H, TAU, glow, shade, camera } = paint;
 
 const cam = camera({ x: 0, y: 1.1, z: 0, yaw: 0, pitch: .05, focal: 1050, cx: 960, cy: 580 });
 const P = p => { const s = cam.project(p); return [s[0], s[1]]; };

@@ -7,7 +7,7 @@
 // stands over the far range. Close by, a few boulders and the boots left outside the door. The tent's
 // light breathes as the person inside moves; a gust shivers the fly sheet.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, shade, camera, v3, noise, pathOf } = paint;
+const { W, H, TAU, lerp, glow, shade, camera, noise, pathOf } = paint;
 
 const cam = camera({ x: 0, y: 1.6, z: 0, yaw: -.12, pitch: -.06, focal: 1050, cx: 960, cy: 600 });
 const P = p => { const s = cam.project(p); return [s[0], s[1]]; };

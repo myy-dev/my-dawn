@@ -7,7 +7,7 @@
 // thickening along the far shore and slowly sliding sideways; now and then a fish rises and a ring spreads.
 // In the near shallows, rounded stones show through the water, and a few reeds stand.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, shade, camera, v3, noise, pathOf } = paint;
+const { W, H, TAU, lerp, glow, shade, camera, v3, noise } = paint;
 
 const cam = camera({ x: 0, y: 2, z: 0, yaw: .04, pitch: -.02, focal: 1100, cx: 960, cy: 520 });
 const P = p => { const s = cam.project(p); return [s[0], s[1]]; };
@@ -27,7 +27,7 @@ function height(x, z) {
   return 8 + peak * (.55 + .45 * ridged(x, z)) + 140 * ridged(x * 2, z * 2) * Math.min(1, (z - 900) / 1500);
 }
 
-function paintWorld(ctx, project, rnd, mirrored) {
+function paintWorld(ctx, project, mirrored) {
   const horizon = project([0, 2, 1e6])[1];
   const sky = mirrored ? ctx.createLinearGradient(0, horizon + 900, 0, horizon) : ctx.createLinearGradient(0, horizon - 900, 0, horizon); sky.addColorStop(0, '#1e2a4a'); sky.addColorStop(.6, '#6a6a8e'); sky.addColorStop(1, '#e0a898');
   ctx.fillStyle = sky; ctx.fillRect(0, Math.min(0, horizon - 900), W, H + 900);
@@ -42,18 +42,17 @@ function paintWorld(ctx, project, rnd, mirrored) {
     else c = [50 + lit * 70, 48 + lit * 50, 64 + lit * 40];
     return shade(c.map((v, i) => lerp(v, [140, 130, 160][i], fog * .5)), forest ? (noise(p[0] / 6, p[2] / 6, 8) - .5) * 20 : 0);
   });
-  void rnd;
 }
 
 function createScene(createCanvas) {
   const make = createCanvas;
   const rnd = paint.seeded(4011);
   const plate = make(W, H), ctx = plate.getContext('2d');
-  paintWorld(ctx, p => cam.project(p), rnd);
+  paintWorld(ctx, p => cam.project(p));
   const shore = P([0, 0, 900])[1];
   // the reflection, built from the mirrored camera and darkened
   const refl = make(W, H), rc = refl.getContext('2d');
-  paintWorld(rc, p => { const s = cam.project([p[0], -p[1], p[2]]); return s; }, rnd, true);
+  paintWorld(rc, p => cam.project([p[0], -p[1], p[2]]), true);
   rc.fillStyle = 'rgba(10,16,30,.35)'; rc.fillRect(0, 0, W, H);
   // the water itself: under the reflection, darker toward us
   ctx.fillStyle = '#141c2a'; ctx.fillRect(0, shore - 3, W, H - shore + 3);

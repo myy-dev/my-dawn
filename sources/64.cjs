@@ -7,7 +7,7 @@
 // runs up to a soft ridge against the stars. The Milky Way arcs over the ridge. The wind sends long waves
 // rolling through the plumes; they bow together and rise again.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, shade, noise } = paint;
+const { W, H, TAU, lerp, glow, noise } = paint;
 
 function createScene(createCanvas) {
   const make = createCanvas;

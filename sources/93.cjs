@@ -6,7 +6,7 @@
 // between. The sun is still low on the left and the barley glows; big clouds float high and their shadows
 // slide over the fields and up the far slopes. Close by, the barley heads lean in the wind.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, edge, glow, pathOf, shade, camera, noise } = paint;
+const { W, H, TAU, lerp, edge, glow, pathOf, shade, camera } = paint;
 
 const cam = camera({ x: 0, y: 7, z: 0, yaw: 0, pitch: .07, focal: 1100, cx: 960, cy: 520 });
 const P = p => { const s = cam.project(p); return [s[0], s[1]]; };

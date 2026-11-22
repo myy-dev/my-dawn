@@ -16,7 +16,7 @@ const LOW = v3.unit([-.85, .22, .45]);
 
 function height(x, z) {
   const hills = 46 * noise(x / 240, z / 240, 3) + 12 * noise(x / 70, z / 70, 4) - 30;
-  const sastrugi = .06 * Math.sin((x * .9 + z * .4) * 1.3 + 4 * noise(x / 20, z / 20, 5)) * Math.min(1, 30 / (z + 1));
+  const sastrugi = .07 * (noise(x / 3 + z / 9, z / 2.2, 5) - .5) * Math.min(1, 30 / (z + 1));
   return hills + sastrugi;
 }
 
@@ -31,9 +31,16 @@ function createScene(createCanvas) {
   paint.terrain(ctx, cam, height, { z0: 2, z1: 1500, cols: 300, rows: 280, bias: 2.4, fan: 1.5, cx: 0 }, (p, n) => {
     const lit = Math.min(1, Math.max(0, (n[0] * LOW[0] + n[1] * LOW[1] + n[2] * LOW[2] - LOW[1]) * 3.2 + .36));
     const fog = Math.min(1, p[2] / 1300) ** .8;
-    const c = [lerp(40, 218, lit), lerp(52, 200, lit), lerp(108, 212, lit)];
+    const rose = Math.max(0, lit - .6) * 2.5, c = [lerp(40, 214, lit) + 30 * rose, lerp(52, 196, lit) - 6 * rose, lerp(108, 212, lit) - 10 * rose];
     return shade(c.map((v, i) => lerp(v, [176, 150, 168][i], fog * .7)), 0);
   });
+  // a few wind-bent birches on the far rise, their white trunks barely brighter than the snow
+  for (let i = 0; i < 9; i++) {
+    const x = 26 + i * 2.6 + (rnd() - .5) * 2, z = 130 + (rnd() - .5) * 14, y = height(x, z), b = P([x, y, z]), k = cam.focal / cam.project([x, y, z])[2], h = (5 + rnd() * 4) * k, lean = (.12 + rnd() * .1) * h;
+    ctx.strokeStyle = 'rgba(40,36,52,.9)'; ctx.lineWidth = Math.max(1.5, .25 * k); ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(...b); ctx.quadraticCurveTo(b[0] + lean * .3, b[1] - h * .5, b[0] + lean, b[1] - h); ctx.stroke();
+    for (let t = 0; t < 7; t++) { const u = .35 + t * .09, px = b[0] + lean * u * u, py = b[1] - h * u, len = h * (.25 - t * .02); ctx.lineWidth = Math.max(1, .1 * k); ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + len * (t % 2 ? .9 : -.5), py - len * .5); ctx.stroke(); }
+  }
   // the fence: posts half buried, a sagging wire between them, over the rise
   const posts = [];
   for (let i = 0; i < 16; i++) { const z = 10 + i * 6, x = -14 + i * 2.2 + Math.sin(i) * .4, y = height(x, z); posts.push([x, y, z]); }

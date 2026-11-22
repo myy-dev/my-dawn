@@ -7,7 +7,7 @@
 // filters down from behind. The forest behind is out of focus: dark trunks, soft green, a few glints. Now
 // and then a bead at a tip grows heavy and drops.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, pathOf, shade } = paint;
+const { W, H, TAU, glow, pathOf, shade } = paint;
 
 function vertical(ctx, y0, y1, stops) {
   const g = ctx.createLinearGradient(0, y0, 0, y1);

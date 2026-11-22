@@ -7,7 +7,7 @@
 // still licks along a log's edge. The fieldstone surround and the hearth slab catch the warm glow; a brass
 // fender, a poker and tongs on a stand, a basket of kindling. Sparks drift up now and then.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, shade, noise, pathOf } = paint;
+const { W, H, TAU, lerp, glow, shade, pathOf } = paint;
 
 function fill(ctx, points, style) { pathOf(ctx, points); ctx.fillStyle = style; ctx.fill(); }
 const BOX = { x0: 560, x1: 1360, top: 330, floor: 760, back: { x0: 680, x1: 1240, top: 400, floor: 690 } };

@@ -7,7 +7,7 @@
 // warm light, and under it a bicycle is chained to a railing, snow piled on its saddle and rack. Snow lies
 // soft and rounded on every ledge, slowly falling through the light; a gust now and then sweeps it sideways.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, pathOf, shade, camera } = paint;
+const { W, H, TAU, lerp, glow, pathOf, camera } = paint;
 
 const cam = camera({ x: .3, y: 1.55, z: 0, yaw: -.04, pitch: .02, focal: 1050, cx: 960, cy: 560 });
 const P = p => { const s = cam.project(p); return [s[0], s[1]]; };
@@ -76,7 +76,7 @@ function alley(ctx, rnd) {
   snowCap(ctx, [LEFT, 5.5, 1], [LEFT, 5.5, 30], .18, 60);
 }
 
-function bicycle(ctx, rnd) {
+function bicycle(ctx) {
   // a railing post at the left wall and the bicycle leaning on it, side-on along z
   const z0 = 4.6, x = LEFT + .35, k = cam.focal / cam.project([x, .5, z0 + .6])[2];
   const at = (y, dz) => P([x, y, z0 + dz]);
@@ -97,7 +97,6 @@ function bicycle(ctx, rnd) {
   snowCap(ctx, [x, .98, z0 + 1.18], [x, .98, z0 + 1.46], .1, k);
   // the chain around the post
   ctx.strokeStyle = '#8a8a90'; ctx.lineWidth = 2; ctx.setLineDash([3, 2]); ctx.beginPath(); ctx.moveTo(...at(.5, -.2)); ctx.quadraticCurveTo(...at(.3, .1), ...rear); ctx.stroke(); ctx.setLineDash([]);
-  void rnd;
 }
 
 function createScene(createCanvas) {
@@ -105,7 +104,7 @@ function createScene(createCanvas) {
   const rnd = paint.seeded(72011);
   const plate = make(W, H), ctx = plate.getContext('2d');
   alley(ctx, rnd);
-  bicycle(ctx, rnd);
+  bicycle(ctx);
   // the lamp on its bracket from the left wall
   const head = P(LAMP), k = cam.focal / cam.project(LAMP)[2], root = P([LEFT, LAMP[1] + .3, LAMP[2]]);
   ctx.strokeStyle = '#141418'; ctx.lineWidth = .04 * k; ctx.beginPath(); ctx.moveTo(...root); ctx.quadraticCurveTo(root[0] + .3 * k, root[1] - .2 * k, head[0], head[1] - .2 * k); ctx.stroke();

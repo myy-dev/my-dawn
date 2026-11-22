@@ -7,7 +7,7 @@
 // bank; the sky is turning pink behind the far trees and the river holds the colours. The wheel turns,
 // the water falls and the lit window flickers.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, pathOf, shade, camera, planks, v3 } = paint;
+const { W, H, TAU, lerp, glow, pathOf, camera, planks, v3 } = paint;
 const { add, mul } = v3;
 
 const cam = camera({ x: 0, y: 1.6, z: 0, yaw: .14, pitch: .03, focal: 1100, cx: 960, cy: 560 });
@@ -118,7 +118,7 @@ function createScene(createCanvas) {
     }
     for (let i = 0; i < 10; i++) {
       const age = (phase * 3 + i / 10) % 1;
-      glow(target, foot[0] + (i - 5) * 14 + age * 120, foot[1] + age * 30, 30 + age * 40, 8, '226,232,244', .3 * (1 - age));
+      glow(target, foot[0] + (i - 5) * 14 + age * 120, foot[1] + age * 30, 30 + age * 40, 8, '226,232,244', .3 * (1 - age) * Math.min(1, age * 10));
     }
     glow(target, lit[0], lit[1], 50, 40, '255,190,120', .3 + .05 * paint.loopNoise(phase, 4, 8));
   };

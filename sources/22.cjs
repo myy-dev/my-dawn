@@ -7,7 +7,7 @@
 // hairspring breathing. Beside it the dial with its black numerals, the hands laid out, tweezers,
 // a loupe, a tray of tiny screws, an oiler. The ring lamp throws a pool of cool-white light.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, pathOf, shade } = paint;
+const { W, H, TAU, glow, pathOf } = paint;
 
 function fill(ctx, points, style) { pathOf(ctx, points); ctx.fillStyle = style; ctx.fill(); }
 const MOV = { x: 900, y: 560, r: 330 };

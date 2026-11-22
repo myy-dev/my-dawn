@@ -12,7 +12,7 @@ const { W, H, TAU, lerp, glow, shade, noise, pathOf } = paint;
 function fill(ctx, points, style) { pathOf(ctx, points); ctx.fillStyle = style; ctx.fill(); }
 // The stream's centre line and half-width, by screen y (it narrows and wanders as it recedes).
 const centre = y => 960 + (330 * Math.sin(y / 180 + .5) + 120 * Math.sin(y / 70 + 2)) * ((y - 380) / 700);
-const half = y => lerp(30, 520, ((y - 420) / 660) ** 1.2);
+const half = y => lerp(30, 520, (Math.max(0, y - 420) / 660) ** 1.2);
 
 function createScene(createCanvas) {
   const make = createCanvas;

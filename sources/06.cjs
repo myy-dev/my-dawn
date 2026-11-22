@@ -7,7 +7,7 @@
 // poles flicking by. Everything outside slides at its own speed — near things fast, the far coast slowly,
 // the moon not at all. Inside: worn velvet seat edge, a reading lamp, a cup of tea trembling with the rails.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, shade, noise, pathOf } = paint;
+const { W, H, TAU, lerp, glow, pathOf } = paint;
 
 function fill(ctx, points, style) { pathOf(ctx, points); ctx.fillStyle = style; ctx.fill(); }
 function rrect(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
@@ -87,7 +87,7 @@ function createScene(createCanvas) {
     fill(target, [[cup[0] - 44, cup[1] - 70 + sway * .4], [cup[0] + 44, cup[1] - 70 + sway * .4], [cup[0] + 38, cup[1] - 4 + sway * .4], [cup[0] - 38, cup[1] - 4 + sway * .4]], '#ece6dc');
     target.fillStyle = '#7a4a24'; target.beginPath(); target.ellipse(cup[0], cup[1] - 70 + sway * .4, 44, 10, 0, 0, TAU); target.fill();
     for (let r = 1; r < 3; r++) { target.strokeStyle = `rgba(255,220,180,${.3 * Math.abs(Math.sin(TAU * phase * 6 + r))})`; target.lineWidth = 1; target.beginPath(); target.ellipse(cup[0], cup[1] - 70 + sway * .4, 12 * r, 3 * r, 0, 0, TAU); target.stroke(); }
-    for (let i = 0; i < 6; i++) { const t = (phase * 2 + i / 6) % 1; glow(target, cup[0] + Math.sin(t * 6 + i) * 10 * t - t * 30, cup[1] - 90 - t * 160, 10 + t * 30, 8 + t * 20, '240,236,230', .14 * (1 - t)); }
+    for (let i = 0; i < 6; i++) { const t = (phase * 2 + i / 6) % 1; glow(target, cup[0] + Math.sin(t * 6 + i) * 10 * t - t * 30, cup[1] - 90 - t * 160, 10 + t * 30, 8 + t * 20, '240,236,230', .14 * (1 - t) * Math.min(1, t * 10)); }
   };
 }
 

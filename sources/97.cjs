@@ -7,7 +7,7 @@
 // wind is steady: the cups spin, the vane holds, and fine snow streams across the slope.
 const paint = require('../lib/paint.cjs');
 const { W, H, TAU, lerp, edge, glow, pathOf, planks, shade, camera, lambert, v3 } = paint;
-const { add, mul, unit, UP } = v3;
+const { add, mul, unit } = v3;
 
 const cam = camera({ x: 0, y: 1.5, z: 0, yaw: .08, pitch: -.1, focal: 1150, cx: 960, cy: 600 });
 const P = p => { const s = cam.project(p); return [s[0], s[1]]; };
@@ -32,14 +32,16 @@ function backdrop(ctx, rnd) {
   // the slope, drawn in bands from the ridge down to our feet so its rise reads: paler and bluer far up
   for (let i = 0; i <= 30; i++) {
     const z = lerp(60, 2, i / 30), band = [];
-    for (let x = -70; x <= 70; x += 2) band.push(P([x, slope(x, z), z]));
+    const reach = z * 1.1 + 3;
+    for (let x = -reach; x <= reach + 1e-9; x += reach / 35) band.push(P([x, slope(x, z), z]));
     band.push([W, H], [0, H]);
     fill(ctx, band, shade(paint.aerial([70, 80, 100], (z / 60) * .7, [150, 162, 184]), -i * .6));
   }
   // the slope's shape: long wind-ridged contours across it, each catching a line of sky light on its crest
   for (let z = 4; z < 60; z += 1.4 + z * .05) {
     const line = [];
-    for (let x = -50; x <= 50; x += 2) line.push(P([x, slope(x, z) + .05 * Math.sin(x * .7 + z), z]));
+    const reach = Math.min(50, z * 1.1 + 3);
+    for (let x = -reach; x <= reach + 1e-9; x += reach / 25) line.push(P([x, slope(x, z) + .05 * Math.sin(x * .7 + z), z]));
     ctx.strokeStyle = `rgba(200,212,230,${.08 + .1 * (1 - z / 60)})`; ctx.lineWidth = 1.2; ctx.beginPath(); line.forEach((p, i) => (i ? ctx.lineTo(...p) : ctx.moveTo(...p))); ctx.stroke();
     ctx.strokeStyle = `rgba(30,40,60,${.1 + .1 * (1 - z / 60)})`; ctx.beginPath(); line.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1] + 3) : ctx.moveTo(p[0], p[1] + 3))); ctx.stroke();
   }
@@ -157,7 +159,7 @@ function createScene(createCanvas) {
     // smoke from the hut's stovepipe, torn sideways by the wind
     for (let i = 0; i < 8; i++) {
       const t = ((phase * 2 + i / 8) % 1);
-      glow(target, h.smoke[0] - t * 260, h.smoke[1] - t * 60, 10 + t * 40, 6 + t * 18, '200,206,216', .25 * (1 - t));
+      glow(target, h.smoke[0] - t * 260, h.smoke[1] - t * 60, 10 + t * 40, 6 + t * 18, '200,206,216', .25 * (1 - t) * Math.min(1, t * 10));
     }
     snow.draw(target, phase, '236,240,248');
   };

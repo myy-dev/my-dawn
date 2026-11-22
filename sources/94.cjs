@@ -150,11 +150,11 @@ function createScene(createCanvas) {
     for (const r of rings) {
       if (!r.p) continue;
       const age = (phase * r.turns + r.offset) % 1, x = r.p.s[0] + r.dx * r.p.r * r.p.k * .5, y = r.p.s[1];
-      target.strokeStyle = `rgba(170,184,206,${.5 * (1 - age)})`; target.lineWidth = 1;
+      target.strokeStyle = `rgba(170,184,206,${.5 * (1 - age) * Math.min(1, age * 12)})`; target.lineWidth = 1;
       target.beginPath(); target.ellipse(x, y, (2 + age * 16) * r.p.k / 120, (1 + age * 5) * r.p.k / 120, 0, 0, TAU); target.stroke();
     }
     // the trough spills: a thin sheet over the corner, and the drainpipe pours in
-    const spill = (phase * 6) % 1;
+    const spill = .5 + .5 * Math.sin(TAU * phase * 6);                // the sheet's length breathes smoothly instead of stepping
     target.strokeStyle = 'rgba(180,196,220,.5)'; target.lineWidth = 2;
     target.beginPath(); target.moveTo(...tr.spout); target.lineTo(tr.spout[0] + Math.sin(TAU * phase * 8) * 1.5, tr.surface[0][1]); target.stroke();
     target.beginPath(); target.moveTo(tr.spill[0], tr.spill[1]); target.quadraticCurveTo(tr.spill[0] - 6, tr.spill[1] + 20, tr.spill[0] - 4, tr.spill[1] + 60 + spill * 4); target.stroke();

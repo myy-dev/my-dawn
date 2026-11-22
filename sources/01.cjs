@@ -114,7 +114,7 @@ function createScene(createCanvas) {
     }
     target.restore();
     // steam from the mug
-    for (let i = 0; i < 8; i++) { const t = (phase * 2 + i / 8) % 1; glow(target, r.steam[0] + Math.sin(t * 6 + i) * 24 * t, r.steam[1] - t * 260, 16 + t * 40, 12 + t * 30, '240,236,230', .16 * (1 - t)); }
+    for (let i = 0; i < 8; i++) { const t = (phase * 2 + i / 8) % 1; glow(target, r.steam[0] + Math.sin(t * 6 + i) * 24 * t, r.steam[1] - t * 260, 16 + t * 40, 12 + t * 30, '240,236,230', .16 * (1 - t) * Math.min(1, t * 10)); }
   };
 }
 

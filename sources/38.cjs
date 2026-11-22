@@ -7,7 +7,7 @@
 // against the black rock; mist rolls off the pool and the pool's surface trembles in rings from the
 // plunge. A little moonlight comes down the gorge and silvers the falling water.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, edge, glow, pathOf, shade, wobble } = paint;
+const { W, H, TAU, lerp, edge, glow, pathOf, wobble } = paint;
 
 function fill(ctx, points, style) { pathOf(ctx, points); ctx.fillStyle = style; ctx.fill(); }
 function vertical(ctx, y0, y1, stops) {
@@ -91,7 +91,7 @@ function createScene(createCanvas) {
     // spray and rings where it lands, mist rolling off
     for (let i = 0; i < 4; i++) {
       const age = (phase * 4 + i / 4) % 1;
-      target.strokeStyle = `rgba(200,214,236,${.4 * (1 - age)})`; target.lineWidth = 1.5;
+      target.strokeStyle = `rgba(200,214,236,${.4 * (1 - age) * Math.min(1, age * 12)})`; target.lineWidth = 1.5;
       target.beginPath(); target.ellipse(970, POOL_Y + 110, 60 + age * 400, 14 + age * 90, 0, 0, TAU); target.stroke();
     }
     glow(target, 970, POOL_Y + 90, 220, 70, '220,230,244', .3 + .08 * Math.sin(TAU * phase * 8));

@@ -6,7 +6,7 @@
 // fronds of weed and the open mouths of anemones. The moon floats on its surface. The tide's last trickle
 // spills over a lip at one side and sends faint rings across the pool; the weed sways in it.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, pathOf, shade, wobble } = paint;
+const { W, H, TAU, glow, pathOf, shade, wobble } = paint;
 
 function fill(ctx, points, style) { pathOf(ctx, points); ctx.fillStyle = style; ctx.fill(); }
 
@@ -84,7 +84,7 @@ function createScene(createCanvas) {
     // rings from the trickle at the lip
     for (let r = 0; r < 4; r++) {
       const age = (phase * 4 + r / 4) % 1;
-      target.strokeStyle = `rgba(200,214,236,${.35 * (1 - age)})`; target.lineWidth = 1.5;
+      target.strokeStyle = `rgba(200,214,236,${.35 * (1 - age) * Math.min(1, age * 12)})`; target.lineWidth = 1.5;
       target.beginPath(); target.ellipse(lip[0] - 40, lip[1] + 40, 20 + age * 400, 12 + age * 240, 0, 0, TAU); target.stroke();
     }
     target.restore();

@@ -7,7 +7,7 @@
 // is littered with floating brash ice and a few bergy bits catching the light. The moon's path lies across
 // the water. Small pieces of ice rock on the slow swell; now and then a sliver falls from the face.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, shade, noise, pathOf } = paint;
+const { W, H, TAU, lerp, glow, noise, pathOf } = paint;
 
 function fill(ctx, points, style) { pathOf(ctx, points); ctx.fillStyle = style; ctx.fill(); }
 const WATER = 760;

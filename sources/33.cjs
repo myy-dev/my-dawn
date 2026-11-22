@@ -7,7 +7,7 @@
 // the pilings lean. A plank dock runs out from the left and a rowboat lies tied off by the bay. The water is
 // a true mirror: everything is drawn a second time below the surface, then broken up by ripples.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, edge, glow, wobble, pathOf, planks, shingles, shade, camera, lambert } = paint;
+const { W, H, TAU, lerp, edge, glow, pathOf, planks, shingles, shade, camera, lambert } = paint;
 
 const cam = camera({ x: 0, y: 1.5, z: 0, yaw: .04, pitch: .015, focal: 1150, cx: 960, cy: 560 });
 const project = p => { const s = cam.project(p); return [s[0], s[1]]; };

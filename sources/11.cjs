@@ -7,8 +7,8 @@
 // leaving a clear trail. Slatted staging benches carry rows of terracotta pots: ferns, geraniums, a lemon
 // tree, cuttings under a bell jar; a watering can stands on the brick floor.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, pathOf, shade, camera, v3 } = paint;
-const { add } = v3;
+const { W, H, TAU, glow, pathOf, shade, camera, v3 } = paint;
+
 
 const cam = camera({ x: 0, y: 1.5, z: 0, yaw: 0, pitch: .12, focal: 900, cx: 960, cy: 600 });
 const P = p => { const s = cam.project(p); return [s[0], s[1]]; };

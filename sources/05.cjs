@@ -7,7 +7,7 @@
 // hangs by the door, a woodpile is stacked under the eave, a path of footprints leads to the door. Smoke
 // rises from the stone chimney and bends away. Snow falls; the spruces around stand heavy with it.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, shade, camera, v3, noise, pathOf } = paint;
+const { W, H, TAU, lerp, glow, shade, camera, pathOf } = paint;
 
 const cam = camera({ x: -2, y: 1.7, z: 0, yaw: .14, pitch: -.03, focal: 1050, cx: 960, cy: 560 });
 const P = p => { const s = cam.project(p); return [s[0], s[1]]; };
@@ -116,7 +116,7 @@ function createScene(createCanvas) {
     const phase = input - Math.floor(input);
     target.drawImage(plate, 0, 0);
     // chimney smoke bending away to the right
-    for (let i = 0; i < 12; i++) { const t = (phase * 2 + i / 12) % 1; glow(target, c.smoke[0] + t * t * 260 + Math.sin(t * 8 + i) * 8, c.smoke[1] - t * 220, 10 + t * 50, 8 + t * 34, '170,176,196', .26 * (1 - t)); }
+    for (let i = 0; i < 12; i++) { const t = (phase * 2 + i / 12) % 1; glow(target, c.smoke[0] + t * t * 260 + Math.sin(t * 8 + i) * 8, c.smoke[1] - t * 220, 10 + t * 50, 8 + t * 34, '170,176,196', .26 * (1 - t) * Math.min(1, t * 10)); }
     // lantern flicker
     const fl = .8 + .12 * Math.sin(TAU * phase * 9) + .08 * Math.sin(TAU * phase * 23);
     glow(target, c.lantern[0], c.lantern[1], 26, 30, '255,190,110', .7 * fl); glow(target, c.lantern[0], c.lantern[1], 5, 6, '255,240,200', fl);

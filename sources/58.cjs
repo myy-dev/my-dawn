@@ -60,7 +60,7 @@ function createScene(createCanvas) {
     glow(target, sunAt[0], HORIZON - 10, 500, 120, '255,210,150', .12 + .12 * swell);
     for (const c of crests) for (let j = 0; j < 5; j++) {
       const t = (phase * 3 + j / 5) % 1;
-      glow(target, c.at[0] + t * 30 * c.k, c.at[1] - t * 4 * c.k, (2 + t * 10) * c.k, (.4 + t) * c.k, '255,200,150', .14 * (1 - t));
+      glow(target, c.at[0] + t * 30 * c.k, c.at[1] - t * 4 * c.k, (2 + t * 10) * c.k, (.4 + t) * c.k, '255,200,150', .14 * (1 - t) * Math.min(1, t * 10));
     }
     // the flock: crosses once per loop left to right, wings beating
     const fx = lerp(-200, W + 200, phase), fy = HORIZON - 180 + Math.sin(TAU * phase) * 30;

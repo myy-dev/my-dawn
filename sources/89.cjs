@@ -6,8 +6,8 @@
 // insulators, wires sagging between them in real catenaries. The snow has only dusted the fields: dark
 // stubble rows show through in streaks. A crow sits on the nearest wire. Snow falls, thin and steady.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, edge, glow, pathOf, shade, camera, v3 } = paint;
-const { add, mul, unit } = v3;
+const { W, H, TAU, lerp, glow, pathOf, camera, v3 } = paint;
+const { add, mul } = v3;
 
 const cam = camera({ x: -1.2, y: 1.6, z: 0, yaw: .06, pitch: .01, focal: 1150, cx: 960, cy: 560 });
 const P = p => { const s = cam.project(p); return [s[0], s[1]]; };

@@ -166,7 +166,7 @@ function createScene(createCanvas) {
   // silos: the far steel one first, then the concrete one nearer the lamp
   cylinder(ctx, silos[1].base, silos[1].r, silos[1].h, [150, 154, 158], rnd, { ribs: 1, hoops: [] });
   roofOf(ctx, add(silos[1].base, [0, silos[1].h, 0]), silos[1].r, 2.6, false, [130, 134, 140]);
-  const view = cylinder(ctx, silos[0].base, silos[0].r, silos[0].h, [168, 160, 146], rnd, { staves: 38, hoops: [2, 4.5, 7, 9.5, 12, 14.5] });
+  cylinder(ctx, silos[0].base, silos[0].r, silos[0].h, [168, 160, 146], rnd, { staves: 38, hoops: [2, 4.5, 7, 9.5, 12, 14.5] });
   roofOf(ctx, add(silos[0].base, [0, silos[0].h, 0]), silos[0].r, 2.4, true, [120, 112, 100]);
   // the steel silo's caged ladder, catching the lamp
   for (let y = .6; y < silos[1].h; y += .45) {
@@ -174,7 +174,6 @@ function createScene(createCanvas) {
     const q = P(p), q2 = P(add(p, [Math.sin(a) * .4, 0, -Math.cos(a) * .4]));
     ctx.strokeStyle = 'rgba(40,40,46,.9)'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(...q); ctx.lineTo(...q2); ctx.stroke();
   }
-  void view;
   // the lamp pole and its fixture
   const foot = P([LAMP[0], 0, LAMP[2]]), head = P(LAMP);
   ctx.strokeStyle = '#1c1a1c'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(...foot); ctx.lineTo(head[0], head[1] - 10); ctx.stroke();

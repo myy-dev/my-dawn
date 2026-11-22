@@ -6,7 +6,7 @@
 // glassy. Out on the dark open water, floes drift past on the current, each its own shape, white on top
 // with a blue-green rim at the waterline. The wind is hard and cold: snow streams off the slabs.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, pathOf, shade, camera, wobble } = paint;
+const { W, H, TAU, glow, pathOf, camera, wobble } = paint;
 
 const cam = camera({ x: 0, y: 1.6, z: 0, yaw: -.04, pitch: -.02, focal: 1100, cx: 960, cy: 520 });
 const P = p => { const s = cam.project(p); return [s[0], s[1]]; };

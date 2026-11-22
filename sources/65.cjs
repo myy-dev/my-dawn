@@ -35,10 +35,9 @@ function createScene(createCanvas) {
   glow(ctx, 1500, HORIZON, 800, 160, '255,200,160', .4);
   paint.starfield(ctx, rnd, 40, HORIZON * .3);
   // the cloud sea's flat top as a pale plane under everything
-  const cloudTop = cam.project([0, CLOUD, 3000])[1], cloudNear = cam.project([0, CLOUD, 200])[1];
+  const cloudTop = cam.project([0, CLOUD, 3000])[1];
   const cg = ctx.createLinearGradient(0, cloudTop, 0, H); cg.addColorStop(0, '#c8b4c0'); cg.addColorStop(.3, '#9890a8'); cg.addColorStop(1, '#5a5a78');
   ctx.fillStyle = cg; ctx.fillRect(0, cloudTop, W, H);
-  void cloudNear;
   // mountains: only what rises above the cloud is drawn (cells below CLOUD are skipped as transparent)
   paint.applyTexture(ctx, make, 6501, .34, 0, 0, W, H, true);
   const peaks = make(W, H), pc = peaks.getContext('2d');

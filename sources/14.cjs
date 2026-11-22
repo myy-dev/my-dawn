@@ -6,7 +6,7 @@
 // white tiles with dark grout, a rail with ladles and a pan, a shelf of jars. A rain-streaked window over
 // the sink shows the dark yard. A lamp under the shelf lights the counter. Rain runs down the glass.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, pathOf, shade, camera, planks, v3 } = paint;
+const { W, H, TAU, lerp, glow, pathOf, shade, camera, planks } = paint;
 
 const cam = camera({ x: .3, y: 1.55, z: 0, yaw: -.05, pitch: .06, focal: 1150, cx: 960, cy: 560 });
 const P = p => { const s = cam.project(p); return [s[0], s[1]]; };
@@ -105,7 +105,7 @@ function createScene(createCanvas) {
     // the last of the steam: soft puffs rising and curling from the spout
     for (let i = 0; i < 8; i++) {
       const t = (phase * 2 + i / 8) % 1;
-      glow(target, spout[0] + Math.sin(t * 5 + i) * 20 * t + t * 30, spout[1] - t * 220, 12 + t * 40, 10 + t * 30, '230,230,236', .22 * (1 - t));
+      glow(target, spout[0] + Math.sin(t * 5 + i) * 20 * t + t * 30, spout[1] - t * 220, 12 + t * 40, 10 + t * 30, '230,230,236', .22 * (1 - t) * Math.min(1, t * 10));
     }
   };
 }

@@ -69,7 +69,7 @@ function createScene(createCanvas) {
     target.globalCompositeOperation = 'soft-light'; target.globalAlpha = .7; target.drawImage(glowLayer, 0, 0);
     target.restore();
     // a cloud banner streaming off the high summit
-    for (let i = 0; i < 8; i++) { const t = (phase * 2 + i / 8) % 1; glow(target, summit[0] + 20 + t * 300, summit[1] + 10 + t * 30, 30 + t * 120, 8 + t * 20, '240,210,220', .3 * (1 - t)); }
+    for (let i = 0; i < 8; i++) { const t = (phase * 2 + i / 8) % 1; glow(target, summit[0] + 20 + t * 300, summit[1] + 10 + t * 30, 30 + t * 120, 8 + t * 20, '240,210,220', .3 * (1 - t) * Math.min(1, t * 10)); }
   };
 }
 

@@ -7,7 +7,7 @@
 // brush, a small press with brass screws, a stack of marbled papers. The paper window glows dim blue and
 // breathes in and out with the wind; a desk lamp lights the work in a warm circle.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, pathOf, shade, planks } = paint;
+const { W, H, TAU, glow, pathOf, shade, planks } = paint;
 
 function fill(ctx, points, style) { pathOf(ctx, points); ctx.fillStyle = style; ctx.fill(); }
 function vertical(ctx, y0, y1, stops) {

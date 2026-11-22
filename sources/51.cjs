@@ -6,7 +6,7 @@
 // a few still green; the leaves nearest us are large and translucent where the moonlight comes through,
 // the farther ones are dark shapes against the sky. A few leaves let go and spin down. The branches rock.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, pathOf, shade } = paint;
+const { W, H, TAU, glow, shade } = paint;
 
 const MOON = [1120, 300];
 

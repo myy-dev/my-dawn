@@ -7,7 +7,7 @@
 // bracket; the door's glass reads 'closed'. The houses lean in over the lane with deep eaves dripping, a
 // drainpipe gurgling. The wet cobbles take the shop's light in long gold smears. Rain falls through it.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, shade, camera, noise, pathOf } = paint;
+const { W, H, TAU, lerp, glow, shade, camera, pathOf } = paint;
 
 const cam = camera({ x: -1.9, y: 1.6, z: 0, yaw: .5, pitch: .02, focal: 1000, cx: 960, cy: 540 });
 const P = p => { const s = cam.project(p); return [s[0], s[1]]; };

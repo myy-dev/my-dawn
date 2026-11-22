@@ -56,7 +56,7 @@ function bridge(ctx, rnd) {
     const z0 = ARCH.z + ARCH.depth * r / 10, z1 = ARCH.z + ARCH.depth * (r + 1) / 10;
     for (let i = 0; i < 30; i++) {
       const q = [P(archAt(i / 30, z0)), P(archAt((i + 1) / 30, z0)), P(archAt((i + 1) / 30, z1)), P(archAt(i / 30, z1))];
-      const light = .3 + .5 * Math.sin(Math.PI * i / 30) * (1 - r / 10) * 0 + .15 * (i / 30);
+      const light = .3 + .15 * (i / 30);
       fill(ctx, q, shade([62, 62, 64].map(c => c * (.5 + light)), (rnd() - .5) * 14));
       ctx.strokeStyle = 'rgba(10,10,14,.45)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(...q[0]); ctx.lineTo(...q[3]); ctx.stroke();
     }

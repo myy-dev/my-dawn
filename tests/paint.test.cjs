@@ -49,7 +49,7 @@ test('paint.cjs never uses Math.random', () => {
 });
 
 test('drawing tools are exported', () => {
-  for (const name of ['pathOf', 'strokesIn', 'planks', 'stones', 'shingles', 'bark']) {
+  for (const name of ['pathOf', 'planks', 'shingles', 'bark', 'masonry']) {
     assert.strictEqual(typeof paint[name], 'function', name);
   }
 });
@@ -74,14 +74,6 @@ test('camera yaw turns the view: a point to the right comes to the centre', () =
   const cam = paint.camera({ x: 0, y: 1.6, z: 0, yaw: Math.atan2(5, 10), focal: 1200, cx: 960, cy: 540 });
   const [sx] = cam.project([5, 1.6, 10]);
   assert.ok(near(sx, 960, 1e-6));
-});
-
-test('surface maps (u, v) through its corners and adds the deformation', () => {
-  const cam = paint.camera({ x: 0, y: 0, z: 0, focal: 1000, cx: 0, cy: 0 });
-  const flat = paint.surface(cam, [[-1, 1, 10], [1, 1, 10], [1, -1, 10], [-1, -1, 10]]);
-  assert.deepStrictEqual(flat(.5, .5).map(v => Math.round(v * 1e6) / 1e6), [0, 0]);
-  const sag = paint.surface(cam, [[-1, 1, 10], [1, 1, 10], [1, -1, 10], [-1, -1, 10]], (u, v) => [0, -1, 0]);
-  assert.ok(near(sag(.5, .5)[1], 100));
 });
 
 test('lambert is 1 facing the light, 0 facing away', () => {
@@ -151,7 +143,7 @@ test('mirrorOf reflects a point through the water plane', () => {
 
 test('ripple draws every band of the water', () => {
   let calls = 0;
-  const ctx = { drawImage: () => { calls++; } };
+  const ctx = { drawImage: (img, sx, sy, sw) => { if (sw === 1920) calls++; } };     // the main band draws, not the edge fills
   paint.ripple(ctx, {}, 680, .3, { bands: 4 });
   assert.strictEqual(calls, Math.ceil((1080 - 680) / 4));
 });
@@ -172,22 +164,37 @@ test('terrain paints rows far to near and passes each cell its normal', () => {
   assert.ok(seen.every(([, n]) => n[1] > 0 && Math.abs(Math.hypot(...n) - 1) < 1e-9));
 });
 
-test('finisher knows its looks and rejects an unknown one', () => {
-  assert.deepStrictEqual(paint.LOOKS.map(l => l.id), ['film', 'paint', 'clean', 'citypop']);
-  assert.throws(() => paint.lookOf('glossy'), /unknown look/);
-  assert.strictEqual(paint.lookOf(() => 'paint').id, 'paint');
-  assert.strictEqual(paint.lookOf(undefined).id, 'film');
+test('ripple covers the frame edges and never reads past the image', () => {
+  const calls = [];
+  const ctx = { drawImage: (img, sx, sy, sw, sh, dx, dy, dw, dh) => calls.push({ sy, sh, dx, dy, dw }) };
+  paint.ripple(ctx, {}, 683, .37, { bands: 4, amp: 1.4 });
+  assert.ok(calls.every(c => c.sy + c.sh <= 1080), 'a band reads below the image');
+  const rows = new Map();
+  for (const c of calls) rows.set(c.dy, [...(rows.get(c.dy) || []), [c.dx, c.dx + c.dw]]);
+  for (const [y, spans] of rows) {
+    spans.sort((p, q) => p[0] - q[0]);
+    let reach = 0;
+    for (const [a, b] of spans) { assert.ok(a <= reach + 1e-9, `gap at x=${reach} on row ${y}`); reach = Math.max(reach, b); }
+    assert.ok(reach >= 1920, `row ${y} stops at x=${reach}`);
+  }
 });
 
-test('citypop look is grain-free and scales down the baked paper texture while a scene is built', () => {
-  const cp = paint.lookOf('citypop');
-  assert.strictEqual(cp.grain, 0);
-  assert.ok(cp.texture < .3 && cp.saturate > 1);
-  let seen = null;
-  const factory = paint.finished(() => { seen = paint.textureScale(); return () => {}; }, { look: 'citypop' });
-  try { factory((w, h) => ({ width: w, height: h, getContext: () => new Proxy({}, { get: () => () => ({ addColorStop() {} }) }) })); } catch (e) { /* the stub canvas cannot run the finisher; only creation matters */ }
-  assert.strictEqual(seen, cp.texture);
-  assert.strictEqual(paint.textureScale(), 1);
+test('groundShadow stays finite for light that does not come down', () => {
+  for (const dir of [[1, 0, 0], [1, .2, 0]]) assert.ok(paint.groundShadow([1, 2, 5], dir).every(Number.isFinite));
 });
 
+test('box with a negative height draws the same faces as the equivalent positive box', () => {
+  const cam = paint.camera({ x: 0, y: 1.6, z: 0, focal: 1000, cx: 960, cy: 540 });
+  const up = paint.box(stubContext(), cam, { at: [0, -1, 5], sa: .5, sb: .5, h: 1 }, () => '#000');
+  const down = paint.box(stubContext(), cam, { at: [0, 0, 5], sa: .5, sb: .5, h: -1 }, () => '#000');
+  assert.deepStrictEqual(Object.keys(down).sort(), Object.keys(up).sort());
+  for (const k of Object.keys(up)) assert.deepStrictEqual(down[k].map(p => p.map(v => Math.round(v * 1e6))), up[k].map(p => p.map(v => Math.round(v * 1e6))), k);
+});
 
+test('rain streaks wrap only after their whole length has left the frame', () => {
+  const rain = paint.particles(paint.seeded(4), 200, { kind: 'rain', near: .5 });
+  for (const p of rain.items) {
+    const lowest = rain.at(p, ((1 - p.y) / p.turns) - 1e-9)[1];       // just before this streak wraps
+    assert.ok(lowest - p.len >= 1080, `streak of length ${p.len} wraps with its tail at ${lowest - p.len}`);
+  }
+});

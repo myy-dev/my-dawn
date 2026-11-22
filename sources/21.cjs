@@ -7,7 +7,7 @@
 // cut squares in blues and ochres. On the wall a cork board of pinned swatches and paper patterns. A
 // rain-dark window behind; drops run down the pane. The tape measure sways a little.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, pathOf, shade } = paint;
+const { W, H, TAU, lerp, glow, pathOf } = paint;
 
 function fill(ctx, points, style) { pathOf(ctx, points); ctx.fillStyle = style; ctx.fill(); }
 function vertical(ctx, y0, y1, stops) {

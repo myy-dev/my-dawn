@@ -7,7 +7,7 @@
 // fading to violet higher up, made of countless vertical rays — rippling and folding slowly, a pulse of
 // brightness racing along a fold now and then. The snow takes a faint green cast from it. Stars behind.
 const paint = require('../lib/paint.cjs');
-const { W, H, TAU, lerp, glow, shade, camera, v3, noise, pathOf } = paint;
+const { W, H, TAU, lerp, glow, shade, camera, noise, pathOf } = paint;
 
 const cam = camera({ x: 0, y: 2.2, z: 0, yaw: 0, pitch: -.1, focal: 1000, cx: 960, cy: 600 });
 const P = p => { const s = cam.project(p); return [s[0], s[1]]; };
@@ -63,7 +63,7 @@ function createScene(createCanvas) {
       const hem = u => cu.y + cu.amp * Math.sin(TAU * (u * cu.k + phase * cu.speed) + ci) + .4 * cu.amp * Math.sin(TAU * (u * cu.k * 2.3 - phase * cu.speed * 2) + ci * 2);
       const pulseAt = (phase * 2 + ci * .3) % 1;
       for (const r of rays[ci]) {
-        const x = lerp(-100, W + 100, r.u), y = hem(r.u), d = Math.abs(r.u - pulseAt), pulse = Math.exp(-((d / .05) ** 2));
+        const x = lerp(-100, W + 100, r.u), y = hem(r.u), d = Math.min(Math.abs(r.u - pulseAt), 1 - Math.abs(r.u - pulseAt)), pulse = Math.exp(-((d / .05) ** 2));
         const flick = .7 + .3 * Math.sin(TAU * (phase * 3 + r.u * 17));
         const g = target.createLinearGradient(x, y, x, y - r.len);
         const green = `rgba(${Math.round(80 + 80 * pulse)},255,${Math.round(150 + 40 * cu.hue)},${(.11 + .2 * pulse) * r.a * flick})`;
