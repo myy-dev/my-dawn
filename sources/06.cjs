@@ -1,603 +1,93 @@
 'use strict';
 
-const WIDTH = 1920;
-const HEIGHT = 1080;
-const TAU = Math.PI * 2;
-const WINDOW = { x: 252, y: 103, width: 1388, height: 708, radius: 72 };
+// 06 · 달빛 해안을 지나는 야간열차
+// Inside a night train running along a coast, looking out past a small table. The window is a big rounded
+// rectangle in the carriage wall; through it the moonlit sea, the moon's path broken on the swell, a dark
+// headland far off with a town's few lights, and close by the shore rushing past: rocks, a fence, telegraph
+// poles flicking by. Everything outside slides at its own speed — near things fast, the far coast slowly,
+// the moon not at all. Inside: worn velvet seat edge, a reading lamp, a cup of tea trembling with the rails.
+const paint = require('../lib/paint.cjs');
+const { W, H, TAU, lerp, glow, shade, noise, pathOf } = paint;
 
-function random(seed) {
-  let state = seed;
-  return () => {
-    state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
-    return state / 4294967296;
-  };
-}
+function fill(ctx, points, style) { pathOf(ctx, points); ctx.fillStyle = style; ctx.fill(); }
+function rrect(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+const WIN = { x: 300, y: 120, w: 1360, h: 640, r: 90 }, SEA = 470;
 
-function wash(ctx, x, y, radius, stops, heightScale = 1) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.scale(1, heightScale);
-  const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, radius);
-  for (const [offset, color] of stops) gradient.addColorStop(offset, color);
-  ctx.fillStyle = gradient;
-  ctx.fillRect(-radius, -radius, radius * 2, radius * 2);
-  ctx.restore();
-}
-
-function shape(ctx, points, fill) {
-  ctx.beginPath();
-  ctx.moveTo(...points[0]);
-  for (const point of points.slice(1)) ctx.lineTo(...point);
-  ctx.closePath();
-  ctx.fillStyle = fill;
-  ctx.fill();
-}
-
-function rounded(ctx, x, y, width, height, radius, fill) {
-  ctx.beginPath();
-  ctx.roundRect(x, y, width, height, radius);
-  ctx.fillStyle = fill;
-  ctx.fill();
-}
-
-function windowPath(ctx, padding = 0) {
-  const {x, y, width, height, radius} = WINDOW;
-  ctx.beginPath();
-  ctx.roundRect(x - padding, y - padding, width + padding * 2, height + padding * 2, radius + padding);
-}
-
-function makeMountain(ctx, peaks, color, highlight, rng) {
-  const points = [peaks[0]];
-  for (let ridge = 1; ridge < peaks.length; ridge++) {
-    const [x0, y0] = peaks[ridge - 1];
-    const [x1, y1] = peaks[ridge];
-    const span = Math.ceil((x1 - x0) / 10);
-    for (let index = 1; index <= span; index++) {
-      const u = index / span;
-      const broken = Math.sin(Math.PI * u) * (Math.sin(u * 11 + ridge) * 11 + rng() * 9);
-      points.push([x0 + (x1 - x0) * u, y0 + (y1 - y0) * u + broken]);
-    }
-  }
-  shape(ctx, [...points, [WIDTH, 579], [0, 579]], color);
-  ctx.save();
-  ctx.clip();
-  for (let ridge = 1; ridge < peaks.length - 1; ridge++) {
-    const [x, y] = peaks[ridge];
-    const [nextX, nextY] = peaks[ridge + 1];
-    const [previousX, previousY] = peaks[ridge - 1];
-    const rightDown = nextY - y;
-    const leftDown = previousY - y;
-    if (rightDown > 40) {
-      shape(ctx, [[x, y], [x + (nextX - x) * 0.42, y + rightDown * 0.42],
-        [x + (nextX - x) * 0.33, y + rightDown * 0.66], [x + 26, y + rightDown * 0.41],
-        [x + 51, y + rightDown * 0.86], [x + 12, y + rightDown * 0.47], [x + 2, y + 12]], highlight);
-    }
-    if (leftDown > 34) {
-      shape(ctx, [[x, y], [x - 3, y + 13], [x - 22, y + 36],
-        [x - 10, y + leftDown * 0.59], [x + (previousX - x) * 0.37, y + leftDown * 0.55]], '#839eaa17');
-    }
-  }
-  ctx.restore();
-}
-
-function drawExterior(ctx, rng) {
-  const sky = ctx.createLinearGradient(0, 100, 0, 604);
-  sky.addColorStop(0, '#132238');
-  sky.addColorStop(0.43, '#233b51');
-  sky.addColorStop(0.74, '#416072');
-  sky.addColorStop(1, '#739298');
-  ctx.fillStyle = sky;
-  ctx.fillRect(0, 0, WIDTH, 621);
-  wash(ctx, 1261, 304, 485,
-    [[0, '#a4b3b84a'], [0.55, '#8aa8b32d'], [1, '#8aa8b300']], 0.51);
-  wash(ctx, 905, 491, 720,
-    [[0, '#68929845'], [0.52, '#75979c28'], [1, '#75979c00']], 0.13);
-
-  for (let star = 0; star < 194; star++) {
-    const x = rng() * WIDTH;
-    const y = 68 + rng() * 375;
-    const alpha = (0.09 + rng() ** 3 * 0.43) * (1 - (y / 580) ** 2);
-    ctx.fillStyle = `rgba(206,228,239,${alpha})`;
-    const size = rng() > 0.92 ? 2.2 : 0.6 + rng() * 0.8;
-    ctx.fillRect(x, y, size, size);
-  }
-  wash(ctx, 1261, 304, 118,
-    [[0, '#e2ddca50'], [0.2, '#e0dfca25'], [0.5, '#eee2c416'], [1, '#e6decd00']]);
-  ctx.beginPath();
-  ctx.arc(1261, 304, 18.3, 0, TAU);
-  const moon = ctx.createLinearGradient(1261, 287, 1261, 322);
-  moon.addColorStop(0, '#e7e6d6');
-  moon.addColorStop(1, '#c9cbbb');
-  ctx.fillStyle = moon;
-  ctx.fill();
-  ctx.save();
-  ctx.clip();
-  for (let dot = 0; dot < 80; dot++) {
-    const x = 1242 + rng() * 39;
-    const y = 285 + rng() * 39;
-    ctx.fillStyle = '#64828433';
-    ctx.fillRect(x, y, 0.5 + rng() * 1.5, 0.5 + rng());
-  }
-  ctx.restore();
-
-  for (let i = 0; i < 17; i++) {
-    const x = rng() * WIDTH;
-    const y = 210 + rng() * 315;
-    wash(ctx, x, y, 180 + rng() * 320,
-      [[0, '#93aeb41c'], [0.47, '#91aeb412'], [1, '#93aeb400']], 0.045 + rng() * 0.055);
-  }
-
-  makeMountain(ctx, [[0, 561], [140, 455], [209, 481], [320, 402], [355, 437], [423, 421],
-    [511, 374], [580, 460], [650, 438], [745, 461], [850, 408], [915, 486], [994, 459], [1117, 532],
-    [1297, 558], [1383, 522], [1455, 491], [1534, 459], [1607, 498], [1729, 422], [1803, 465], [1920, 503]],
-    '#40596c', '#95a5b03c', rng);
-  makeMountain(ctx, [[0, 533], [147, 482], [215, 495], [335, 448], [422, 495], [525, 460],
-    [622, 508], [716, 516], [833, 543], [966, 547], [1082, 569], [1306, 571], [1494, 549],
-    [1602, 525], [1678, 546], [1790, 508], [1920, 544]], '#31495a', '#71929c5c', rng);
-  wash(ctx, 866, 546, 980, [[0, '#8bb4b35c'], [0.48, '#8bb4b32e'], [1, '#8bb4b300']], 0.036);
-  wash(ctx, 1515, 539, 485, [[0, '#8cb1b03f'], [1, '#8cb1b000']], 0.045);
-
-  const water = ctx.createLinearGradient(0, 553, 0, 795);
-  water.addColorStop(0, '#466371');
-  water.addColorStop(0.18, '#3e5967');
-  water.addColorStop(1, '#223745');
-  ctx.fillStyle = water;
-  ctx.fillRect(0, 553, WIDTH, 271);
-  wash(ctx, 1263, 596, 280,
-    [[0, '#c2c9b843'], [0.46, '#afc0ad21'], [1, '#afc0ad00']], 0.65);
-  for (let index = 0; index < 4900; index++) {
-    const x = rng() * WIDTH;
-    const y = 554 + rng() * 259;
-    const scale = (y - 545) * 0.09;
-    const alpha = 0.02 + rng() ** 4 * (0.105 + scale * 0.002);
-    ctx.fillStyle = index % 3 ? `rgba(176,206,213,${alpha})` : `rgba(9,26,42,${alpha})`;
-    ctx.fillRect(x, y, 1 + rng() ** 2 * (12 + scale), 0.55 + rng() * 0.65);
-  }
-
-  for (let i = 0; i < 38; i++) {
-    const spread = rng();
-    const x = i < 24 ? 408 + spread * 272 : 1435 + spread * 140;
-    const y = 548 + rng() * 10;
-    const a = 0.19 + rng() ** 3 * 0.62;
-    wash(ctx, x, y, 7, [[0, `rgba(245,191,120,${a * 0.59})`], [1, '#f5bf7800']]);
-    ctx.fillStyle = `rgba(250,219,172,${a})`;
-    ctx.fillRect(x, y, 1.35 + rng() * 1.6, 0.9 + rng());
-    ctx.fillStyle = `rgba(215,175,131,${a * 0.37})`;
-    ctx.fillRect(x, y + 5, 2 + rng() * 3, 0.6);
-  }
-
-  const reflection = [];
-  for (let i = 0; i < 260; i++) {
-    const y = 553 + rng() * 197;
-    const halfWidth = 27 + (y - 550) * 0.48;
-    const x = 1262 + (rng() + rng() - 1) * halfWidth;
-    reflection.push({
-      x,
-      y,
-      width: 3 + rng() * (11 + (y - 550) * 0.11),
-      alpha: 0.046 + rng() ** 3 * 0.154,
-      phase: rng() * TAU
-    });
-  }
-  return reflection;
-}
-
-function makeShore(createCanvas, width, tier, rng) {
-  const height = 167;
-  const layer = createCanvas(width, height);
-  const ctx = layer.getContext('2d');
-  const distant = tier === 0;
-  // Give each shoreline a different span and leave genuine gaps between points.
-  const banks = distant
-    ? [[140, 213, 21, 105], [406, 151, 18, 126], [741, 298, 26, 97]]
-    : [[310, 556, 67, 151], [690, 110, 29, 147], [989, 261, 51, 133],
-       [1234, 87, 22, 140], [1524, 348, 61, 155]];
-
-  for (const [center, span, rise, baseY] of banks) {
-    const left = center - span / 2;
-    const right = center + span / 2;
-    const offset = rng() * TAU;
-    const topY = x => {
-      const progress = (x - left) / span;
-      const shoulder = Math.sin(Math.PI * progress) ** .87;
-      const undulation = Math.sin(progress * 17 + offset) * rise * .14
-        + Math.sin(progress * 31 + offset) * rise * .065;
-      return baseY - shoulder * (rise + undulation);
-    };
-
-    wash(ctx, center, baseY, span * .6,
-      [[0, distant ? '#10273438' : '#0b1c2b71'], [.55, '#132a3841'], [1, '#132a3800']], .13);
-    const rim = [];
-    for (let part = 0; part <= 36; part++) {
-      const x = left + span * part / 36;
-      rim.push([x, topY(x)]);
-    }
-    const tail = [[right, baseY], [center + span * .3, baseY + 11],
-      [center - span * .2, baseY + 14], [left, baseY]];
-    const earth = ctx.createLinearGradient(0, baseY - rise, 0, baseY + 15);
-    earth.addColorStop(0, distant ? '#435d69' : '#48616d');
-    earth.addColorStop(.43, distant ? '#354f5b' : '#324955');
-    earth.addColorStop(1, distant ? '#283f4b' : '#1c3140');
-    shape(ctx, [...rim, ...tail], earth);
-
-    ctx.save();
-    ctx.clip();
-    for (let grain = 0; grain < span * 1.2; grain++) {
-      const x = left + rng() * span;
-      const y = topY(x) + rng() ** 1.7 * (baseY + 13 - topY(x));
-      ctx.fillStyle = grain % 3 ? '#a7c0c220' : '#111f2a52';
-      ctx.fillRect(x, y, 1 + rng() * (distant ? 6 : 10), .65 + rng());
-    }
-    for (let strip = 0; strip < Math.floor(span / 30); strip++) {
-      const x = left + span * (.11 + rng() * .75);
-      const y = topY(x) + 2 + rng() * 11;
-      wash(ctx, x, y, 9 + rng() * 25,
-        [[0, distant ? '#8fa8b135' : '#9db2b94f'], [.45, '#91abb928'], [1, '#91abb900']], .27);
-    }
-    ctx.restore();
-
-    const groups = distant ? 3 : Math.ceil(span / 33);
-    for (let group = 0; group < groups; group++) {
-      const x = left + (.12 + rng() * .77) * span;
-      const y = Math.min(baseY - 2, topY(x) + 4 + rng() * 18);
-      for (let stalk = 0; stalk < (distant ? 4 : 7); stalk++) {
-        const root = x + (rng() - .5) * 17;
-        const length = 3 + rng() ** 1.6 * (distant ? 14 : 26);
-        const bend = rng() * 9 + length * .25;
-        ctx.beginPath();
-        ctx.moveTo(root, y);
-        ctx.quadraticCurveTo(root - bend * .17, y - length * .6, root - bend, y - length);
-        ctx.strokeStyle = stalk % 4 ? '#101f2b95' : '#526e79a8';
-        ctx.lineWidth = .7 + rng() * (distant ? .7 : 1.15);
-        ctx.stroke();
-      }
-    }
-  }
-  return layer;
-}
-
-function drawWoodGrain(ctx, rng, x, y, w, h, angle) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.rotate(angle);
-  for (let fleck = 0; fleck < 2600; fleck++) {
-    const u = rng() * w;
-    const v = rng() * h;
-    ctx.fillStyle = fleck % 3 ? '#dab69812' : '#0c090d35';
-    ctx.fillRect(u, v, 1 + rng() ** 3 * 108, 0.55 + rng() * 0.9);
-  }
-  ctx.restore();
-}
-
-function drawLamp(ctx) {
-  const x = 1768;
-  wash(ctx, x, 383, 322,
-    [[0, '#f2a76632'], [0.37, '#e0925a19'], [1, '#e2975800']], 1.20);
-  wash(ctx, x, 318, 102, [[0, '#ffd6a837'], [0.56, '#d59a5721'], [1, '#e9b37a00']], 1.34);
-  rounded(ctx, x - 35, 281, 70, 141, 29, '#15171f');
-  rounded(ctx, x - 29, 285, 60, 133, 24, '#71604f');
-  rounded(ctx, x - 23, 294, 47, 112, 18, '#42353a');
-  rounded(ctx, x - 13, 309, 27, 79, 13, '#a87045');
-  const glass = ctx.createLinearGradient(x - 15, 330, x + 14, 330);
-  glass.addColorStop(0, '#d79760');
-  glass.addColorStop(0.46, '#f6cca5');
-  glass.addColorStop(0.72, '#fed2a0');
-  glass.addColorStop(1, '#c68b60');
-  rounded(ctx, x - 11, 311, 22, 74, 11, glass);
-  for (let rib = -8; rib <= 8; rib += 4) {
-    ctx.fillStyle = '#6d4a4847';
-    ctx.fillRect(x + rib, 321, 1, 54);
-  }
-  ctx.fillStyle = '#c29570aa';
-  ctx.fillRect(x - 19, 302, 38, 2.2);
-  ctx.fillRect(x - 19, 392, 38, 2.6);
-}
-
-function drawGlass(ctx, rng) {
-  windowPath(ctx);
-  ctx.save();
-  ctx.clip();
-  const reflection = ctx.createLinearGradient(248, 0, 1640, 0);
-  reflection.addColorStop(0, '#0d192877');
-  reflection.addColorStop(0.27, '#0e213406');
-  reflection.addColorStop(0.70, '#091a2f00');
-  reflection.addColorStop(1, '#1f182346');
-  ctx.fillStyle = reflection;
-  ctx.fillRect(0, 0, WIDTH, HEIGHT);
-  wash(ctx, 1500, 378, 152, [[0, '#ca92521b'], [0.52, '#b3875110'], [1, '#b3875100']], 1.1);
-  wash(ctx, 1490, 369, 19, [[0, '#ecb67828'], [0.35, '#d8a57518'], [1, '#e7b57d00']], 2.6);
-  wash(ctx, 1505, 379, 25, [[0, '#ffd19b1e'], [0.43, '#d4a47611'], [1, '#edb98400']], 1.92);
-
-  for (let i = 0; i < 1800; i++) {
-    const left = i % 3 === 0;
-    const x = left ? 256 + rng() ** 2 * 150 : 1637 - rng() ** 2 * 133;
-    const y = 699 + rng() ** 0.32 * 127;
-    const a = rng() ** 2 * (0.16 + (y - 699) / 600);
-    const size = 0.6 + rng() ** 2 * 2.4;
-    ctx.fillStyle = `rgba(169,194,202,${a})`;
-    ctx.fillRect(x, y, size, size * 0.7);
-  }
-  ctx.restore();
-}
-
-function drawInterior(ctx, rng) {
-  const wall = ctx.createLinearGradient(0, 0, WIDTH, HEIGHT);
-  wall.addColorStop(0, '#222a35');
-  wall.addColorStop(0.45, '#292531');
-  wall.addColorStop(1, '#443134');
-  ctx.fillStyle = wall;
-  ctx.fillRect(0, 0, WIDTH, HEIGHT);
-  wash(ctx, 1650, 487, 584,
-    [[0, '#df975333'], [0.56, '#b7794b15'], [1, '#bf7b5000']], 1.39);
-  wash(ctx, 690, 74, 762,
-    [[0, '#65758726'], [0.66, '#6c798c10'], [1, '#65758700']], 0.25);
-
-  for (let i = 0; i < 5300; i++) {
-    const x = rng() * WIDTH;
-    const y = rng() * HEIGHT;
-    ctx.fillStyle = i % 2 ? '#f1e4df0e' : '#0707101c';
-    ctx.fillRect(x, y, 0.65 + rng() * 1.65, 0.65 + rng() * 1.35);
-  }
-
-  const trim = ctx.createLinearGradient(270, 80, 1650, 834);
-  trim.addColorStop(0, '#566577');
-  trim.addColorStop(0.26, '#242938');
-  trim.addColorStop(0.51, '#302a37');
-  trim.addColorStop(0.79, '#634e4c');
-  trim.addColorStop(1, '#201d2b');
-  windowPath(ctx, 36);
-  ctx.fillStyle = '#151823';
-  ctx.fill();
-  windowPath(ctx, 28);
-  ctx.fillStyle = trim;
-  ctx.fill();
-  windowPath(ctx, 24);
-  ctx.strokeStyle = '#d8b59c3f';
-  ctx.lineWidth = 1.6;
-  ctx.stroke();
-  windowPath(ctx, 11);
-  ctx.fillStyle = '#161a25';
-  ctx.fill();
-  windowPath(ctx, 4);
-  ctx.strokeStyle = '#8999a251';
-  ctx.lineWidth = 3.8;
-  ctx.stroke();
-  for (const [x, y] of [[341, 82], [633, 82], [947, 82], [1261, 82], [1554, 82],
-    [1661, 219], [1661, 466], [1661, 708], [1557, 832], [1261, 832], [947, 832], [633, 832], [339, 832]]) {
-    wash(ctx, x + 1, y + 1, 6, [[0, '#18151cd7'], [0.43, '#221e2a77'], [1, '#211e2600']]);
-    ctx.beginPath();
-    ctx.arc(x, y, 2.5, 0, TAU);
-    ctx.fillStyle = '#aba1957a';
-    ctx.fill();
-    ctx.fillStyle = '#2b2630b2';
-    ctx.fillRect(x - 1.2, y, 2.5, 0.6);
-  }
-  ctx.save();
-  ctx.globalCompositeOperation = 'destination-out';
-  windowPath(ctx);
-  ctx.fillStyle = '#fff';
-  ctx.fill();
-  ctx.restore();
-  drawGlass(ctx, rng);
-
-  const upper = ctx.createLinearGradient(0, 0, 0, 57);
-  upper.addColorStop(0, '#161b25');
-  upper.addColorStop(0.85, '#232a36');
-  upper.addColorStop(1, '#454954');
-  ctx.fillStyle = upper;
-  ctx.fillRect(0, 0, WIDTH, 55);
-  ctx.fillStyle = '#b8a39b20';
-  ctx.fillRect(0, 54, WIDTH, 2);
-  ctx.fillStyle = '#120e1867';
-  ctx.fillRect(0, 894, WIDTH, 7);
-
-  const curtain = ctx.createLinearGradient(0, 0, 257, 0);
-  curtain.addColorStop(0, '#212333');
-  curtain.addColorStop(0.26, '#3c3441');
-  curtain.addColorStop(0.49, '#262635');
-  curtain.addColorStop(0.73, '#453747');
-  curtain.addColorStop(1, '#202333');
-  ctx.beginPath();
-  ctx.moveTo(0, 32);
-  ctx.lineTo(235, 32);
-  ctx.bezierCurveTo(243, 242, 188, 426, 210, 577);
-  ctx.bezierCurveTo(216, 673, 233, 786, 217, 866);
-  ctx.lineTo(0, 868);
-  ctx.closePath();
-  ctx.fillStyle = curtain;
-  ctx.fill();
-  for (let fold = 0; fold < 6; fold++) {
-    const x = 17 + fold * 38;
-    ctx.beginPath();
-    ctx.moveTo(x, 41);
-    ctx.bezierCurveTo(x + 21, 213, x - 41, 466, x - 10, 587);
-    ctx.bezierCurveTo(x + 6, 657, x + 20, 810, x - 2, 866);
-    ctx.lineWidth = 2.5 + fold * 0.33;
-    ctx.strokeStyle = fold % 2 ? '#121a2974' : '#96778539';
-    ctx.stroke();
-  }
-  ctx.beginPath();
-  ctx.moveTo(1, 604);
-  ctx.quadraticCurveTo(119, 606, 208, 531);
-  ctx.strokeStyle = '#78604c88';
-  ctx.lineWidth = 11;
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(1, 602);
-  ctx.quadraticCurveTo(119, 604, 207, 529);
-  ctx.strokeStyle = '#b4976e66';
-  ctx.lineWidth = 2.6;
-  ctx.stroke();
-
-  drawLamp(ctx);
-
-  const shelf = ctx.createLinearGradient(0, 817, 0, 873);
-  shelf.addColorStop(0, '#2b2530');
-  shelf.addColorStop(0.18, '#71625b');
-  shelf.addColorStop(0.60, '#4a3a3c');
-  shelf.addColorStop(1, '#211d29');
-  shape(ctx, [[259, 820], [1615, 818], [1648, 853], [240, 852]], shelf);
-  shape(ctx, [[241, 852], [1648, 853], [1647, 862], [242, 861]], '#26212b');
-  ctx.fillStyle = '#c0a3943f';
-  ctx.fillRect(265, 842, 1343, 1.7);
-
-  const seat = ctx.createLinearGradient(0, 691, 534, HEIGHT);
-  seat.addColorStop(0, '#3e3c51');
-  seat.addColorStop(0.4, '#302e3f');
-  seat.addColorStop(1, '#181d2c');
-  ctx.beginPath();
-  ctx.moveTo(0, 691);
-  ctx.bezierCurveTo(89, 663, 190, 665, 282, 701);
-  ctx.bezierCurveTo(337, 716, 363, 803, 413, 856);
-  ctx.bezierCurveTo(463, 892, 529, 939, 540, HEIGHT);
-  ctx.lineTo(0, HEIGHT);
-  ctx.closePath();
-  ctx.fillStyle = seat;
-  ctx.fill();
-  ctx.save();
-  ctx.clip();
-  for (let dot = 0; dot < 9800; dot++) {
-    const x = rng() * 550;
-    const y = 668 + rng() * 412;
-    ctx.fillStyle = dot % 2 ? '#b2adcb12' : '#16132327';
-    ctx.fillRect(x, y, 1.5 + rng() * 12, 0.65 + rng() * 1.3);
-  }
-  ctx.restore();
-  ctx.beginPath();
-  ctx.moveTo(0, 704);
-  ctx.bezierCurveTo(89, 679, 190, 678, 276, 712);
-  ctx.bezierCurveTo(331, 731, 351, 809, 406, 871);
-  ctx.bezierCurveTo(465, 912, 513, 960, 523, HEIGHT);
-  ctx.strokeStyle = '#9a8aa066';
-  ctx.lineWidth = 5;
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(0, 720);
-  ctx.bezierCurveTo(113, 693, 241, 692, 299, 757);
-  ctx.bezierCurveTo(342, 817, 388, 890, 447, 931);
-  ctx.strokeStyle = '#171827c7';
-  ctx.lineWidth = 3;
-  ctx.setLineDash([3, 5]);
-  ctx.stroke();
-  ctx.setLineDash([]);
-
-  const table = ctx.createLinearGradient(1333, 925, 1711, 1120);
-  table.addColorStop(0, '#574347');
-  table.addColorStop(0.45, '#76534a');
-  table.addColorStop(0.86, '#43333c');
-  table.addColorStop(1, '#2b2936');
-  ctx.beginPath();
-  ctx.moveTo(1186, 1045);
-  ctx.bezierCurveTo(1205, 1005, 1240, 973, 1308, 953);
-  ctx.quadraticCurveTo(1487, 894, 1920, 905);
-  ctx.lineTo(1920, HEIGHT);
-  ctx.lineTo(1208, HEIGHT);
-  ctx.closePath();
-  ctx.fillStyle = table;
-  ctx.fill();
-  ctx.save();
-  ctx.clip();
-  drawWoodGrain(ctx, rng, 1123, 950, 920, 251, -0.111);
-  wash(ctx, 1682, 955, 345, [[0, '#d38e5a31'], [1, '#d38e5a00']], 0.22);
-  ctx.restore();
-  ctx.beginPath();
-  ctx.moveTo(1186, 1045);
-  ctx.bezierCurveTo(1205, 1005, 1240, 973, 1308, 953);
-  ctx.quadraticCurveTo(1487, 894, 1920, 905);
-  ctx.strokeStyle = '#a47c6c86';
-  ctx.lineWidth = 3.6;
-  ctx.stroke();
-
-  wash(ctx, 1563, 985, 116, [[0, '#130f1b85'], [1, '#130f1b00']], 0.18);
-  ctx.beginPath();
-  ctx.ellipse(1552, 977, 69, 17, -0.045, 0, TAU);
-  ctx.fillStyle = '#292532';
-  ctx.fill();
-  ctx.beginPath();
-  ctx.ellipse(1550, 972, 67, 15, -0.045, 0, TAU);
-  ctx.fillStyle = '#7f7778';
-  ctx.fill();
-  ctx.strokeStyle = '#b1a8a1a6';
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(1586, 916);
-  ctx.bezierCurveTo(1624, 893, 1635, 944, 1593, 954);
-  ctx.strokeStyle = '#666472';
-  ctx.lineWidth = 11;
-  ctx.stroke();
-  ctx.strokeStyle = '#aea19795';
-  ctx.lineWidth = 3;
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(1507, 906);
-  ctx.bezierCurveTo(1509, 946, 1512, 962, 1533, 968);
-  ctx.quadraticCurveTo(1557, 973, 1580, 966);
-  ctx.bezierCurveTo(1598, 960, 1599, 935, 1601, 903);
-  ctx.closePath();
-  const ceramic = ctx.createLinearGradient(1507, 906, 1600, 944);
-  ceramic.addColorStop(0, '#666674');
-  ceramic.addColorStop(0.38, '#a3a2a8');
-  ceramic.addColorStop(0.72, '#ada4a0');
-  ceramic.addColorStop(1, '#766a72');
-  ctx.fillStyle = ceramic;
-  ctx.fill();
-  ctx.beginPath();
-  ctx.ellipse(1554, 904, 47, 16, -0.02, 0, TAU);
-  ctx.fillStyle = '#c2af9c';
-  ctx.fill();
-  ctx.beginPath();
-  ctx.ellipse(1554, 907, 41, 11.7, -0.02, 0, TAU);
-  ctx.fillStyle = '#463235';
-  ctx.fill();
-  wash(ctx, 1576, 908, 24, [[0, '#dcad743e'], [1, '#dcad7400']], 0.22);
-}
+// A strip that tiles horizontally every `period` px, so sliding it loops cleanly.
+function strip(make, period, height, draw) { const c = make(period, height); draw(c.getContext('2d'), period, height); return c; }
 
 function createScene(createCanvas) {
-  const rng = random(18651);
-  const exterior = createCanvas(WIDTH, HEIGHT);
-  const reflection = drawExterior(exterior.getContext('2d'), rng);
-  const interior = createCanvas(WIDTH, HEIGHT);
-  drawInterior(interior.getContext('2d'), rng);
-  const middleBank = makeShore(createCanvas, 960, 0, rng);
-  const nearBank = makeShore(createCanvas, 1760, 1, rng);
+  const make = createCanvas;
+  const rnd = paint.seeded(6011);
+  // static sky and sea
+  const outside = make(W, H), oc = outside.getContext('2d');
+  const sky = oc.createLinearGradient(0, WIN.y, 0, SEA); sky.addColorStop(0, '#0a1226'); sky.addColorStop(1, '#22304a');
+  oc.fillStyle = sky; oc.fillRect(0, 0, W, SEA);
+  paint.starfield(oc, rnd, 200, SEA - 40);
+  const moon = [1240, 250];
+  glow(oc, moon[0], moon[1], 220, 220, '210,220,240', .2); oc.fillStyle = '#eef2f6'; oc.beginPath(); oc.arc(moon[0], moon[1], 26, 0, TAU); oc.fill();
+  const sea = oc.createLinearGradient(0, SEA, 0, H); sea.addColorStop(0, '#1e2a3e'); sea.addColorStop(1, '#0a1018');
+  oc.fillStyle = sea; oc.fillRect(0, SEA, W, H);
+  // layers that slide: far coast (slow), near shore and rocks (fast), poles (fastest)
+  const far = strip(make, 2400, 120, (c, w, h) => {
+    c.fillStyle = '#0e141e'; c.beginPath(); c.moveTo(0, h);
+    const per = x => Math.sin(TAU * x / w * 3 + 1) * .5 + Math.sin(TAU * x / w * 7 + 2) * .3 + Math.sin(TAU * x / w * 17) * .12;
+    for (let x = 0; x <= w; x += 10) c.lineTo(x, h - 30 - 50 * Math.max(0, per(x) + .2));
+    c.lineTo(w, h); c.fill();
+    for (let i = 0; i < 18; i++) { const x = (300 + i * 37 + (i % 3) * 11) % w; glow(c, x, h - 14 - (i % 4) * 4, 3, 3, '255,200,130', .9); }
+  });
+  const near = strip(make, 1900, 260, (c, w, h) => {
+    c.fillStyle = '#080a0e'; c.beginPath(); c.moveTo(0, h); for (let x = 0; x <= w; x += 6) c.lineTo(x, 130 + 22 * Math.sin(TAU * x / w * 5) + 12 * Math.sin(TAU * x / w * 13 + 1) + 6 * Math.sin(TAU * x / w * 41 + 2)); c.lineTo(w, h); c.fill();
+    for (let i = 0; i < 26; i++) { const x = (i + .5) * w / 26, y = 110 + (i % 5) * 10; c.fillStyle = '#12151c'; c.beginPath(); c.ellipse(x, y + 40, 30 + (i % 4) * 14, 16 + (i % 3) * 6, 0, Math.PI, TAU); c.fill(); c.strokeStyle = 'rgba(170,190,220,.25)'; c.lineWidth = 2; c.beginPath(); c.ellipse(x, y + 40, 30 + (i % 4) * 14, 16 + (i % 3) * 6, 0, Math.PI * 1.2, Math.PI * 1.6); c.stroke(); }
+    c.strokeStyle = '#06070a'; c.lineWidth = 2; for (let x = 0; x < w; x += 38) { c.beginPath(); c.moveTo(x, 70); c.lineTo(x, 130); c.stroke(); } c.beginPath(); c.moveTo(0, 82); c.lineTo(w, 82); c.moveTo(0, 104); c.lineTo(w, 104); c.stroke();
+  });
+  const poles = strip(make, 1700, WIN.h + 200, (c, w, h) => {
+    c.strokeStyle = '#030406'; c.lineWidth = 16; c.beginPath(); c.moveTo(300, 0); c.lineTo(300, h); c.stroke();
+    c.lineWidth = 8; c.beginPath(); c.moveTo(240, 70); c.lineTo(360, 70); c.stroke();
+    c.lineWidth = 2; c.beginPath(); c.moveTo(0, 80); c.quadraticCurveTo(w / 2, 150, w, 80); c.moveTo(0, 100); c.quadraticCurveTo(w / 2, 170, w, 100); c.stroke();
+  });
+  // the carriage interior over everything, with the window cut out
+  const inside = make(W, H), ic = inside.getContext('2d');
+  const wall = ic.createLinearGradient(0, 0, 0, H); wall.addColorStop(0, '#3a2a28'); wall.addColorStop(1, '#22181a');
+  ic.fillStyle = wall; ic.fillRect(0, 0, W, H);
+  paint.planks(ic, [[0, 0], [W, 0], [W, H], [0, H]], rnd, { along: 'v', width: [.05, .07], base: [86, 58, 46], vary: 10, streaks: 2 });
+  // a curtain tied back at the left, the seat back's edge, the table and the cup, a reading lamp
+  ic.fillStyle = '#5a1e22'; ic.beginPath(); ic.moveTo(160, 0); ic.lineTo(400, 0); ic.quadraticCurveTo(330, 360, 400, 520); ic.quadraticCurveTo(300, 600, 200, 1000); ic.lineTo(120, 1000); ic.quadraticCurveTo(220, 600, 280, 520); ic.quadraticCurveTo(200, 360, 160, 0); ic.fill();
+  for (let f = 0; f < 6; f++) { ic.strokeStyle = 'rgba(0,0,0,.3)'; ic.lineWidth = 3; ic.beginPath(); ic.moveTo(190 + f * 36, 0); ic.quadraticCurveTo(260 + f * 10, 360, 300 + f * 6, 520); ic.stroke(); }
+  ic.fillStyle = '#c8a050'; ic.fillRect(270, 500, 60, 22);
+  fill(ic, [[0, 760], [420, 740], [520, H], [0, H]], '#3a2a4a');
+  for (let i = 0; i < 400; i++) { ic.fillStyle = `rgba(${rnd() < .5 ? '0,0,0' : '120,100,140'},.12)`; ic.fillRect(rnd() * 480, 760 + rnd() * 320, 3, 3); }
+  fill(ic, [[1220, 820], [1920, 800], [1920, 860], [1240, 880]], '#6a4a32');
+  fill(ic, [[1240, 880], [1920, 860], [1920, 900], [1250, 912]], '#3a2818');
+  ic.fillStyle = '#c8a050'; ic.fillRect(1760, 140, 20, 120); ic.beginPath(); ic.ellipse(1770, 140, 50, 22, 0, Math.PI, TAU); ic.fill();
+  paint.applyTexture(ic, make, 6012, .32, 0, 0, W, H, true);
+  const lamp = paint.lighting(make, { ambient: [.66, .66, .76], lights: [paint.LIGHT.lamp(1770, 300, .45, 600, 500, [1.35, 1, .62])] });
+  lamp(ic);
+  ic.save(); rrect(ic, WIN.x - 26, WIN.y - 26, WIN.w + 52, WIN.h + 52, WIN.r + 20); ic.fillStyle = '#6a5a48'; ic.fill(); rrect(ic, WIN.x - 12, WIN.y - 12, WIN.w + 24, WIN.h + 24, WIN.r + 8); ic.fillStyle = '#2a201c'; ic.fill();
+  ic.globalCompositeOperation = 'destination-out'; rrect(ic, WIN.x, WIN.y, WIN.w, WIN.h, WIN.r); ic.fill(); ic.restore();
+  const cup = [1520, 830];
+  const moonPath = Array.from({ length: 70 }, () => ({ y: lerp(SEA + 4, WIN.y + WIN.h, rnd() ** 1.4), dx: (rnd() - .5), lag: rnd() * TAU }));
 
-  const steam = createCanvas(120, 106);
-  wash(steam.getContext('2d'), 60, 54, 58,
-    [[0, '#d2bbaa88'], [0.41, '#ccb69e46'], [1, '#d7c5ac00']], 0.79);
-
-  return (ctx, phase) => {
-    const t = phase - Math.floor(phase);
-    const angle = t * TAU;
-    ctx.fillStyle = '#191e28';
-    ctx.fillRect(0, 0, WIDTH, HEIGHT);
-    ctx.save();
-    windowPath(ctx);
-    ctx.clip();
-    ctx.drawImage(exterior, 0, 0);
-    for (const glint of reflection) {
-      const sway = Math.sin(glint.phase + angle) * (1 + (glint.y - 545) * 0.032);
-      const alpha = glint.alpha * (0.68 + 0.25 * Math.sin(glint.phase + angle * 2));
-      ctx.fillStyle = `rgba(215,212,186,${alpha})`;
-      ctx.fillRect(glint.x + sway, glint.y, glint.width, 0.75 + (glint.y - 548) * 0.004);
-    }
-    for (const [bank, y] of [[middleBank, 640], [nearBank, 680]]) {
-      for (let x = -t * bank.width; x < WIDTH; x += bank.width) {
-        ctx.drawImage(bank, x, y);
-      }
-    }
-    ctx.restore();
-    ctx.drawImage(interior, 0, 0);
-
-    for (let i = 0; i < 11; i++) {
-      const age = (t * 3 + i / 11) % 1;
-      const width = 11 + age * 35;
-      ctx.globalAlpha = Math.sin(Math.PI * age) ** 1.8 * (0.13 - age * 0.048);
-      const x = 1551 + age * 14 + Math.sin(age * 8 + angle * 3) * 11 * age;
-      const y = 901 - age * 123;
-      ctx.drawImage(steam, x - width, y - width * 0.82, width * 2, width * 1.64);
-    }
-    ctx.globalAlpha = 1;
+  return (target, input) => {
+    const phase = input - Math.floor(input);
+    const sway = Math.sin(TAU * phase * 6) * 1.5;
+    target.drawImage(outside, 0, 0);
+    // the moon's path on the swell: short bright dashes that shimmer
+    for (const m of moonPath) { const w = lerp(6, 70, (m.y - SEA) / (H - SEA)); glow(target, moon[0] + m.dx * w * 2.4, m.y, w * (.5 + .5 * Math.sin(TAU * phase * 3 + m.lag)), 2 + (m.y - SEA) * .01, '220,230,246', .3); }
+    // sliding layers: far coast 1 period per loop, near shore 6 periods, poles 9 periods
+    const slide = (img, periods, y) => { const off = (phase * periods % 1) * img.width; for (let x = -off; x < W; x += img.width) target.drawImage(img, x, y); };
+    slide(far, 1, SEA - 110);
+    slide(near, 6, WIN.y + WIN.h - 200 + sway);
+    slide(poles, 9, WIN.y - 60 + sway);
+    // a faint reflection of the lamp in the glass
+    glow(target, 1640, 300, 160, 120, '255,200,140', .08);
+    target.drawImage(inside, 0, sway * .4);
+    // the cup on the table with tea trembling
+    target.fillStyle = '#e8e2d8'; target.beginPath(); target.ellipse(cup[0], cup[1] + sway * .4, 70, 16, 0, 0, TAU); target.fill();
+    fill(target, [[cup[0] - 44, cup[1] - 70 + sway * .4], [cup[0] + 44, cup[1] - 70 + sway * .4], [cup[0] + 38, cup[1] - 4 + sway * .4], [cup[0] - 38, cup[1] - 4 + sway * .4]], '#ece6dc');
+    target.fillStyle = '#7a4a24'; target.beginPath(); target.ellipse(cup[0], cup[1] - 70 + sway * .4, 44, 10, 0, 0, TAU); target.fill();
+    for (let r = 1; r < 3; r++) { target.strokeStyle = `rgba(255,220,180,${.3 * Math.abs(Math.sin(TAU * phase * 6 + r))})`; target.lineWidth = 1; target.beginPath(); target.ellipse(cup[0], cup[1] - 70 + sway * .4, 12 * r, 3 * r, 0, 0, TAU); target.stroke(); }
+    for (let i = 0; i < 6; i++) { const t = (phase * 2 + i / 6) % 1; glow(target, cup[0] + Math.sin(t * 6 + i) * 10 * t - t * 30, cup[1] - 90 - t * 160, 10 + t * 30, 8 + t * 20, '240,236,230', .14 * (1 - t)); }
   };
 }
 
@@ -605,5 +95,5 @@ module.exports = {
   title: '달빛 해안을 지나는 야간열차',
   slug: 'moonlit-coastal-train',
   sound: 'train',
-  createScene
+  createScene,
 };

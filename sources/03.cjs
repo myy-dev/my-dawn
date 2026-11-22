@@ -1,466 +1,114 @@
-const WIDTH = 1920;
-const HEIGHT = 1080;
-const HORIZON = 593;
-const TAU = Math.PI * 2;
-const LIGHT = { x: 566, y: 388 };
+'use strict';
 
-function randomFrom(seed) {
-  return () => ((seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) / 4294967296);
+// 03 · 안개 낀 곶의 등대
+// A rocky headland at night in sea fog, seen from the water's edge across a small cove. The land runs out
+// from the left in stepped cliffs of dark fractured rock, each step a ledge with a lip of grass; at its tip
+// stands a white lighthouse with a black gallery and a red-domed lantern, a keeper's cottage crouched
+// beside it with one lit window. The lamp turns: its beam sweeps through the fog as a broad pale shaft,
+// brightening as it swings toward us. Below, swells roll in and break white over the rocks at the foot.
+const paint = require('../lib/paint.cjs');
+const { W, H, TAU, lerp, glow, shade, noise, pathOf } = paint;
+
+function fill(ctx, points, style) { pathOf(ctx, points); ctx.fillStyle = style; ctx.fill(); }
+const SEA = 690, TOWER = { x: 1180, base: 340, h: 230, rb: 40, rt: 28 };
+
+// The cliff: a plateau edge (top line) and a foot line, filled with vertical facets that catch the light
+// from the left differently, broken by horizontal ledges.
+function cliff(ctx, rnd) {
+  const topY = x => x < 1320 ? 330 + 20 * noise(x / 120, 1, 3) + (x < 300 ? -60 + x * .2 : 0) : 330 + (x - 1320) * 2.2;
+  const footY = x => SEA + 6 * noise(x / 50, 2, 4);
+  const end = 1460;
+  // the body, dark
+  fill(ctx, [[-20, topY(-20)], ...Array.from({ length: 80 }, (_, i) => { const x = lerp(-20, end, i / 79); return [x, topY(x)]; }), [end, footY(end)], [-20, footY(-20)]], '#14161c');
+  // facets
+  for (let i = 0; i < 520; i++) {
+    const x = rnd() * end, yTop = topY(x) + 6, yBot = footY(x), y = lerp(yTop, yBot, rnd()), w = 10 + rnd() * 40, h = 30 + rnd() * 110;
+    if (y + h > yBot + 10 || x + w > end - (end - 1320) * (y - 330) / 330) continue;
+    const facing = rnd(), light = .4 + .9 * facing * (1 - (y - 330) / 600);
+    const pts = [[x, y], [x + w, y + w * (rnd() - .5) * .3], [x + w * (.9 + rnd() * .2), y + h], [x - w * .1, y + h * (.9 + rnd() * .1)]];
+    fill(ctx, pts, shade([30, 32, 40].map(c => c * light), 0));
+    if (facing > .7) { ctx.strokeStyle = 'rgba(150,160,170,.18)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(...pts[0]); ctx.lineTo(...pts[3]); ctx.stroke(); }
+  }
+  // ledges with grass lips
+  for (let l = 0; l < 6; l++) {
+    const y0 = 380 + l * 50 + rnd() * 20, x0 = rnd() * 400, x1 = x0 + 300 + rnd() * 600;
+    ctx.strokeStyle = 'rgba(10,10,14,.7)'; ctx.lineWidth = 4; ctx.beginPath(); for (let x = x0; x <= x1; x += 20) ctx.lineTo(x, y0 + 6 * Math.sin(x / 60 + l)); ctx.stroke();
+    ctx.strokeStyle = 'rgba(70,90,60,.6)'; ctx.lineWidth = 3; ctx.beginPath(); for (let x = x0; x <= x1; x += 20) ctx.lineTo(x, y0 - 3 + 6 * Math.sin(x / 60 + l)); ctx.stroke();
+  }
+  // the grassy top
+  ctx.fillStyle = '#26362a'; ctx.beginPath(); ctx.moveTo(-20, topY(-20) + 12); for (let x = -20; x <= 1340; x += 10) ctx.lineTo(x, topY(x) - 4 - 3 * noise(x / 20, 4, 5)); ctx.lineTo(1340, topY(1340) + 14); for (let x = 1340; x >= -20; x -= 10) ctx.lineTo(x, topY(x) + 14); ctx.fill();
+  // rocks at the foot
+  for (let i = 0; i < 26; i++) { const x = 100 + rnd() * 1400, r = 14 + rnd() * 40; fill(ctx, paint.wobble(Array.from({ length: 9 }, (_, k) => [x + Math.cos(k / 9 * TAU) * r * 1.4, SEA + 4 + Math.sin(k / 9 * TAU) * r * .5 - r * .3]), r * .1, 301 + i, 10), shade([24, 26, 32], (rnd() - .5) * 10)); }
+  return topY;
 }
 
-function fillPath(ctx, points, fill) {
-  ctx.fillStyle = fill;
-  ctx.beginPath();
-  ctx.moveTo(...points[0]);
-  for (const point of points.slice(1)) ctx.lineTo(...point);
-  ctx.closePath();
-  ctx.fill();
-}
-
-function erodedEdge(points, rng, depth, loop = false) {
-  const route = loop ? [...points, points[0]] : points;
-  const result = [route[0]];
-  for (let index = 1; index < route.length; index += 1) {
-    const [x, y] = route[index - 1];
-    const [endX, endY] = route[index];
-    const dx = endX - x;
-    const dy = endY - y;
-    const length = Math.hypot(dx, dy);
-    const steps = Math.ceil(length / 10);
-    for (let step = 1; step < steps; step += 1) {
-      const u = step / steps;
-      const shift = (rng() - 0.5) * depth * Math.sin(Math.PI * u) ** 0.42;
-      result.push([x + dx * u - dy / length * shift, y + dy * u + dx / length * shift]);
-    }
-    result.push(route[index]);
-  }
-  return result;
-}
-
-function radial(ctx, x, y, radius, light, clear) {
-  const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
-  gradient.addColorStop(0, light);
-  gradient.addColorStop(1, clear);
-  return gradient;
-}
-
-function softOval(ctx, x, y, width, height, light, clear) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.scale(width, height);
-  ctx.fillStyle = radial(ctx, 0, 0, 1, light, clear);
-  ctx.fillRect(-1, -1, 2, 2);
-  ctx.restore();
-}
-
-function drawSky(ctx, rng) {
-  const sky = ctx.createLinearGradient(0, 0, 65, HORIZON);
-  sky.addColorStop(0, '#0a0e19');
-  sky.addColorStop(0.38, '#131c2b');
-  sky.addColorStop(0.72, '#27333e');
-  sky.addColorStop(1, '#4a4c50');
-  ctx.fillStyle = sky;
-  ctx.fillRect(0, 0, WIDTH, HORIZON + 3);
-
-  softOval(ctx, 1610, 572, 805, 215, 'rgba(160,122,114,0.26)', 'rgba(153,120,116,0)');
-  softOval(ctx, 625, 574, 658, 276, 'rgba(121,141,142,0.16)', 'rgba(121,141,142,0)');
-
-  for (let index = 0; index < 128; index += 1) {
-    const x = rng() * WIDTH;
-    const y = 12 + Math.pow(rng(), 1.38) * 330;
-    const visibility = (1 - y / 386) * (0.08 + rng() * 0.42);
-    ctx.fillStyle = 'rgba(201,211,225,' + visibility + ')';
-    ctx.beginPath();
-    ctx.arc(x, y, 0.3 + Math.pow(rng(), 4) * 1.2, 0, TAU);
-    ctx.fill();
-  }
-
-  // Wind-sheared banks of low maritime cloud, layered toward the horizon.
-  const cloudBands = [
-    [1580, 428, 460, 28, 0.28], [1203, 478, 400, 22, 0.2],
-    [1766, 497, 520, 29, 0.26], [754, 506, 535, 34, 0.15],
-    [1652, 546, 483, 17, 0.33], [1098, 554, 448, 11, 0.22],
-    [281, 460, 490, 31, 0.23], [255, 526, 644, 21, 0.26],
-    [1502, 339, 569, 49, 0.12], [400, 307, 520, 46, 0.12],
-  ];
-  for (const [x, y, width, height, opacity] of cloudBands) {
-    for (let layer = 0; layer < 13; layer += 1) {
-      const leafX = x + (rng() - 0.5) * width * 1.6;
-      const leafY = y + (rng() - 0.5) * height * 0.9;
-      const leafWidth = width * (0.18 + rng() * 0.28);
-      const leafHeight = height * (0.23 + rng() * 0.48);
-      softOval(ctx, leafX, leafY, leafWidth, leafHeight, 'rgba(16,23,37,' + opacity * (0.22 + rng() * 0.66) + ')', 'rgba(21,28,40,0)');
-    }
-  }
-
-  const shore = [[0, 569], [122, 561], [165, 557], [248, 561], [333, 571], [386, 568], [446, 576], [489, 573], [541, 582], [616, 589], [701, 592], [0, 597]];
-  fillPath(ctx, shore, '#293640');
-  fillPath(ctx, [[0, 579], [151, 577], [211, 568], [251, 570], [309, 574], [359, 572], [390, 579], [428, 580], [470, 589], [538, 593], [0, 596]], '#25333c');
-
-  const water = ctx.createLinearGradient(0, HORIZON, 46, HEIGHT);
-  water.addColorStop(0, '#353e48');
-  water.addColorStop(0.08, '#273740');
-  water.addColorStop(0.36, '#1b2a37');
-  water.addColorStop(0.77, '#13212d');
-  water.addColorStop(1, '#09151e');
-  ctx.fillStyle = water;
-  ctx.fillRect(0, HORIZON, WIDTH, HEIGHT - HORIZON);
-  softOval(ctx, 1506, 632, 746, 122, 'rgba(152,127,120,0.18)', 'rgba(152,127,120,0)');
-  softOval(ctx, 1180, 852, 712, 230, 'rgba(100,126,132,0.10)', 'rgba(100,126,132,0)');
-
-  ctx.fillStyle = 'rgba(151,153,151,0.15)';
-  ctx.fillRect(703, HORIZON, WIDTH - 703, 1);
-}
-
-function drawTower(ctx, rng) {
-  fillPath(ctx, [[514, 558], [665, 563], [656, 576], [490, 570]], '#101b23');
-  fillPath(ctx, [[518, 558], [624, 554], [624, 565], [514, 570]], '#273239');
-  fillPath(ctx, [[494, 529], [517, 511], [550, 525], [546, 566], [487, 565]], '#333d41');
-  fillPath(ctx, [[481, 529], [515, 500], [557, 526], [549, 531], [516, 511], [490, 535]], '#111c24');
-  fillPath(ctx, [[515, 514], [550, 529], [546, 566], [518, 566]], '#202c32');
-  ctx.fillStyle = '#18242b';
-  ctx.fillRect(498, 537, 10, 15);
-  ctx.fillRect(522, 537, 8, 12);
-  ctx.fillStyle = 'rgba(199,151,91,0.48)';
-  ctx.fillRect(499, 538, 6, 10);
-  ctx.fillStyle = '#30302b';
-  ctx.fillRect(501, 537, 1, 13);
-
-  const body = ctx.createLinearGradient(529, 0, 608, 0);
-  body.addColorStop(0, '#727f7b');
-  body.addColorStop(0.26, '#64756f');
-  body.addColorStop(0.56, '#53605d');
-  body.addColorStop(1, '#303f42');
-  const tower = [[542, 418], [590, 418], [604, 558], [529, 559]];
-  fillPath(ctx, tower, body);
-
-  ctx.save();
-  ctx.beginPath();
-  ctx.moveTo(...tower[0]);
-  for (const point of tower.slice(1)) ctx.lineTo(...point);
-  ctx.closePath();
-  ctx.clip();
-  for (let index = 0; index < 360; index += 1) {
-    const x = 528 + rng() * 78;
-    const y = 419 + rng() * 140;
-    ctx.fillStyle = rng() < 0.62 ? 'rgba(21,39,42,0.07)' : 'rgba(180,181,152,0.08)';
-    ctx.fillRect(x, y, 0.6 + rng() * 3, 1.1 + rng() * 5.8);
-  }
-  for (const y of [445, 473, 503, 532, 553]) {
-    ctx.fillStyle = 'rgba(23,39,40,0.23)';
-    ctx.fillRect(532, y, 70, 1.3);
-  }
-  fillPath(ctx, [[543, 420], [551, 423], [542, 557], [534, 557]], 'rgba(213,203,156,0.08)');
-  ctx.restore();
-
-  ctx.fillStyle = '#263739';
-  ctx.fillRect(559, 468, 9, 18);
-  ctx.fillRect(555, 502, 8, 13);
-  ctx.fillStyle = '#394546';
-  ctx.fillRect(560, 470, 5, 13);
-  ctx.fillRect(556, 503, 5, 11);
-  fillPath(ctx, [[565, 558], [565, 536], [569, 531], [577, 531], [581, 536], [581, 558]], '#253239');
-
-  fillPath(ctx, [[535, 417], [597, 417], [594, 424], [539, 424]], '#243138');
-  fillPath(ctx, [[532, 412], [599, 412], [596, 417], [535, 417]], '#4b5551');
-  fillPath(ctx, [[542, 374], [589, 374], [588, 412], [543, 412]], '#302f2c');
-  const glass = ctx.createLinearGradient(542, 0, 586, 0);
-  glass.addColorStop(0, '#8b7653');
-  glass.addColorStop(0.35, '#e1bd7a');
-  glass.addColorStop(0.57, '#f3d997');
-  glass.addColorStop(1, '#a08358');
-  fillPath(ctx, [[545, 376], [586, 376], [585, 408], [546, 408]], glass);
-
-  ctx.strokeStyle = '#252e30';
-  ctx.lineWidth = 2;
-  for (const x of [543, 553, 579, 588]) {
-    ctx.beginPath();
-    ctx.moveTo(x, 373);
-    ctx.lineTo(x + (x < 566 ? 1 : -1), 413);
-    ctx.stroke();
-  }
-  ctx.fillStyle = 'rgba(74,67,54,0.68)';
-  ctx.fillRect(545, 400, 42, 1.5);
-  ctx.fillStyle = '#344140';
-  ctx.fillRect(532, 410, 67, 2.4);
-  ctx.fillStyle = '#1b292d';
-  ctx.fillRect(532, 404, 67, 1.1);
-  for (const x of [533, 542, 552, 579, 589, 598]) ctx.fillRect(x, 403, 1.5, 10);
-
-  fillPath(ctx, [[533, 375], [544, 368], [559, 356], [572, 355], [590, 366], [599, 374], [588, 378], [544, 378]], '#202c32');
-  fillPath(ctx, [[543, 371], [558, 357], [569, 356], [560, 368], [537, 374]], '#39494c');
-  ctx.fillStyle = '#43504d';
-  ctx.fillRect(565, 346, 2, 11);
-  ctx.fillRect(562, 349, 8, 1);
-  ctx.fillRect(576, 551, 59, 1.2);
-  for (const x of [583, 598, 612, 626, 635]) ctx.fillRect(x, 551, 1.5, 12);
-}
-
-function drawTerrain(ctx, rng) {
-  const anchors = [[0, 569], [48, 549], [83, 553], [127, 534], [171, 551], [216, 545], [257, 552], [293, 548], [316, 560], [385, 556], [420, 564], [458, 552], [484, 557], [519, 556], [549, 561], [588, 559], [625, 561], [647, 569], [658, 585], [683, 595], [693, 614], [680, 633], [656, 641], [638, 660], [658, 678], [628, 699], [587, 711], [563, 729], [515, 745], [488, 765], [444, 780], [433, 796], [382, 819], [372, 849], [329, 862], [290, 890], [249, 909], [202, 949], [166, 971], [105, 998], [68, 1027], [20, 1062], [0, 1080]];
-  const profile = erodedEdge(anchors, rng, 7);
-  const shore = erodedEdge(anchors.slice(15), randomFrom(78233), 3);
-  const base = ctx.createLinearGradient(258, 536, 283, 971);
-  base.addColorStop(0, '#303d42');
-  base.addColorStop(0.38, '#202f35');
-  base.addColorStop(1, '#0a171e');
-  fillPath(ctx, profile, base);
-  ctx.save();
-  ctx.beginPath();
-  ctx.moveTo(...profile[0]);
-  for (const point of profile.slice(1)) ctx.lineTo(...point);
-  ctx.closePath();
-  ctx.clip();
-
-  const planes = [
-    [[[34, 584], [340, 575], [396, 594], [348, 707], [271, 746], [213, 842], [0, 944]], '#1c2931'],
-    [[[0, 574], [124, 551], [206, 567], [161, 620], [86, 661], [0, 661]], '#3b4546'],
-    [[[179, 571], [331, 561], [421, 577], [372, 619], [228, 619], [142, 664]], '#364145'],
-    [[[410, 569], [535, 554], [629, 564], [679, 593], [634, 610], [529, 610], [441, 646], [368, 646]], '#354247'],
-    [[[574, 602], [684, 594], [675, 633], [630, 655], [565, 666], [526, 697], [459, 720], [484, 663]], '#25353d'],
-    [[[623, 652], [679, 654], [633, 703], [562, 730], [509, 751], [537, 712]], '#172830'],
-    [[[42, 672], [135, 642], [224, 646], [205, 701], [128, 752], [0, 775]], '#273439'],
-    [[[22, 788], [131, 752], [264, 715], [213, 787], [154, 823], [0, 879]], '#1d2c32'],
-    [[[261, 659], [415, 621], [458, 630], [396, 710], [363, 757], [241, 819], [221, 771]], '#28363c'],
-    [[[412, 721], [553, 673], [520, 733], [474, 776], [383, 818]], '#1b2b33'],
-    [[[140, 836], [282, 779], [380, 774], [356, 833], [299, 856], [222, 897], [100, 924]], '#233238'],
-    [[[22, 911], [123, 846], [175, 827], [151, 880], [86, 924], [0, 950]], '#17272f'],
-  ];
-  ctx.globalAlpha = 0.79;
-  for (const [points, color] of planes) fillPath(ctx, erodedEdge(points, rng, 13, true), color);
-  ctx.globalAlpha = 1;
-
-  for (let cluster = 0; cluster < 350; cluster += 1) {
-    const x = rng() * 699;
-    const y = 548 + rng() * 535;
-    const width = 4 + rng() ** 2 * 27;
-    const shear = 0.23 + rng() * 0.62;
-    const color = rng() < 0.55 ? 'rgba(181,179,152,0.096)' : 'rgba(7,15,18,0.17)';
-    const edge = [[x, y], [x + width * 0.28, y - width * shear + 3], [x + width * 0.82, y - width * shear], [x + width, y - width * 0.45], [x + width * 0.39, y + 1]];
-    fillPath(ctx, edge, color);
-  }
-
-  for (let index = 0; index < 190; index += 1) {
-    const x = rng() * 710;
-    const y = 548 + rng() * 510;
-    const run = 7 + rng() ** 2 * 43;
-    const descent = 4 + rng() ** 2 * 23;
-    const alpha = 0.1 + rng() * 0.16;
-    ctx.strokeStyle = 'rgba(9,20,24,' + alpha + ')';
-    ctx.lineWidth = 0.6 + rng() * 1.1;
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(x - run * 0.2, y + descent * 1.1);
-    ctx.lineTo(x - run * 0.59, y + descent * 1.21);
-    ctx.lineTo(x - run, y + descent * 1.9);
-    ctx.stroke();
-  }
-
-  // Eroded strata with fine but irregular seams.
-  for (let index = 0; index < 7200; index += 1) {
-    const x = rng() * 696;
-    const y = 544 + rng() * 525;
-    const length = 0.6 + Math.pow(rng(), 6) * 39;
-    const shine = rng() < 0.53;
-    const strength = (0.045 + rng() * 0.18) * (1 - (y - 544) / 1100);
-    ctx.strokeStyle = 'rgba(' + (shine ? '154,158,143,' : '8,18,22,') + strength + ')';
-    ctx.lineWidth = 0.45 + rng() * 1.5;
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(x + length, y - length * (0.12 + rng() * 0.41));
-    ctx.stroke();
-  }
-
-  for (let index = 0; index < 49; index += 1) {
-    const x = 26 + rng() * 636;
-    const y = 561 + rng() * 437;
-    const width = 9 + rng() * 46;
-    const height = 3 + rng() * 15;
-    fillPath(ctx, [[x - 4, y], [x + width * 0.28, y - height], [x + width, y - height * 0.4], [x + width * 0.62, y + height * 0.48]], 'rgba(10,22,27,0.24)');
-    fillPath(ctx, [[x - 4, y], [x + width * 0.28, y - height], [x + width, y - height * 0.4], [x + width * 0.29, y - height * 0.48]], 'rgba(154,159,142,0.11)');
-  }
-  ctx.restore();
-
-  fillPath(ctx, [[0, 908], [39, 900], [83, 914], [122, 907], [152, 928], [189, 934], [213, 951], [202, 967], [241, 983], [269, 985], [298, 1004], [352, 1024], [384, 1062], [459, 1080], [0, 1080]], '#0b171e');
-  fillPath(ctx, [[0, 940], [56, 927], [106, 931], [139, 946], [132, 962], [75, 986], [0, 1007]], '#111f27');
-
-  for (let index = 0; index < 226; index += 1) {
-    const x = rng() * 450;
-    const y = 916 + x * 0.37 + rng() * 34;
-    const height = 4 + Math.pow(rng(), 2.2) * 36;
-    ctx.strokeStyle = rng() < 0.56 ? 'rgba(24,38,43,0.81)' : 'rgba(12,27,30,0.84)';
-    ctx.lineWidth = 0.6 + rng() * 1.3;
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.quadraticCurveTo(x - height * 0.24, y - height * 0.7, x - height * (0.3 + rng() * 0.32), y - height);
-    ctx.stroke();
-  }
-
-  drawTower(ctx, rng);
-  return shore;
-}
-
-function makeLightShaft(createCanvas) {
-  const shaft = createCanvas(512, 144);
-  const ctx = shaft.getContext('2d');
-  const pixels = ctx.createImageData(shaft.width, shaft.height);
-  for (let x = 0; x < shaft.width; x += 1) {
-    const u = x / (shaft.width - 1);
-    const spread = 0.07 + u ** 0.76 * 0.72;
-    const attenuation = (1 - u) ** 1.65 * (0.91 + 0.09 * Math.sin(u * 32));
-    for (let y = 0; y < shaft.height; y += 1) {
-      const v = 2 * y / (shaft.height - 1) - 1;
-      const center = u * (0.043 * Math.sin(u * 9) - 0.026);
-      const relativeDistance = (v - center) / spread;
-      const glow = Math.max(0, Math.exp(-5 * relativeDistance ** 2) - 0.0068);
-      const halo = Math.max(0, 1 - (relativeDistance * 0.76) ** 2) ** 3;
-      const index = (y * shaft.width + x) * 4;
-      pixels.data[index] = 231;
-      pixels.data[index + 1] = 202;
-      pixels.data[index + 2] = 155;
-      pixels.data[index + 3] = attenuation * (32 * glow + 11 * halo);
-    }
-  }
-  ctx.putImageData(pixels, 0, 0);
-  return shaft;
+function tower(ctx) {
+  const { x, base, h, rb, rt } = TOWER, top = base - h;
+  const g = ctx.createLinearGradient(x - rb, 0, x + rb, 0); g.addColorStop(0, '#7a8288'); g.addColorStop(.3, '#e4e8e8'); g.addColorStop(.7, '#9aa0a4'); g.addColorStop(1, '#40464c');
+  fill(ctx, [[x - rb, base], [x + rb, base], [x + rt, top], [x - rt, top]], g);
+  ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.beginPath(); ctx.ellipse(x, base, rb, 8, 0, 0, Math.PI); ctx.fill();
+  for (let w = 1; w < 4; w++) { const y = lerp(base, top, w / 4); ctx.fillStyle = '#1a1e22'; ctx.fillRect(x - 5, y - 14, 10, 20); }
+  // gallery: a black deck and railing
+  fill(ctx, [[x - rt - 16, top], [x + rt + 16, top], [x + rt + 12, top - 8], [x - rt - 12, top - 8]], '#16181c');
+  ctx.strokeStyle = '#16181c'; ctx.lineWidth = 2; for (let r = -6; r <= 6; r++) { ctx.beginPath(); ctx.moveTo(x + r * (rt + 12) / 6, top - 8); ctx.lineTo(x + r * (rt + 12) / 6, top - 30); ctx.stroke(); }
+  ctx.beginPath(); ctx.moveTo(x - rt - 12, top - 30); ctx.lineTo(x + rt + 12, top - 30); ctx.stroke();
+  // lantern room: glass panes with mullions, red dome, vent ball
+  fill(ctx, [[x - rt + 4, top - 8], [x + rt - 4, top - 8], [x + rt - 4, top - 58], [x - rt + 4, top - 58]], '#f0dca0');
+  ctx.strokeStyle = '#2a2420'; ctx.lineWidth = 3; for (let m = -1; m <= 1; m++) { ctx.beginPath(); ctx.moveTo(x + m * rt * .5, top - 8); ctx.lineTo(x + m * rt * .5, top - 58); ctx.stroke(); }
+  ctx.fillStyle = '#8a2a22'; ctx.beginPath(); ctx.ellipse(x, top - 58, rt, 22, 0, Math.PI, TAU); ctx.fill();
+  ctx.fillStyle = 'rgba(255,200,180,.25)'; ctx.beginPath(); ctx.ellipse(x - rt * .4, top - 66, rt * .3, 6, -.3, 0, TAU); ctx.fill();
+  ctx.fillStyle = '#16181c'; ctx.beginPath(); ctx.arc(x, top - 84, 5, 0, TAU); ctx.fill();
+  // cottage
+  const cx = 1010, cy = TOWER.base + 4;
+  fill(ctx, [[cx - 90, cy], [cx + 70, cy], [cx + 70, cy - 70], [cx - 90, cy - 70]], '#a0a6a8');
+  fill(ctx, [[cx - 100, cy - 70], [cx + 80, cy - 70], [cx + 50, cy - 118], [cx - 70, cy - 118]], '#2a2c32');
+  ctx.fillStyle = '#3a3c42'; ctx.fillRect(cx + 30, cy - 136, 14, 30);
+  ctx.fillStyle = '#e8a860'; ctx.fillRect(cx - 50, cy - 48, 24, 24); glow(ctx, cx - 38, cy - 36, 40, 30, '255,180,110', .5);
+  return [x, top - 34];
 }
 
 function createScene(createCanvas) {
-  const rng = randomFrom(37654673);
-  const backdrop = createCanvas(WIDTH, HEIGHT);
-  const foreground = createCanvas(WIDTH, HEIGHT);
-  const details = createCanvas(WIDTH, HEIGHT - HORIZON);
-  const vignette = createCanvas(WIDTH, HEIGHT);
-  const lightShaft = makeLightShaft(createCanvas);
-  drawSky(backdrop.getContext('2d'), rng);
-  const shore = drawTerrain(foreground.getContext('2d'), rng);
-  const waterDetail = details.getContext('2d');
-  const shade = vignette.getContext('2d');
+  const make = createCanvas;
+  const rnd = paint.seeded(3011);
+  const plate = make(W, H), ctx = plate.getContext('2d');
+  const sky = ctx.createLinearGradient(0, 0, 0, SEA); sky.addColorStop(0, '#0a1018'); sky.addColorStop(1, '#2c3844');
+  ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
+  paint.starfield(ctx, rnd, 60, 300);
+  // the far sea under fog, and the near swell
+  const sea = ctx.createLinearGradient(0, 600, 0, H); sea.addColorStop(0, '#2a3640'); sea.addColorStop(1, '#080c12');
+  ctx.fillStyle = sea; ctx.fillRect(0, 600, W, H);
+  for (let i = 0; i < 40; i++) { const y = lerp(SEA + 4, H, (i / 40) ** 1.5); ctx.strokeStyle = `rgba(150,170,180,${.05 + .05 * rnd()})`; ctx.lineWidth = 1 + i * .08; ctx.beginPath(); for (let x = -1; x <= W + 1; x += 40) ctx.lineTo(x, y + Math.sin(x * .006 + i * 1.3) * (2 + i * .3)); ctx.stroke(); }
+  cliff(ctx, rnd);
+  const lantern = tower(ctx);
+  paint.applyTexture(ctx, make, 3012, .36, 0, 0, W, H, true);
+  paint.lighting(make, { ambient: [.6, .66, .76], lights: [paint.LIGHT.lamp(lantern[0], lantern[1] + 80, .35, 500, 300, [1.3, 1.1, .8])] })(ctx);
+  const foot = Array.from({ length: 30 }, () => ({ x: 80 + rnd() * 1420, lag: rnd(), w: 30 + rnd() * 70 }));
+  const fogBands = Array.from({ length: 10 }, () => ({ y: lerp(250, H, rnd()), lag: rnd(), w: 600 + rnd() * 600 }));
 
-  for (let index = 0; index < 2190; index += 1) {
-    const x = rng() * WIDTH;
-    const y = Math.pow(rng(), 2.2) * (HEIGHT - HORIZON);
-    const depth = y / (HEIGHT - HORIZON);
-    const length = (2 + Math.pow(rng(), 1.7) * (70 + depth * 80)) * (0.33 + depth * 0.63);
-    const alpha = (0.025 + rng() * 0.105) * (0.46 + 0.38 * Math.sin(x * 0.0013 + 0.1) + depth * 0.24);
-    waterDetail.fillStyle = rng() < 0.71 ? 'rgba(142,160,166,' + alpha + ')' : 'rgba(7,15,25,' + alpha * 1.3 + ')';
-    waterDetail.fillRect(x, y, length, (0.44 + rng() * 0.56) * (0.7 + depth * 1.8));
-  }
-  const darkEdges = shade.createRadialGradient(1070, 518, 341, 988, 520, 1147);
-  darkEdges.addColorStop(0, 'rgba(3,7,16,0)');
-  darkEdges.addColorStop(0.63, 'rgba(3,7,16,0.04)');
-  darkEdges.addColorStop(1, 'rgba(3,7,16,0.41)');
-  shade.fillStyle = darkEdges;
-  shade.fillRect(0, 0, WIDTH, HEIGHT);
-
-  const ripples = Array.from({ length: 306 }, () => ({
-    x: rng() * WIDTH,
-    depth: Math.pow(rng(), 1.76),
-    length: 11 + Math.pow(rng(), 2) * 119,
-    offset: rng() * TAU,
-    alpha: 0.024 + rng() * 0.095,
-    cycle: 1 + Math.floor(rng() * 3),
-  }));
-  const swashes = [];
-  const contact = createCanvas(WIDTH, HEIGHT);
-  const tidalEdge = contact.getContext('2d');
-  for (let index = 1; index < shore.length; index += 1) {
-    const [x, y] = shore[index - 1];
-    const [endX, endY] = shore[index];
-    const dx = endX - x;
-    const dy = endY - y;
-    const length = Math.hypot(dx, dy);
-    const outwardX = dy / length;
-    const outwardY = -dx / length;
-    const depth = Math.max(0, (y - HORIZON) / (HEIGHT - HORIZON));
-    if (y < HORIZON) continue;
-    for (let mark = 0; mark < 9; mark += 1) {
-      const fraction = rng();
-      const opacity = (0.05 + rng() * 0.07) * (1 - depth * 0.55);
-      const offset = 1 + rng() ** 2 * 14;
-      tidalEdge.strokeStyle = 'rgba(4,13,19,' + opacity + ')';
-      tidalEdge.lineWidth = 1 + rng() * 4;
-      tidalEdge.beginPath();
-      tidalEdge.moveTo(x + fraction * dx + outwardX * offset, y + fraction * dy + outwardY * offset);
-      tidalEdge.lineTo(x + (fraction + 0.85) * dx + outwardX * offset, y + (fraction + 0.85) * dy + outwardY * offset);
-      tidalEdge.stroke();
+  return (target, input) => {
+    const phase = input - Math.floor(input);
+    target.drawImage(plate, 0, 0);
+    for (const f of foot) { const t = (phase * 2 + f.lag) % 1, burst = t < .35 ? Math.sin(Math.PI * t / .35) : 0, drain = t >= .35 ? 1 - (t - .35) / .65 : 0; glow(target, f.x, SEA - burst * 26, f.w * (1 + burst), 8 + burst * 30, '220,230,236', .45 * burst + .12 * drain); }
+    for (const fb of fogBands) glow(target, ((phase + fb.lag) % 1) * (W + 1200) - 600, fb.y, fb.w, 60, '150,164,176', .08);
+    // the beam: two opposite shafts on a turning lamp — seen from the side, each swings across and back
+    const a = TAU * phase;
+    target.save(); target.globalCompositeOperation = 'lighter';
+    for (const off of [0, Math.PI]) {
+      const ang = a + off, side = Math.sin(ang), toward = Math.cos(ang);
+      const len = 1900 * Math.abs(side) + 120, spread = 40 + 220 * Math.max(0, toward);
+      const ex = lantern[0] + side * len, ey = lantern[1] + 30 * Math.max(0, toward);
+      const gb = target.createLinearGradient(...lantern, ex, ey); gb.addColorStop(0, `rgba(255,240,200,${.28 + .3 * Math.max(0, toward)})`); gb.addColorStop(1, 'rgba(255,240,200,0)');
+      target.fillStyle = gb; target.beginPath(); target.moveTo(lantern[0], lantern[1] - 6); target.lineTo(ex, ey - spread); target.lineTo(ex, ey + spread); target.lineTo(lantern[0], lantern[1] + 6); target.fill();
     }
-    if (rng() < 0.14) continue;
-    swashes.push({
-      x, y, dx, dy, outwardX, outwardY, depth,
-      length: 0.48 + rng() * 1.58,
-      offset: x * 0.008 + y * 0.004 + (rng() - 0.5) * 1.8,
-      strength: (0.15 + rng() * 0.21) * (1 - depth * 0.44),
-    });
-  }
-  const lanternWash = radial(shade, LIGHT.x, LIGHT.y, 38, 'rgba(220,164,92,0.11)', 'rgba(220,164,92,0)');
-  shade.fillStyle = lanternWash;
-  shade.fillRect(527, 349, 78, 78);
-
-  return (ctx, phase) => {
-    const time = (phase % 1) * TAU;
-    ctx.drawImage(backdrop, 0, 0);
-    ctx.drawImage(details, Math.sin(time) * 4, HORIZON);
-
-    for (const ripple of ripples) {
-      const wave = Math.sin(time * ripple.cycle + ripple.offset);
-      const y = HORIZON + 2 + ripple.depth * (HEIGHT - HORIZON) + wave * (0.6 + ripple.depth * 5);
-      const x = ripple.x + wave * (3 + ripple.depth * 14);
-      const length = ripple.length * (0.27 + ripple.depth);
-      ctx.strokeStyle = 'rgba(160,177,179,' + ripple.alpha * (0.67 + wave * 0.28) + ')';
-      ctx.lineWidth = 0.5 + ripple.depth * 1.65;
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.quadraticCurveTo(x + length * 0.48, y - 0.3 - ripple.depth * 1.8, x + length, y + wave * 0.64);
-      ctx.stroke();
-    }
-
-    ctx.drawImage(contact, 0, 0);
-    for (const crest of swashes) {
-      const lap = 0.5 + 0.5 * Math.sin(time * 4 + crest.offset);
-      const advance = 5 + (1 - lap) ** 2 * (7 + crest.depth * 11);
-      const x = crest.x + crest.outwardX * advance;
-      const y = crest.y + crest.outwardY * advance;
-      const dx = crest.dx * crest.length + 4 * lap;
-      const dy = crest.dy * crest.length;
-      const strength = crest.strength * lap ** 2;
-      ctx.strokeStyle = 'rgba(143,163,166,' + strength + ')';
-      ctx.lineWidth = 0.65 + lap * 0.92;
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.quadraticCurveTo(x + dx * 0.55 + 4, y + dy * 0.49 - 1.3, x + dx, y + dy);
-      ctx.stroke();
-      ctx.strokeStyle = 'rgba(178,193,185,' + strength * 0.48 + ')';
-      ctx.lineWidth = 0.69 + crest.depth * 0.64;
-      ctx.beginPath();
-      ctx.moveTo(x + dx * 0.24 + crest.outwardX * 4, y + dy * 0.24 + crest.outwardY * 4);
-      ctx.lineTo(x + dx * 0.7 + crest.outwardX * 7, y + dy * 0.7 + crest.outwardY * 7);
-      ctx.stroke();
-    }
-
-    const rotation = Math.sin(time - 0.88);
-    const forward = Math.cos(time - 0.88);
-    const castX = LIGHT.x + rotation * 1690;
-    const castY = LIGHT.y - 9 + 31 * rotation - 23 * forward;
-    const reach = Math.abs(rotation);
-    if (reach > 0.01) {
-      const dx = castX - LIGHT.x;
-      const dy = castY - LIGHT.y;
-      const width = 83 + reach * 83;
-      ctx.save();
-      ctx.translate(LIGHT.x, LIGHT.y);
-      ctx.rotate(Math.atan2(dy, dx));
-      ctx.globalAlpha = reach ** 1.38 * (0.69 + (1 + forward) * 0.12);
-      ctx.drawImage(lightShaft, 0, -width / 2, Math.hypot(dx, dy), width);
-      ctx.restore();
-    }
-
-    ctx.drawImage(foreground, 0, 0);
-    const light = 0.27 + 0.13 * Math.pow(0.5 + 0.5 * forward, 1.35);
-    softOval(ctx, LIGHT.x, LIGHT.y, 70, 65, 'rgba(240,180,98,' + light + ')', 'rgba(240,180,98,0)');
-    softOval(ctx, LIGHT.x, LIGHT.y, 10, 12, 'rgba(255,228,158,0.61)', 'rgba(255,228,158,0)');
-    ctx.drawImage(vignette, 0, 0);
+    target.restore();
+    const flash = Math.max(0, Math.cos(a)) ** 30 + Math.max(0, Math.cos(a + Math.PI)) ** 30;
+    glow(target, lantern[0], lantern[1], 24 + 220 * flash, 24 + 220 * flash, '255,240,200', .6 + .4 * flash);
   };
 }
 
-module.exports = { title: '안개 낀 곶의 등대', slug: 'beacon-on-the-headland', sound: 'sea', createScene };
+module.exports = {
+  title: '안개 낀 곶의 등대',
+  slug: 'beacon-on-the-headland',
+  sound: 'sea',
+  createScene,
+};

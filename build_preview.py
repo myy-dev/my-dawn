@@ -94,6 +94,7 @@ def build(output):
       // Every scene ends with the shared finishing pass (lens, bloom, film base, grain, vignette).
       const createScene = sharedModules['../lib/paint.cjs'].finished(scene.createScene, {{
         amount: entry.finish ?? 1, cycleSeconds: entry.cycleSeconds,
+        look: () => globalThis.__dawnLook || entry.look || scene.look || 'film',
       }});
       return {{ ...entry, scene: {{ ...scene, createScene }} }};
     }});"""

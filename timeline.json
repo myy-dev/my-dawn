@@ -82,7 +82,6 @@
     },
     {
       "id": "11",
-      "family": "interiors",
       "category": "실내",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -92,7 +91,6 @@
     },
     {
       "id": "12",
-      "family": "interiors",
       "category": "실내",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -102,7 +100,6 @@
     },
     {
       "id": "13",
-      "family": "interiors",
       "category": "실내",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -112,7 +109,6 @@
     },
     {
       "id": "14",
-      "family": "interiors",
       "category": "실내",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -122,7 +118,6 @@
     },
     {
       "id": "15",
-      "family": "interiors",
       "category": "실내",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -132,7 +127,6 @@
     },
     {
       "id": "16",
-      "family": "interiors",
       "category": "실내",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -142,7 +136,6 @@
     },
     {
       "id": "17",
-      "family": "interiors",
       "category": "실내",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -152,7 +145,6 @@
     },
     {
       "id": "18",
-      "family": "interiors",
       "category": "실내",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -162,7 +154,6 @@
     },
     {
       "id": "19",
-      "family": "interiors",
       "category": "실내",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -172,7 +163,6 @@
     },
     {
       "id": "20",
-      "family": "interiors",
       "category": "실내",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -182,7 +172,6 @@
     },
     {
       "id": "21",
-      "family": "interiors",
       "category": "실내",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -192,7 +181,6 @@
     },
     {
       "id": "22",
-      "family": "interiors",
       "category": "실내",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -202,7 +190,6 @@
     },
     {
       "id": "23",
-      "family": "interiors",
       "category": "실내",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -212,7 +199,6 @@
     },
     {
       "id": "24",
-      "family": "interiors",
       "category": "실내",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -222,7 +208,6 @@
     },
     {
       "id": "25",
-      "family": "interiors",
       "category": "실내",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -232,7 +217,6 @@
     },
     {
       "id": "26",
-      "family": "waters",
       "category": "물가",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -242,7 +226,6 @@
     },
     {
       "id": "27",
-      "family": "waters",
       "category": "물가",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -252,7 +235,6 @@
     },
     {
       "id": "28",
-      "family": "waters",
       "category": "물가",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -262,7 +244,6 @@
     },
     {
       "id": "29",
-      "family": "waters",
       "category": "물가",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -272,7 +253,6 @@
     },
     {
       "id": "30",
-      "family": "waters",
       "category": "물가",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -282,7 +262,6 @@
     },
     {
       "id": "31",
-      "family": "waters",
       "category": "물가",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -292,7 +271,6 @@
     },
     {
       "id": "32",
-      "family": "waters",
       "category": "물가",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -302,7 +280,6 @@
     },
     {
       "id": "33",
-      "family": "waters",
       "category": "물가",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -312,7 +289,6 @@
     },
     {
       "id": "34",
-      "family": "waters",
       "category": "물가",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -322,7 +298,6 @@
     },
     {
       "id": "35",
-      "family": "waters",
       "category": "물가",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -332,7 +307,6 @@
     },
     {
       "id": "36",
-      "family": "waters",
       "category": "물가",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -342,7 +316,6 @@
     },
     {
       "id": "37",
-      "family": "waters",
       "category": "물가",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -352,7 +325,6 @@
     },
     {
       "id": "38",
-      "family": "waters",
       "category": "물가",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -362,7 +334,6 @@
     },
     {
       "id": "39",
-      "family": "waters",
       "category": "물가",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -372,7 +343,6 @@
     },
     {
       "id": "40",
-      "family": "waters",
       "category": "물가",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -382,7 +352,6 @@
     },
     {
       "id": "41",
-      "family": "woodlands",
       "category": "숲과 정원",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -392,7 +361,6 @@
     },
     {
       "id": "42",
-      "family": "woodlands",
       "category": "숲과 정원",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -402,7 +370,6 @@
     },
     {
       "id": "43",
-      "family": "woodlands",
       "category": "숲과 정원",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -412,7 +379,6 @@
     },
     {
       "id": "44",
-      "family": "woodlands",
       "category": "숲과 정원",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -422,7 +388,6 @@
     },
     {
       "id": "45",
-      "family": "woodlands",
       "category": "숲과 정원",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -432,7 +397,6 @@
     },
     {
       "id": "46",
-      "family": "woodlands",
       "category": "숲과 정원",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -442,7 +406,6 @@
     },
     {
       "id": "47",
-      "family": "woodlands",
       "category": "숲과 정원",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -452,7 +415,6 @@
     },
     {
       "id": "48",
-      "family": "woodlands",
       "category": "숲과 정원",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -462,7 +424,6 @@
     },
     {
       "id": "49",
-      "family": "woodlands",
       "category": "숲과 정원",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -472,7 +433,6 @@
     },
     {
       "id": "50",
-      "family": "woodlands",
       "category": "숲과 정원",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -482,7 +442,6 @@
     },
     {
       "id": "51",
-      "family": "woodlands",
       "category": "숲과 정원",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -492,7 +451,6 @@
     },
     {
       "id": "52",
-      "family": "woodlands",
       "category": "숲과 정원",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -502,7 +460,6 @@
     },
     {
       "id": "53",
-      "family": "woodlands",
       "category": "숲과 정원",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -512,7 +469,6 @@
     },
     {
       "id": "54",
-      "family": "woodlands",
       "category": "숲과 정원",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -522,7 +478,6 @@
     },
     {
       "id": "55",
-      "family": "woodlands",
       "category": "숲과 정원",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -532,7 +487,6 @@
     },
     {
       "id": "56",
-      "family": "skies",
       "category": "밤하늘",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -542,7 +496,6 @@
     },
     {
       "id": "57",
-      "family": "skies",
       "category": "밤하늘",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -552,7 +505,6 @@
     },
     {
       "id": "58",
-      "family": "skies",
       "category": "밤하늘",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -562,7 +514,6 @@
     },
     {
       "id": "59",
-      "family": "skies",
       "category": "밤하늘",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -572,7 +523,6 @@
     },
     {
       "id": "60",
-      "family": "skies",
       "category": "밤하늘",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -582,7 +532,6 @@
     },
     {
       "id": "61",
-      "family": "skies",
       "category": "밤하늘",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -592,7 +541,6 @@
     },
     {
       "id": "62",
-      "family": "skies",
       "category": "밤하늘",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -602,7 +550,6 @@
     },
     {
       "id": "63",
-      "family": "skies",
       "category": "밤하늘",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -612,7 +559,6 @@
     },
     {
       "id": "64",
-      "family": "skies",
       "category": "밤하늘",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -622,7 +568,6 @@
     },
     {
       "id": "65",
-      "family": "skies",
       "category": "밤하늘",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -632,7 +577,6 @@
     },
     {
       "id": "66",
-      "family": "skies",
       "category": "밤하늘",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -642,7 +586,6 @@
     },
     {
       "id": "67",
-      "family": "skies",
       "category": "밤하늘",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -652,7 +595,6 @@
     },
     {
       "id": "68",
-      "family": "skies",
       "category": "밤하늘",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -662,7 +604,6 @@
     },
     {
       "id": "69",
-      "family": "skies",
       "category": "밤하늘",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -672,7 +613,6 @@
     },
     {
       "id": "70",
-      "family": "skies",
       "category": "밤하늘",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -682,7 +622,6 @@
     },
     {
       "id": "71",
-      "family": "street",
       "category": "도시와 교통",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -692,7 +631,6 @@
     },
     {
       "id": "72",
-      "family": "street",
       "category": "도시와 교통",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -702,7 +640,6 @@
     },
     {
       "id": "73",
-      "family": "street",
       "category": "도시와 교통",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -712,7 +649,6 @@
     },
     {
       "id": "74",
-      "family": "street",
       "category": "도시와 교통",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -722,7 +658,6 @@
     },
     {
       "id": "75",
-      "family": "street",
       "category": "도시와 교통",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -732,7 +667,6 @@
     },
     {
       "id": "76",
-      "family": "street",
       "category": "도시와 교통",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -742,7 +676,6 @@
     },
     {
       "id": "77",
-      "family": "street",
       "category": "도시와 교통",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -752,7 +685,6 @@
     },
     {
       "id": "78",
-      "family": "street",
       "category": "도시와 교통",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -762,7 +694,6 @@
     },
     {
       "id": "79",
-      "family": "street",
       "category": "도시와 교통",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -772,7 +703,6 @@
     },
     {
       "id": "80",
-      "family": "street",
       "category": "도시와 교통",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -782,7 +712,6 @@
     },
     {
       "id": "81",
-      "family": "street",
       "category": "도시와 교통",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -792,7 +721,6 @@
     },
     {
       "id": "82",
-      "family": "street",
       "category": "도시와 교통",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -802,7 +730,6 @@
     },
     {
       "id": "83",
-      "family": "street",
       "category": "도시와 교통",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -812,7 +739,6 @@
     },
     {
       "id": "84",
-      "family": "street",
       "category": "도시와 교통",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -822,7 +748,6 @@
     },
     {
       "id": "85",
-      "family": "street",
       "category": "도시와 교통",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -832,7 +757,6 @@
     },
     {
       "id": "86",
-      "family": "weather",
       "category": "날씨와 전원",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -842,7 +766,6 @@
     },
     {
       "id": "87",
-      "family": "weather",
       "category": "날씨와 전원",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -852,7 +775,6 @@
     },
     {
       "id": "88",
-      "family": "weather",
       "category": "날씨와 전원",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -862,7 +784,6 @@
     },
     {
       "id": "89",
-      "family": "weather",
       "category": "날씨와 전원",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -872,7 +793,6 @@
     },
     {
       "id": "90",
-      "family": "weather",
       "category": "날씨와 전원",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -882,7 +802,6 @@
     },
     {
       "id": "91",
-      "family": "weather",
       "category": "날씨와 전원",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -892,7 +811,6 @@
     },
     {
       "id": "92",
-      "family": "weather",
       "category": "날씨와 전원",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -902,7 +820,6 @@
     },
     {
       "id": "93",
-      "family": "weather",
       "category": "날씨와 전원",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -912,7 +829,6 @@
     },
     {
       "id": "94",
-      "family": "weather",
       "category": "날씨와 전원",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -922,7 +838,6 @@
     },
     {
       "id": "95",
-      "family": "weather",
       "category": "날씨와 전원",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -932,7 +847,6 @@
     },
     {
       "id": "96",
-      "family": "weather",
       "category": "날씨와 전원",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -942,7 +856,6 @@
     },
     {
       "id": "97",
-      "family": "weather",
       "category": "날씨와 전원",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -952,7 +865,6 @@
     },
     {
       "id": "98",
-      "family": "weather",
       "category": "날씨와 전원",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -962,7 +874,6 @@
     },
     {
       "id": "99",
-      "family": "weather",
       "category": "날씨와 전원",
       "cycleSeconds": 24,
       "durationSeconds": null,
@@ -972,7 +883,6 @@
     },
     {
       "id": "100",
-      "family": "weather",
       "category": "날씨와 전원",
       "cycleSeconds": 24,
       "durationSeconds": null,
